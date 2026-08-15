@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>ES140826</title>
+<style>
+:root{--glass-bg:rgba(255,255,255,.03);--glass-border:rgba(255,255,255,.2);--glass-shadow:0 8px 32px 0 rgba(31,38,135,.37);--text-color:#fff;--danger:#ff453a;--success:#30d158;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px)}
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;-webkit-tap-highlight-color:transparent}
+body{background:linear-gradient(45deg,#0f2027,#203a43,#2c5364);background-size:400% 400%;animation:gradientBG 15s ease infinite;color:var(--text-color);overflow:hidden;height:100vh;height:100dvh;width:100vw;-webkit-font-smoothing:antialiased}
+@keyframes gradientBG{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}body{animation:none}}
+.app-container{position:relative;width:100vw;height:100vh;height:100dvh;background:var(--glass-bg);backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);overflow:hidden}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.app-container,.floating-glass-bar,.modal-sheet,.glass-card{background:rgba(20,40,55,.92)!important}}
+.screen{position:absolute;top:0;left:0;width:100%;height:100%;padding-bottom:calc(90px + var(--safe-bottom));display:flex;justify-content:center;align-items:center;opacity:0;visibility:hidden;transition:opacity .5s ease,visibility .5s;z-index:1;overflow:hidden}
+.screen.active{opacity:1;visibility:visible;z-index:10}
+.screen-content{opacity:0;transform:scale(.8) translateY(30px);transition:all .7s cubic-bezier(.16,1,.3,1)}
+.screen.active .screen-content{opacity:1;transform:scale(1) translateY(0)}
+.screen h2{font-size:2.5rem;font-weight:300;letter-spacing:3px;text-transform:uppercase;text-shadow:0 4px 10px rgba(0,0,0,.3)}
+.floating-glass-bar{position:fixed;bottom:calc(20px + var(--safe-bottom));left:50%;transform:translateX(-50%);display:flex;background:rgba(255,255,255,.08);backdrop-filter:blur(25px);-webkit-backdrop-filter:blur(25px);border:1px solid var(--glass-border);border-radius:50px;padding:8px;box-shadow:var(--glass-shadow);z-index:100;max-width:calc(100vw - 24px)}
+.morphing-indicator{position:absolute;top:8px;bottom:8px;left:0;background:rgba(255,255,255,.25);border-radius:40px;transition:all .5s cubic-bezier(.25,1,.5,1);z-index:1;box-shadow:0 4px 15px rgba(255,255,255,.15)}
+.nav-btn{position:relative;background:none;border:none;color:rgba(255,255,255,.5);font-size:1rem;font-weight:500;padding:12px 24px;cursor:pointer;z-index:2;transition:color .3s ease;outline:none;white-space:nowrap}
+.nav-btn.active{color:#fff;font-weight:600}.nav-btn:active{opacity:.7}
+@media(max-width:400px){.nav-btn{padding:10px 16px;font-size:.9rem}}
+#screen-2{align-items:stretch;justify-content:flex-start;padding:0;padding-top:var(--safe-top);padding-bottom:calc(90px + var(--safe-bottom))}
+#screen-2 .screen-content{width:100%;height:100%;display:flex;flex-direction:column;transform:none;opacity:1;overflow:hidden}
+.contact-storage-summary{margin-top:14px;padding:14px 16px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1)}
+.contact-storage-summary .css-title{font-size:.75rem;font-weight:600;color:rgba(255,255,255,.45);letter-spacing:.6px;text-transform:uppercase;margin-bottom:10px}
+.contact-storage-summary .css-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:.9rem;color:rgba(255,255,255,.8)}
+.contact-storage-summary .css-row.total{margin-top:6px;padding-top:8px;border-top:1px solid rgba(255,255,255,.08);font-weight:600;color:#fff}
+.btn-block{width:100%;padding:14px;border-radius:14px;border:1px solid var(--glass-border);background:rgba(255,255,255,.08);color:#fff;font-size:1rem;font-weight:500;cursor:pointer;text-align:center}
+.btn-block:active{opacity:.8}
+.btn-block.danger{color:var(--danger);border-color:rgba(255,69,58,.3);background:rgba(255,69,58,.1)}
+.btn-block.primary{color:#64d2ff;border-color:rgba(100,210,255,.3);background:rgba(100,210,255,.1)}
+.agenda-header{padding:12px 20px 0;flex-shrink:0}
+.search-wrap{position:relative;margin-bottom:12px}
+.search-wrap input{width:100%;padding:12px 16px 12px 42px;border-radius:14px;border:1px solid var(--glass-border);background:rgba(255,255,255,.08);color:#fff;font-size:1rem;outline:none;-webkit-appearance:none}
+.search-wrap input::placeholder{color:rgba(255,255,255,.4)}
+.search-wrap .search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);opacity:.5;pointer-events:none;font-size:1.1rem}
+.contacts-list{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:8px 16px 24px;overscroll-behavior:contain}
+.contact-item{display:flex;align-items:center;gap:14px;padding:12px 14px;border-radius:16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);margin-bottom:8px;cursor:pointer;transition:background .2s,transform .15s,box-shadow .2s,border-color .2s;min-height:72px;-webkit-user-select:none;user-select:none;touch-action:pan-y}
+.contact-item:active{background:rgba(255,255,255,.12);transform:scale(.985)}
+.contact-item.lp-holding{background:rgba(255,255,255,.1);transform:scale(.99);border-color:rgba(100,210,255,.25)}
+.contact-item.lp-active{background:rgba(255,255,255,.16);transform:scale(.97);border-color:rgba(100,210,255,.45);box-shadow:0 0 0 2px rgba(100,210,255,.28),0 8px 24px rgba(0,0,0,.25)}
+.contact-avatar{width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,.12);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.25rem;font-weight:600;color:rgba(255,255,255,.7);overflow:hidden}
+.contact-avatar img{width:100%;height:100%;object-fit:cover}
+.contact-info{flex:1;min-width:0}
+.contact-name{font-weight:600;font-size:1.05rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.contact-meta{font-size:.8rem;color:rgba(255,255,255,.5);margin-top:2px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.social-dots{display:flex;gap:4px}
+.social-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.35)}
+.contact-socials{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.contact-social-chip{display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;padding:0 8px;border-radius:14px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.12);font-size:.85rem;color:rgba(255,255,255,.85);cursor:pointer;transition:background .15s;-webkit-user-select:none;user-select:none}
+.contact-social-chip:active{background:rgba(255,255,255,.22)}
+.memory-thumb .mem-del{position:absolute;top:4px;right:4px;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.3);color:#fff;font-size:.85rem;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2;line-height:1;padding:0;-webkit-tap-highlight-color:transparent}
+.memory-thumb .mem-del:active{background:rgba(255,69,58,.9);transform:scale(.92)}
+.memory-thumb .video-duration{position:absolute;bottom:6px;left:6px;background:rgba(0,0,0,.6);border-radius:4px;padding:2px 5px;font-size:.65rem;color:#fff}
+.empty-state,.no-results{text-align:center;padding:48px 24px;color:rgba(255,255,255,.5);font-size:.95rem}
+.empty-state p,.no-results p{margin-top:8px}
+.fab-add{position:absolute;bottom:calc(100px + var(--safe-bottom));right:20px;width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,.18);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--glass-border);color:#fff;font-size:1.8rem;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.3);z-index:50;transition:transform .2s,background .2s}
+.fab-add:active{transform:scale(.92);background:rgba(255,255,255,.28)}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;opacity:0;visibility:hidden;transition:opacity .3s,visibility .3s;display:flex;align-items:flex-end;justify-content:center}
+.overlay.open{opacity:1;visibility:visible}
+.modal-sheet{width:100%;max-width:520px;max-height:92dvh;background:rgba(22,38,52,.92);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:24px 24px 0 0;border:1px solid var(--glass-border);border-bottom:none;padding:12px 0 calc(20px + var(--safe-bottom));overflow-y:auto;-webkit-overflow-scrolling:touch;transform:translateY(100%);transition:transform .4s cubic-bezier(.16,1,.3,1);overscroll-behavior:contain}
+.overlay.open .modal-sheet{transform:translateY(0)}
+.modal-handle{width:36px;height:5px;background:rgba(255,255,255,.25);border-radius:3px;margin:0 auto 12px}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:0 20px 12px;position:sticky;top:0;background:inherit;z-index:5}
+.modal-header h3{font-size:1.15rem;font-weight:600}
+.modal-close,.modal-action{background:none;border:none;color:rgba(255,255,255,.7);font-size:1rem;padding:8px 12px;cursor:pointer;border-radius:10px}
+.modal-action.primary{color:#64d2ff;font-weight:600}
+.modal-action:disabled{opacity:.4;pointer-events:none}
+.modal-body{padding:0 20px 12px}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:.8rem;color:rgba(255,255,255,.55);margin-bottom:6px;font-weight:500}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--glass-border);background:rgba(255,255,255,.07);color:#fff;font-size:1rem;outline:none;-webkit-appearance:none}
+.form-group textarea{min-height:72px;resize:vertical}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:rgba(100,210,255,.5)}
+.form-error{color:var(--danger);font-size:.8rem;margin-top:4px;display:none}
+.form-group.has-error input,.form-group.has-error select{border-color:var(--danger)}
+.form-group.has-error .form-error{display:block}
+.avatar-picker{display:flex;justify-content:center;margin-bottom:20px}
+.avatar-preview{width:88px;height:88px;border-radius:50%;background:rgba(255,255,255,.12);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:1.8rem;font-weight:600;flex-shrink:0;cursor:pointer;position:relative;border:2px solid rgba(255,255,255,.2);transition:transform .15s,border-color .15s}
+.avatar-preview:active{transform:scale(.96);border-color:rgba(255,255,255,.45)}
+.avatar-preview img{width:100%;height:100%;object-fit:cover}
+.avatar-preview .avatar-hint{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.45);font-size:.65rem;text-align:center;padding:3px 0;color:rgba(255,255,255,.85);pointer-events:none}
+.avatar-preview .avatar-remove{position:absolute;top:-4px;right:-4px;width:26px;height:26px;border-radius:50%;background:rgba(255,69,58,.9);border:2px solid rgba(22,38,52,.9);color:#fff;font-size:.85rem;display:none;align-items:center;justify-content:center;cursor:pointer;z-index:2;line-height:1}
+.avatar-preview.has-photo .avatar-remove{display:flex}
+.avatar-preview.has-photo .avatar-hint{display:none}
+.profile-view{position:fixed;inset:0;z-index:150;background:linear-gradient(180deg,#0f2027 0%,#1a3340 40%,#203a43 100%);opacity:0;visibility:hidden;transform:translateX(30px);transition:opacity .35s,visibility .35s,transform .35s cubic-bezier(.16,1,.3,1);display:flex;flex-direction:column;padding-top:var(--safe-top);overflow:hidden}
+.profile-view.open{opacity:1;visibility:visible;transform:translateX(0)}
+.profile-topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;flex-shrink:0}
+.profile-topbar button{background:rgba(255,255,255,.1);border:none;color:#fff;width:40px;height:40px;border-radius:50%;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.profile-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 20px calc(40px + var(--safe-bottom));overscroll-behavior:contain}
+.profile-header-glass{text-align:center;padding:8px 0 24px}
+.profile-avatar-lg{width:110px;height:110px;border-radius:50%;margin:0 auto 14px;background:rgba(255,255,255,.12);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:2.4rem;font-weight:600;border:3px solid rgba(255,255,255,.2);box-shadow:0 8px 32px rgba(0,0,0,.3)}
+.profile-avatar-lg img{width:100%;height:100%;object-fit:cover}
+.profile-name{font-size:1.5rem;font-weight:700;letter-spacing:-.3px}
+.profile-username{color:rgba(255,255,255,.55);font-size:.95rem;margin-top:4px}
+.profile-badges{display:flex;justify-content:center;gap:8px;margin-top:10px;flex-wrap:wrap}
+.badge{padding:4px 12px;border-radius:12px;font-size:.8rem;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15)}
+.section-title{font-size:.8rem;font-weight:600;color:rgba(255,255,255,.45);letter-spacing:.8px;text-transform:uppercase;margin:20px 0 10px}
+.glass-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:background .2s;min-height:56px}
+.glass-card:active{background:rgba(255,255,255,.12)}
+.glass-card .card-icon{font-size:1.4rem;width:36px;text-align:center;flex-shrink:0}
+.glass-card .card-body{flex:1;min-width:0}
+.glass-card .card-label{font-size:.75rem;color:rgba(255,255,255,.5)}
+.glass-card .card-value{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.glass-card .card-chevron{opacity:.4;font-size:1.1rem}
+.add-link-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;border-radius:14px;border:1px dashed rgba(255,255,255,.25);background:transparent;color:rgba(255,255,255,.6);font-size:.95rem;cursor:pointer;width:100%;margin-top:4px}
+.add-link-btn:active{background:rgba(255,255,255,.06)}
+.memories-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;border-radius:12px;overflow:hidden}
+.memory-thumb{aspect-ratio:1;background:rgba(255,255,255,.08);position:relative;cursor:pointer;overflow:hidden}
+.memory-thumb img,.memory-thumb video{width:100%;height:100%;object-fit:cover}
+.memory-thumb .video-badge{position:absolute;bottom:6px;right:6px;background:rgba(0,0,0,.6);border-radius:4px;padding:2px 5px;font-size:.7rem}
+.profile-actions{margin-top:28px;display:flex;flex-direction:column;gap:10px}
+.action-sheet-list{padding:0 12px}
+.action-item{display:flex;align-items:center;gap:14px;padding:16px 14px;border-radius:12px;cursor:pointer;font-size:1.05rem;transition:background .15s}
+.action-item:active{background:rgba(255,255,255,.1)}
+.action-item .ai-icon{font-size:1.3rem;width:32px;text-align:center}
+.action-item.destructive{color:var(--danger)}
+.action-cancel{margin:12px 12px 0;padding:14px;text-align:center;border-radius:14px;background:rgba(255,255,255,.1);font-weight:600;cursor:pointer}
+.platform-list{display:flex;flex-direction:column;gap:4px}
+.platform-item{display:flex;align-items:center;gap:14px;padding:14px 12px;border-radius:12px;cursor:pointer}
+.platform-item:active{background:rgba(255,255,255,.1)}
+.platform-item .pi-icon{font-size:1.4rem;width:36px;text-align:center}
+.memory-viewer{position:fixed;inset:0;z-index:300;background:#000;display:none;flex-direction:column;align-items:center;justify-content:center}
+.memory-viewer.open{display:flex}
+.mv-close{position:absolute;top:calc(12px + var(--safe-top));right:16px;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.15);border:none;color:#fff;font-size:1.2rem;cursor:pointer;z-index:10}
+.mv-content{width:100%;height:100%;display:flex;align-items:center;justify-content:center}
+.mv-content img{max-width:100%;max-height:100%;object-fit:contain}
+.mv-content video{max-width:100%;max-height:90%}
+.mv-nav{position:absolute;bottom:calc(24px + var(--safe-bottom));left:0;right:0;display:flex;justify-content:center;gap:24px}
+.mv-nav button{width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.15);border:none;color:#fff;font-size:1.3rem;cursor:pointer}
+.toast{position:fixed;bottom:calc(110px + var(--safe-bottom));left:50%;transform:translateX(-50%) translateY(20px);background:rgba(30,30,30,.92);color:#fff;padding:12px 24px;border-radius:12px;font-size:.9rem;z-index:400;opacity:0;visibility:hidden;transition:all .3s;pointer-events:none;max-width:90vw;text-align:center}
+.toast.show{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0)}
+.hidden-file{position:fixed!important;top:0!important;left:0!important;width:1px!important;height:1px!important;opacity:.01!important;overflow:hidden!important;z-index:-1!important}
+.confirm-msg{text-align:center;padding:8px 12px 20px;color:rgba(255,255,255,.75);line-height:1.5}
+.confirm-msg strong{color:#fff}
+.media-manage-item{display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;background:rgba(255,255,255,.05);margin-bottom:8px}
+.media-manage-item img,.media-manage-item video{width:48px;height:48px;border-radius:8px;object-fit:cover;background:#000}
+.media-manage-item .mm-info{flex:1;min-width:0}
+.media-manage-item .mm-name{font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.media-manage-item .mm-size{font-size:.75rem;color:rgba(255,255,255,.45)}
+.media-manage-item input[type=checkbox]{width:22px;height:22px;accent-color:#64d2ff}
+.quota-warn{background:rgba(255,159,10,.15);border:1px solid rgba(255,159,10,.35);border-radius:12px;padding:12px 14px;margin-bottom:12px;font-size:.9rem;color:#ffd60a}
+/* CSS removido do .filter-chips que não é mais usado para não poluir o arquivo */
+</style>
+</head>
+<body>
+<div class="app-container">
+<div class="screen active" id="screen-0"><div class="screen-content"><h2>Carteira</h2></div></div>
+<div class="screen" id="screen-1"><div class="screen-content"><h2>Perfil</h2></div></div>
+<div class="screen" id="screen-2">
+<div class="screen-content">
+<div class="agenda-header" id="agendaHeader" style="padding-bottom:4px"></div>
+<div class="contacts-list" id="contactsList" role="list">
+<div class="empty-state" id="emptyState">
+<div style="font-size:2rem;margin-bottom:8px">📇</div>
+<p>Nenhum contato ainda</p>
+<p style="font-size:.85rem;margin-top:4px;opacity:.7">Toque em + para adicionar</p>
+</div>
+</div>
+<button class="fab-add" id="fabAdd" aria-label="Adicionar contato">+</button>
+</div>
+</div>
+<nav class="floating-glass-bar" id="navBar" aria-label="Navegação principal">
+<div class="morphing-indicator" id="morphingIndicator"></div>
+<button class="nav-btn active" data-index="0">Carteira</button>
+<button class="nav-btn" data-index="1">Perfil</button>
+<button class="nav-btn" data-index="2">Agenda</button>
+</nav>
+</div>
+<div class="profile-view" id="profileView" aria-hidden="true">
+<div class="profile-topbar">
+<button id="profileBack" aria-label="Voltar">‹</button>
+<button id="profileEditBtn" aria-label="Editar">✎</button>
+</div>
+<div class="profile-scroll" id="profileScroll"></div>
+</div>
+<div class="overlay" id="overlay" aria-hidden="true">
+<div class="modal-sheet" id="modalSheet" role="dialog" aria-modal="true">
+<div class="modal-handle"></div>
+<div class="modal-header">
+<button class="modal-close" id="modalClose" aria-label="Fechar">Cancelar</button>
+<h3 id="modalTitle">Título</h3>
+<button class="modal-action primary" id="modalSave" style="visibility:hidden">Salvar</button>
+</div>
+<div class="modal-body" id="modalBody"></div>
+</div>
+</div>
+<div class="memory-viewer" id="memoryViewer" aria-hidden="true">
+<button class="mv-close" id="mvClose" aria-label="Fechar">✕</button>
+<div class="mv-content" id="mvContent"></div>
+<div class="mv-nav">
+<button id="mvPrev" aria-label="Anterior">‹</button>
+<button id="mvNext" aria-label="Próxima">›</button>
+</div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<input type="file" id="avatarGalleryInput" class="hidden-file" accept="image/*">
+<input type="file" id="avatarFileInput" class="hidden-file" accept="image/jpeg,image/png,image/webp,image/gif,.jpg,.jpeg,.png,.webp,.gif">
+<input type="file" id="memoryFileInput" class="hidden-file" accept="image/*,video/*,.jpg,.jpeg,.png,.webp,.gif,.heic,.mp4,.mov,.m4v,.qt" multiple>
+<script>
+(function(){
+'use strict';
+
+/* ========== Constants ========== */
+const LEGACY_DB = 'ES140826DB';
+const DB_NAME = 'AgendaBankProfileDB';
+const DB_VERSION = 1;
+// Categorias removidas pois não usamos mais filtros, simplificando os dados salvos
+const PLATFORMS = [
+  {id:'whatsapp',label:'WhatsApp',icon:'💬',prefix:'',type:'phone'},
+  {id:'instagram',label:'Instagram',icon:'◎',prefix:'@',type:'username'},
+  {id:'telegram',label:'Telegram',icon:'✈',prefix:'@',type:'username'},
+  {id:'tiktok',label:'TikTok',icon:'♪',prefix:'@',type:'username'},
+  {id:'x',label:'X',icon:'𝕏',prefix:'@',type:'username'}
+];
+/* Facebook removido da UI de adição; dados antigos preservados via platformMeta fallback */
+
+let db = null, contacts = [], socialLinks = [], memories = [];
+let searchQuery = '', activeContactId = null;
+let pendingAvatarBlob = null, pendingAvatarUrl = null;
+let memoryViewerList = [], memoryViewerIndex = 0;
+let objectUrls = new Set(), isSaving = false, memoryTargetContactId = null;
+let lastStats = null, quotaInfo = null;
+
+const $ = (s,c)=>(c||document).querySelector(s);
+const $$ = (s,c)=>Array.from((c||document).querySelectorAll(s));
+const contactsList=$('#contactsList'), emptyState=$('#emptyState');
+const fabAdd=$('#fabAdd');
+const profileView=$('#profileView'), profileScroll=$('#profileScroll');
+const overlay=$('#overlay'), modalTitle=$('#modalTitle'), modalBody=$('#modalBody');
+const modalClose=$('#modalClose'), modalSave=$('#modalSave'), toastEl=$('#toast');
+const memoryViewer=$('#memoryViewer'), mvContent=$('#mvContent');
+const avatarGalleryInput=$('#avatarGalleryInput'), avatarFileInput=$('#avatarFileInput');
+const memoryFileInput=$('#memoryFileInput');
+
+/* ========== Utils ========== */
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,9);}
+function showToast(msg,ms){toastEl.textContent=msg;toastEl.classList.add('show');clearTimeout(showToast._t);showToast._t=setTimeout(()=>toastEl.classList.remove('show'),ms||2200);}
+function createObjectURL(blob){if(!blob)return'';const url=URL.createObjectURL(blob);objectUrls.add(url);return url;}
+function revokeObjectURL(url){if(url&&objectUrls.has(url)){URL.revokeObjectURL(url);objectUrls.delete(url);}}
+function revokeAllObjectURLs(){objectUrls.forEach(u=>URL.revokeObjectURL(u));objectUrls.clear();}
+function revokeElementMediaUrls(root){
+  if(!root)return;
+  try{
+    root.querySelectorAll('img,video').forEach(el=>{
+      const s=el.getAttribute('src')||el.src||'';
+      if(s&&s.indexOf('blob:')===0)revokeObjectURL(s);
+      try{el.removeAttribute('src');el.src='';}catch(_){}
+    });
+  }catch(_){}
+}
+function initials(name){if(!name)return'?';const p=name.trim().split(/\s+/);return p.length===1?p[0].charAt(0).toUpperCase():(p[0].charAt(0)+p[p.length-1].charAt(0)).toUpperCase();}
+function normalizePhone(raw){return raw?String(raw).replace(/[^\d]/g,''):'';}
+function sanitizeUsername(raw){return raw?String(raw).trim().replace(/^@+/,''):'';}
+function isValidUrl(str){try{const u=new URL(str);return u.protocol==='http:'||u.protocol==='https:';}catch{return false;}}
+function platformMeta(id){return PLATFORMS.find(p=>p.id===id)||{id,label:id,icon:'🔗',prefix:'',type:'username'};}
+function formatBytes(n){if(n==null||isNaN(n))return'—';if(n<1024)return n+' B';if(n<1048576)return(n/1024).toFixed(1)+' KB';if(n<1073741824)return(n/1048576).toFixed(2)+' MB';return(n/1073741824).toFixed(2)+' GB';}
+function getContactMemoryStats(contactId){
+  let photosBytes=0,videosBytes=0,photoCount=0,videoCount=0;
+  memories.filter(m=>m.contactId===contactId).forEach(m=>{
+    const sz=m.size||(m.blob&&m.blob.size)||0;
+    if(m.type==='video'){videosBytes+=sz;videoCount++;}
+    else{photosBytes+=sz;photoCount++;}
+  });
+  return{photosBytes,videosBytes,photoCount,videoCount,count:photoCount+videoCount,total:photosBytes+videosBytes};
+}
+function buildPlatformUrl(platform,value,customUrl){
+  if(customUrl&&isValidUrl(customUrl))return customUrl;
+  const v=(value||'').trim();if(!v)return null;
+  switch(platform){
+    case'whatsapp':{const n=normalizePhone(v);return n?'https://wa.me/'+n:null;}
+    case'instagram':return'https://instagram.com/'+sanitizeUsername(v);
+    case'facebook':return'https://facebook.com/'+sanitizeUsername(v);
+    case'telegram':return'https://t.me/'+sanitizeUsername(v);
+    case'tiktok':return'https://www.tiktok.com/@'+sanitizeUsername(v);
+    case'x':return'https://x.com/'+sanitizeUsername(v);
+    default:return isValidUrl(v)?v:null;
+  }
+}
+function openExternal(url,appSchemes){
+  if(!url){showToast('Link indisponível');return;}
+  if(appSchemes&&appSchemes.length){
+    try{
+      const a=document.createElement('a');
+      a.href=appSchemes[0];
+      a.target='_self';
+      a.rel='noopener';
+      a.style.display='none';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(()=>{try{a.remove();}catch(_){}},1500);
+      setTimeout(()=>{if(!document.hidden){window.location.href=url;}},800);
+      return;
+    }catch(_){}
+  }
+  try{window.location.href=url;}catch(_){window.location.assign(url);}
+}
+function compressImage(file,maxW,quality){
+  maxW=maxW||800;quality=quality||.72;
+  return new Promise(resolve=>{
+    if(!file){resolve(null);return;}
+    const isHeic=/heic|heif/i.test(file.type||'')||/\.heic$/i.test(file.name||'');
+    /* Tenta decodificar inclusive HEIC no Safari/iOS; se falhar, devolve o original */
+    const img=new Image();
+    const url=URL.createObjectURL(file);
+    let done=false;
+    const finish=b=>{if(done)return;done=true;try{URL.revokeObjectURL(url);}catch(_){}resolve(b||file);};
+    const timer=setTimeout(()=>finish(file),12000);
+    img.onload=()=>{
+      try{
+        let w=img.width,h=img.height;
+        if(!w||!h){clearTimeout(timer);finish(file);return;}
+        if(w>maxW){h=Math.round(h*maxW/w);w=maxW;}
+        const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+        canvas.getContext('2d').drawImage(img,0,0,w,h);
+        canvas.toBlob(b=>{clearTimeout(timer);finish(b&&b.size?b:file);},'image/jpeg',quality);
+      }catch(_){clearTimeout(timer);finish(file);}
+    };
+    img.onerror=()=>{clearTimeout(timer);finish(file);};
+    try{img.src=url;}catch(_){clearTimeout(timer);finish(file);}
+  });
+}
+function ensureBlob(data,mime){
+  if(!data)return null;
+  if(data instanceof Blob)return data;
+  try{return new Blob([data],{type:mime||'application/octet-stream'});}catch(_){return null;}
+}
+async function copyText(text){
+  try{if(navigator.clipboard&&navigator.clipboard.writeText){await navigator.clipboard.writeText(text);return true;}}catch(_){}
+  try{const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.left='-9999px';document.body.appendChild(ta);ta.select();const ok=document.execCommand('copy');document.body.removeChild(ta);return ok;}catch(_){return false;}
+}
+function isQuotaError(err){
+  if(!err)return false;
+  const n=err.name||'';const m=String(err.message||'');
+  return n==='QuotaExceededError'||n==='NS_ERROR_DOM_QUOTA_REACHED'||/quota/i.test(m);
+}
+
+/* ========== StorageAdapter (hybrid abstraction) ========== */
+const StorageAdapter = {
+  backend: 'indexeddb',
+  detect(){
+    if(window.NativeFileStorage && typeof window.NativeFileStorage.save==='function'){
+      this.backend='native';
+      return 'native';
+    }
+    if(window.indexedDB){this.backend='indexeddb';return 'indexeddb';}
+    this.backend='none';return 'none';
+  },
+  label(){
+    if(this.backend==='native')return 'Backend: Storage nativo (app)';
+    if(this.backend==='indexeddb')return 'Backend: IndexedDB (Web/PWA)';
+    return 'Backend: indisponível';
+  }
+};
+
+/* ========== IndexedDB Manager ========== */
+const IDB = {
+  open(){
+    return new Promise((resolve,reject)=>{
+      if(!window.indexedDB){reject(new Error('IndexedDB indisponível'));return;}
+      const req=indexedDB.open(DB_NAME,DB_VERSION);
+      req.onerror=()=>reject(req.error||new Error('Falha ao abrir DB'));
+      req.onupgradeneeded=e=>{
+        const database=e.target.result;
+        if(!database.objectStoreNames.contains('contacts')){
+          const s=database.createObjectStore('contacts',{keyPath:'id'});
+          s.createIndex('name','name',{unique:false});
+        }
+        if(!database.objectStoreNames.contains('socialLinks')){
+          const s=database.createObjectStore('socialLinks',{keyPath:'id'});
+          s.createIndex('contactId','contactId',{unique:false});
+        }
+        if(!database.objectStoreNames.contains('memories')){
+          const s=database.createObjectStore('memories',{keyPath:'id'});
+          s.createIndex('contactId','contactId',{unique:false});
+          s.createIndex('type','type',{unique:false});
+        }
+        if(!database.objectStoreNames.contains('settings')){
+          database.createObjectStore('settings',{keyPath:'key'});
+        }
+        if(!database.objectStoreNames.contains('storageStats')){
+          database.createObjectStore('storageStats',{keyPath:'key'});
+        }
+      };
+      req.onsuccess=()=>{db=req.result;resolve(db);};
+    });
+  },
+  _tx(names,mode){if(!db)throw new Error('DB não aberta');return db.transaction(names,mode||'readonly');},
+  getAll(store){return new Promise((resolve,reject)=>{try{const r=this._tx(store).objectStore(store).getAll();r.onsuccess=()=>resolve(r.result||[]);r.onerror=()=>reject(r.error);}catch(e){reject(e);}});},
+  get(store,id){return new Promise((resolve,reject)=>{try{const r=this._tx(store).objectStore(store).get(id);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);}catch(e){reject(e);}});},
+  put(store,item){return new Promise((resolve,reject)=>{try{const tx=this._tx(store,'readwrite');const r=tx.objectStore(store).put(item);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);tx.onabort=()=>reject(tx.error||new Error('Transaction aborted'));}catch(e){reject(e);}});},
+  delete(store,id){return new Promise((resolve,reject)=>{try{const r=this._tx(store,'readwrite').objectStore(store).delete(id);r.onsuccess=()=>resolve();r.onerror=()=>reject(r.error);}catch(e){reject(e);}});},
+  deleteByIndex(store,indexName,value){return new Promise((resolve,reject)=>{try{const tx=this._tx(store,'readwrite');const idx=tx.objectStore(store).index(indexName);const r=idx.openCursor(IDBKeyRange.only(value));r.onsuccess=e=>{const c=e.target.result;if(c){c.delete();c.continue();}};tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);}catch(e){reject(e);}});}
+};
+
+/* ========== Migration from legacy ES140826DB ========== */
+async function migrateFromLegacy(){
+  return new Promise((resolve)=>{
+    if(!window.indexedDB){resolve(false);return;}
+    const req=indexedDB.open(LEGACY_DB);
+    req.onerror=()=>resolve(false);
+    req.onsuccess=async()=>{
+      const legacy=req.result;
+      try{
+        const stores=['contacts','socialLinks','memories','settings'];
+        const hasAny=stores.some(s=>legacy.objectStoreNames.contains(s));
+        if(!hasAny){legacy.close();resolve(false);return;}
+        const flag=await IDB.get('settings','migratedFromLegacy');
+        if(flag&&flag.value){legacy.close();resolve(false);return;}
+        const readAll=(ldb,name)=>new Promise((res,rej)=>{
+          if(!ldb.objectStoreNames.contains(name)){res([]);return;}
+          const tx=ldb.transaction(name,'readonly');
+          const r=tx.objectStore(name).getAll();
+          r.onsuccess=()=>res(r.result||[]);r.onerror=()=>rej(r.error);
+        });
+        const [lc,ls,lm,lset]=await Promise.all([
+          readAll(legacy,'contacts'),readAll(legacy,'socialLinks'),
+          readAll(legacy,'memories'),readAll(legacy,'settings')
+        ]);
+        for(const c of lc){await IDB.put('contacts',c);}
+        for(const s of ls){await IDB.put('socialLinks',s);}
+        for(const m of lm){await IDB.put('memories',m);}
+        for(const s of lset){await IDB.put('settings',s);}
+        await IDB.put('settings',{key:'migratedFromLegacy',value:true,at:Date.now()});
+        legacy.close();
+        console.info('[migration] Legacy ES140826DB → AgendaBankProfileDB OK');
+        resolve(true);
+      }catch(e){console.error('[migration]',e);try{legacy.close();}catch(_){}resolve(false);}
+    };
+  });
+}
+
+/* ========== StorageStats ========== */
+const StorageStats = {
+  async compute(){
+    let photosBytes=0,videosBytes=0,avatarBytes=0,otherBytes=0;
+    let photoCount=0,videoCount=0,avatarCount=0;
+    for(const m of memories){
+      const sz=m.size||(m.blob&&m.blob.size)||0;
+      if(m.type==='video'){videosBytes+=sz;videoCount++;}
+      else{photosBytes+=sz;photoCount++;}
+    }
+    for(const c of contacts){
+      if(c.avatar){const sz=c.avatar.size||0;avatarBytes+=sz;avatarCount++;}
+    }
+    const total=photosBytes+videosBytes+avatarBytes+otherBytes;
+    const stats={
+      total,photosBytes,videosBytes,avatarBytes,otherBytes,
+      photoCount,videoCount,avatarCount,
+      contactCount:contacts.length,memoryCount:memories.length,
+      updatedAt:Date.now(),estimated:false
+    };
+    lastStats=stats;
+    try{await IDB.put('storageStats',{key:'latest',value:stats});}catch(_){}
+    return stats;
+  },
+  async estimateQuota(){
+    try{
+      if(navigator.storage&&navigator.storage.estimate){
+        const est=await navigator.storage.estimate();
+        quotaInfo={usage:est.usage||0,quota:est.quota||0,available:(est.quota&&est.usage!=null)?(est.quota-est.usage):null};
+        return quotaInfo;
+      }
+    }catch(e){console.warn('[quota]',e);}
+    quotaInfo=null;return null;
+  }
+};
+
+/* storage panel global removido — resumo fica no perfil de cada contato */
+async function checkStorageIntegrity(){
+  const issues=[];
+  for(const m of memories){
+    if(!m.blob)issues.push('Mídia sem blob: '+m.id);
+    if(m.contactId&&!contacts.find(c=>c.id===m.contactId))issues.push('Mídia órfã (contato inexistente): '+m.id);
+  }
+  for(const s of socialLinks){
+    if(s.contactId&&!contacts.find(c=>c.id===s.contactId))issues.push('Rede órfã: '+s.id);
+  }
+  return issues;
+}
+
+async function rebuildStorageIndex(){
+  await StorageStats.compute();
+  return lastStats;
+}
+
+/* ========== ContactManager ========== */
+const ContactManager={
+  async loadAll(){
+    contacts=await IDB.getAll('contacts');
+    socialLinks=await IDB.getAll('socialLinks');
+    memories=await IDB.getAll('memories');
+    contacts.sort((a,b)=>(a.name||'').localeCompare(b.name||'','pt-BR'));
+  },
+  getContact(id){return contacts.find(c=>c.id===id)||null;},
+  getLinks(cid){return socialLinks.filter(s=>s.contactId===cid);},
+  getMemories(cid){return memories.filter(m=>m.contactId===cid).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));},
+  primaryUsername(cid){
+    const links=this.getLinks(cid);
+    for(const p of['instagram','x','tiktok','telegram','whatsapp','facebook']){
+      const l=links.find(x=>x.platform===p);
+      if(l){const m=platformMeta(p);return p==='whatsapp'?(l.value||''):((m.prefix||'')+(l.username||l.value||''));}
+    }return'';
+  },
+  async saveContact(data){
+    if(!data.id)data.id=uid();data.updatedAt=Date.now();if(!data.createdAt)data.createdAt=Date.now();
+    const record={id:data.id,name:data.name||'',address:data.address||'',avatar:data.avatar||null,createdAt:data.createdAt,updatedAt:data.updatedAt};
+    try{await IDB.put('contacts',record);}
+    catch(err){if(isQuotaError(err)){showToast('Armazenamento cheio.');throw err;}throw err;}
+    const idx=contacts.findIndex(c=>c.id===record.id);if(idx>=0)contacts[idx]=record;else contacts.push(record);
+    contacts.sort((a,b)=>(a.name||'').localeCompare(b.name||'','pt-BR'));
+    return record;
+  },
+  async deleteContact(id){
+    await IDB.delete('contacts',id);
+    await IDB.deleteByIndex('socialLinks','contactId',id);
+    await IDB.deleteByIndex('memories','contactId',id);
+    contacts=contacts.filter(c=>c.id!==id);
+    socialLinks=socialLinks.filter(s=>s.contactId!==id);
+    memories=memories.filter(m=>m.contactId!==id);
+  },
+  async saveLink(link){if(!link.id)link.id=uid();link.updatedAt=Date.now();if(!link.createdAt)link.createdAt=Date.now();await IDB.put('socialLinks',link);const i=socialLinks.findIndex(s=>s.id===link.id);if(i>=0)socialLinks[i]=link;else socialLinks.push(link);return link;},
+  async deleteLink(id){await IDB.delete('socialLinks',id);socialLinks=socialLinks.filter(s=>s.id!==id);},
+  async saveMemory(mem){
+    if(!mem.id)mem.id=uid();if(!mem.createdAt)mem.createdAt=Date.now();
+    mem.storageType=StorageAdapter.backend;mem.updatedAt=Date.now();
+    try{await IDB.put('memories',mem);}
+    catch(err){if(isQuotaError(err)){showToast('Armazenamento cheio.');throw err;}throw err;}
+    memories.push(mem);return mem;
+  },
+  async deleteMemory(id){await IDB.delete('memories',id);memories=memories.filter(m=>m.id!==id);}
+};
+
+/* ========== Nav ========== */
+const navBtns=$$('.nav-btn'),indicator=$('#morphingIndicator'),screens=$$('.screen');
+function updateMorphingBar(btn){if(!btn)return;const br=btn.getBoundingClientRect(),nr=btn.parentElement.getBoundingClientRect();indicator.style.width=br.width+'px';indicator.style.left=(br.left-nr.left)+'px';}
+function changeScreen(index){
+  screens.forEach((s,i)=>{if(i===parseInt(index,10))s.classList.add('active');else s.classList.remove('active');});
+  if(parseInt(index,10)!==2)closeProfile();
+}
+navBtns.forEach(btn=>{btn.addEventListener('click',e=>{if(e.currentTarget.classList.contains('active'))return;navBtns.forEach(b=>b.classList.remove('active'));e.currentTarget.classList.add('active');updateMorphingBar(e.currentTarget);changeScreen(e.currentTarget.getAttribute('data-index'));});});
+window.addEventListener('load',()=>updateMorphingBar($('.nav-btn.active')));
+window.addEventListener('resize',()=>updateMorphingBar($('.nav-btn.active')));
+
+/* ========== Modal ========== */
+let modalOnSave=null;
+function openModal(title,bodyHtml,opts){
+  opts=opts||{};modalTitle.textContent=title;modalBody.innerHTML='';
+  if(typeof bodyHtml==='string'){const t=document.createElement('div');t.innerHTML=bodyHtml;while(t.firstChild)modalBody.appendChild(t.firstChild);}
+  else if(bodyHtml instanceof Node)modalBody.appendChild(bodyHtml);
+  modalSave.style.visibility=opts.showSave?'visible':'hidden';modalSave.textContent=opts.saveLabel||'Salvar';modalSave.disabled=false;
+  modalClose.textContent=opts.closeLabel||'Cancelar';modalClose.style.visibility='';
+  modalOnSave=opts.onSave||null;overlay.classList.add('open');overlay.setAttribute('aria-hidden','false');
+}
+function closeModal(){overlay.classList.remove('open');overlay.setAttribute('aria-hidden','true');modalOnSave=null;modalBody.innerHTML='';isSaving=false;}
+modalClose.addEventListener('click',closeModal);
+overlay.addEventListener('click',e=>{if(e.target===overlay)closeModal();});
+modalSave.addEventListener('click',async()=>{if(typeof modalOnSave==='function'&&!isSaving)await modalOnSave();});
+
+/* ========== Long Press (Agenda) ========== */
+const LP = {duration:500, moveThreshold:12, timer:null, startX:0, startY:0, active:false, triggered:false, target:null};
+function hapticLight(){try{if(navigator.vibrate)navigator.vibrate(12);}catch(_){}}
+function clearLongPress(){
+  if(LP.timer){clearTimeout(LP.timer);LP.timer=null;}
+  if(LP.target){LP.target.classList.remove('lp-holding','lp-active');}
+  LP.active=false;LP.triggered=false;LP.target=null;
+}
+function bindLongPress(el, onLongPress, onTap){
+  let suppressClick=false;
+  const onStart=(e)=>{
+    if(e.button!=null&&e.button!==0)return;
+    if(e.target.closest&&e.target.closest('.contact-social-chip'))return;
+    const pt=e.touches?e.touches[0]:e;
+    clearLongPress();
+    LP.active=true;LP.triggered=false;LP.target=el;LP.startX=pt.clientX;LP.startY=pt.clientY;
+    el.classList.add('lp-holding');
+    LP.timer=setTimeout(()=>{
+      if(!LP.active)return;
+      LP.triggered=true;suppressClick=true;
+      el.classList.remove('lp-holding');
+      el.classList.add('lp-active');
+      hapticLight();
+      onLongPress();
+      setTimeout(()=>{suppressClick=false;},400);
+    },LP.duration);
+  };
+  const onMove=(e)=>{
+    if(!LP.active||!LP.timer)return;
+    const pt=e.touches?e.touches[0]:e;
+    const dx=Math.abs(pt.clientX-LP.startX),dy=Math.abs(pt.clientY-LP.startY);
+    if(dx>LP.moveThreshold||dy>LP.moveThreshold)clearLongPress();
+  };
+  const onEnd=()=>{
+    const wasTriggered=LP.triggered;
+    clearLongPress();
+    if(!wasTriggered&&!suppressClick&&typeof onTap==='function')onTap();
+  };
+  el.addEventListener('pointerdown',onStart,{passive:true});
+  el.addEventListener('pointermove',onMove,{passive:true});
+  el.addEventListener('pointerup',onEnd,{passive:true});
+  el.addEventListener('pointercancel',()=>clearLongPress(),{passive:true});
+  el.addEventListener('contextmenu',e=>{if(LP.triggered||LP.active){e.preventDefault();}});
+  el.addEventListener('click',e=>{
+    if(suppressClick||LP.triggered){e.preventDefault();e.stopPropagation();suppressClick=false;}
+  },true);
+}
+
+/* ========== vCard ========== */
+function blobToBase64(blob){
+  return new Promise((resolve,reject)=>{
+    const r=new FileReader();
+    r.onload=()=>{const s=String(r.result||'');const i=s.indexOf(',');resolve(i>=0?s.slice(i+1):s);};
+    r.onerror=()=>reject(r.error);r.readAsDataURL(blob);
+  });
+}
+function escapeVCard(str){return String(str||'').replace(/\\/g,'\\\\').replace(/\n/g,'\\n').replace(/,/g,'\\,').replace(/;/g,'\\;');}
+async function generateVCard(contact){
+  if(!contact)return null;
+  const links=ContactManager.getLinks(contact.id);
+  const lines=['BEGIN:VCARD','VERSION:3.0'];
+  const name=(contact.name||'').trim()||'Sem nome';
+  lines.push('FN:'+escapeVCard(name));
+  const parts=name.split(/\s+/);const last=parts.length>1?parts[parts.length-1]:'';const first=parts.length>1?parts.slice(0,-1).join(' '):parts[0]||'';
+  lines.push('N:'+escapeVCard(last)+';'+escapeVCard(first)+';;;');
+  const wa=links.find(l=>l.platform==='whatsapp');
+  if(wa&&wa.value){const n=normalizePhone(wa.value);if(n)lines.push('TEL;TYPE=CELL:'+n);}
+  if(contact.address&&contact.address.trim())lines.push('ADR;TYPE=HOME:;;'+escapeVCard(contact.address.trim())+';;;;');
+  links.forEach(link=>{
+    const meta=platformMeta(link.platform);
+    const url=link.url||buildPlatformUrl(link.platform,link.value||link.username,link.url);
+    if(url)lines.push('URL;TYPE='+escapeVCard(meta.label)+':'+url);
+    const handle=link.platform==='whatsapp'?(link.value||''):((meta.prefix||'')+(link.username||link.value||''));
+    if(handle)lines.push('X-SOCIALPROFILE;TYPE='+escapeVCard(link.platform)+':'+escapeVCard(handle));
+    if(link.platform==='instagram'&&(link.username||link.value))lines.push('X-SOCIALPROFILE;TYPE=instagram:https://instagram.com/'+sanitizeUsername(link.username||link.value));
+  });
+  if(contact.avatar){
+    try{
+      const b64=await blobToBase64(contact.avatar);
+      const mime=(contact.avatar.type||'image/jpeg').replace('image/','');
+      const type=mime==='png'?'PNG':mime==='gif'?'GIF':mime==='webp'?'WEBP':'JPEG';
+      lines.push('PHOTO;ENCODING=b;TYPE='+type+':'+b64);
+    }catch(_){}
+  }
+  lines.push('END:VCARD');
+  return lines.join('\r\n');
+}
+async function saveContactAsVCard(contact){
+  try{
+    const vcf=await generateVCard(contact);
+    if(!vcf){showToast('Não foi possível gerar o contato');return;}
+    const blob=new Blob([vcf],{type:'text/vcard;charset=utf-8'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    const safeName=((contact.name||'contato').replace(/[^\w\u00C0-\u024F\s-]/g,'').trim()||'contato').slice(0,40);
+    a.href=url;a.download=safeName+'.vcf';a.style.display='none';document.body.appendChild(a);a.click();
+    setTimeout(()=>{try{a.remove();URL.revokeObjectURL(url);}catch(_){}},1500);
+    showToast('Arquivo de contato gerado');
+  }catch(e){console.error(e);showToast('Erro ao gerar vCard');}
+}
+
+function openContactActions(contact){
+  if(!contact)return;
+  const list=document.createElement('div');list.className='action-sheet-list';
+  const openItem=document.createElement('div');openItem.className='action-item';openItem.innerHTML='<span class="ai-icon">👤</span><span>Abrir perfil</span>';
+  openItem.addEventListener('click',()=>{closeModal();openProfile(contact.id);});list.appendChild(openItem);
+  const editItem=document.createElement('div');editItem.className='action-item';editItem.innerHTML='<span class="ai-icon">✎</span><span>Editar</span>';
+  editItem.addEventListener('click',()=>{closeModal();openContactForm(contact.id);});list.appendChild(editItem);
+  const vcfItem=document.createElement('div');vcfItem.className='action-item';vcfItem.innerHTML='<span class="ai-icon">📇</span><span>Salvar nos Contatos</span>';
+  vcfItem.addEventListener('click',()=>{closeModal();saveContactAsVCard(contact);});list.appendChild(vcfItem);
+  const delItem=document.createElement('div');delItem.className='action-item destructive';delItem.innerHTML='<span class="ai-icon">🗑</span><span>Excluir</span>';
+  delItem.addEventListener('click',()=>{closeModal();confirmDelete(contact);});list.appendChild(delItem);
+  const cancel=document.createElement('div');cancel.className='action-cancel';cancel.textContent='Cancelar';cancel.addEventListener('click',closeModal);list.appendChild(cancel);
+  openModal(contact.name||'Contato',list,{showSave:false,closeLabel:' '});modalClose.style.visibility='hidden';
+}
+
+function openSocialFromChip(link){
+  const url=link.url||buildPlatformUrl(link.platform,link.value||link.username,link.url);
+  let schemes=[];
+  if(link.platform==='whatsapp')schemes=['whatsapp://send?phone='+normalizePhone(link.value)];
+  else if(link.platform==='instagram')schemes=['instagram://user?username='+sanitizeUsername(link.username||link.value)];
+  else if(link.platform==='telegram')schemes=['tg://resolve?domain='+sanitizeUsername(link.username||link.value)];
+  else if(link.platform==='x')schemes=['twitter://user?screen_name='+sanitizeUsername(link.username||link.value)];
+  openExternal(url,schemes);
+}
+
+/* ========== Agenda ========== */
+const AgendaUI={
+  getFiltered(){
+    /* Busca removida — poucos contatos; lista completa ordenada */
+    return contacts.slice();
+  },
+  render(){
+    revokeElementMediaUrls(contactsList);
+    $$('.contact-item',contactsList).forEach(el=>el.remove());
+    const noRes=$('#noResults');if(noRes)noRes.remove();
+    if(contacts.length===0){emptyState.style.display='';return;}
+    emptyState.style.display='none';
+    const list=this.getFiltered();
+    if(list.length===0){const div=document.createElement('div');div.className='no-results';div.id='noResults';div.innerHTML='<p>Nenhum contato encontrado</p>';contactsList.appendChild(div);return;}
+    const frag=document.createDocumentFragment();
+    list.forEach(c=>{
+      const item=document.createElement('div');item.className='contact-item';item.dataset.id=c.id;
+      const avatar=document.createElement('div');avatar.className='contact-avatar';
+      if(c.avatar){const img=document.createElement('img');img.alt='';img.src=createObjectURL(c.avatar);avatar.appendChild(img);}else avatar.textContent=initials(c.name);
+      const info=document.createElement('div');info.className='contact-info';
+      const nameEl=document.createElement('div');nameEl.className='contact-name';nameEl.textContent=c.name||'Sem nome';
+      const meta=document.createElement('div');meta.className='contact-meta';
+      const uname=ContactManager.primaryUsername(c.id);if(uname){const u=document.createElement('span');u.textContent=uname;meta.appendChild(u);}
+      info.appendChild(nameEl);info.appendChild(meta);
+      const links=ContactManager.getLinks(c.id);
+      if(links.length){
+        const socials=document.createElement('div');socials.className='contact-socials';
+        links.slice(0,6).forEach(link=>{
+          const metaP=platformMeta(link.platform);
+          const chip=document.createElement('button');chip.type='button';chip.className='contact-social-chip';
+          chip.setAttribute('aria-label',metaP.label);chip.textContent=metaP.icon;
+          chip.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();openSocialFromChip(link);});
+          chip.addEventListener('pointerdown',e=>e.stopPropagation());
+          socials.appendChild(chip);
+        });
+        info.appendChild(socials);
+      }
+      item.appendChild(avatar);item.appendChild(info);
+      bindLongPress(item,()=>openContactActions(c),()=>openProfile(c.id));
+      frag.appendChild(item);
+    });
+    contactsList.appendChild(frag);
+  }
+};
+
+/* ========== Profile ========== */
+function openProfile(id){activeContactId=id;renderProfile();profileView.classList.add('open');profileView.setAttribute('aria-hidden','false');}
+function closeProfile(){
+  revokeElementMediaUrls(profileScroll);
+  profileView.classList.remove('open');profileView.setAttribute('aria-hidden','true');activeContactId=null;
+}
+
+function renderProfile(){
+  const c=ContactManager.getContact(activeContactId);if(!c){closeProfile();return;}
+  revokeElementMediaUrls(profileScroll);
+  profileScroll.innerHTML='';
+  const header=document.createElement('div');header.className='profile-header-glass';
+  const av=document.createElement('div');av.className='profile-avatar-lg';
+  if(c.avatar){const img=document.createElement('img');img.alt='';img.src=createObjectURL(c.avatar);av.appendChild(img);}else av.textContent=initials(c.name);
+  header.appendChild(av);
+  const name=document.createElement('div');name.className='profile-name';name.textContent=c.name||'Sem nome';header.appendChild(name);
+  const uname=ContactManager.primaryUsername(c.id);if(uname){const u=document.createElement('div');u.className='profile-username';u.textContent=uname;header.appendChild(u);}
+  profileScroll.appendChild(header);
+
+  const links=ContactManager.getLinks(c.id);
+  const st1=document.createElement('div');st1.className='section-title';st1.textContent='🌐 Redes Sociais';profileScroll.appendChild(st1);
+  if(!links.length){const empty=document.createElement('div');empty.style.cssText='color:rgba(255,255,255,.4);font-size:.9rem;padding:8px 0';empty.textContent='Nenhuma rede adicionada';profileScroll.appendChild(empty);}
+  else{links.forEach(link=>{
+    const meta=platformMeta(link.platform);const card=document.createElement('div');card.className='glass-card';
+    const icon=document.createElement('div');icon.className='card-icon';icon.textContent=meta.icon;card.appendChild(icon);
+    const body=document.createElement('div');body.className='card-body';
+    const lab=document.createElement('div');lab.className='card-label';lab.textContent=meta.label;
+    const val=document.createElement('div');val.className='card-value';val.textContent=link.platform==='whatsapp'?(link.value||''):((meta.prefix||'')+(link.username||link.value||''));
+    body.appendChild(lab);body.appendChild(val);card.appendChild(body);
+    const chev=document.createElement('div');chev.className='card-chevron';chev.textContent='›';card.appendChild(chev);
+    card.addEventListener('click',()=>openSocialActions(link));profileScroll.appendChild(card);
+  });}
+  const addNet=document.createElement('button');addNet.className='add-link-btn';addNet.textContent='+ Adicionar rede';
+  addNet.addEventListener('click',()=>openAddSocial(c.id));profileScroll.appendChild(addNet);
+
+  const st2=document.createElement('div');st2.className='section-title';st2.textContent='📍 Localização';profileScroll.appendChild(st2);
+  if(c.address&&c.address.trim()){
+    const card=document.createElement('div');card.className='glass-card';
+    const icon=document.createElement('div');icon.className='card-icon';icon.textContent='📍';card.appendChild(icon);
+    const body=document.createElement('div');body.className='card-body';
+    const lab=document.createElement('div');lab.className='card-label';lab.textContent='Toque para copiar';
+    const val=document.createElement('div');val.className='card-value';val.style.whiteSpace='normal';val.textContent=c.address;
+    body.appendChild(lab);body.appendChild(val);card.appendChild(body);
+    const chev=document.createElement('div');chev.className='card-chevron';chev.textContent='›';card.appendChild(chev);
+    card.addEventListener('click',()=>openLocationActions(c));profileScroll.appendChild(card);
+    const editAddr=document.createElement('button');editAddr.className='add-link-btn';editAddr.textContent='✎ Editar endereço';
+    editAddr.addEventListener('click',()=>openAddressForm(c));profileScroll.appendChild(editAddr);
+  }else{
+    const addAddr=document.createElement('button');addAddr.className='add-link-btn';addAddr.textContent='+ Adicionar endereço';
+    addAddr.addEventListener('click',()=>openAddressForm(c));profileScroll.appendChild(addAddr);
+  }
+
+  const st3=document.createElement('div');st3.className='section-title';st3.textContent='📸 Memórias';profileScroll.appendChild(st3);
+  const mems=ContactManager.getMemories(c.id);
+  if(!mems.length){const empty=document.createElement('div');empty.style.cssText='color:rgba(255,255,255,.4);font-size:.9rem;padding:8px 0 12px';empty.textContent='Adicione fotos ou vídeos deste contato.';profileScroll.appendChild(empty);}
+  else{const grid=document.createElement('div');grid.className='memories-grid';
+    mems.forEach((m,idx)=>{
+      const thumb=document.createElement('div');thumb.className='memory-thumb';
+      if(m.type==='video'){
+        if(m.thumbnail){const img=document.createElement('img');img.alt='';img.loading='lazy';img.src=createObjectURL(m.thumbnail);thumb.appendChild(img);}
+        else{const v=document.createElement('video');v.src=createObjectURL(m.blob);v.muted=true;v.playsInline=true;v.preload='metadata';thumb.appendChild(v);}
+        const badge=document.createElement('span');badge.className='video-badge';badge.textContent='▶';thumb.appendChild(badge);
+        if(m.duration){const dur=document.createElement('span');dur.className='video-duration';dur.textContent=formatDuration(m.duration);thumb.appendChild(dur);}
+      }else{
+        const img=document.createElement('img');img.alt='';img.loading='lazy';img.src=createObjectURL(m.blob);thumb.appendChild(img);
+      }
+      const delBtn=document.createElement('button');delBtn.type='button';delBtn.className='mem-del';delBtn.setAttribute('aria-label','Excluir memória');delBtn.textContent='✕';
+      delBtn.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();confirmDeleteMemory(m);});
+      thumb.appendChild(delBtn);
+      thumb.addEventListener('click',()=>openMemoryViewer(mems,idx));grid.appendChild(thumb);
+    });profileScroll.appendChild(grid);}
+  const addMem=document.createElement('button');addMem.className='add-link-btn';addMem.style.marginTop='10px';addMem.textContent='+ Adicionar memória';
+  addMem.addEventListener('click',()=>openMemorySourcePicker(c.id));profileScroll.appendChild(addMem);
+
+  // Resumo de armazenamento só deste contato (apenas memórias)
+  const memStats=getContactMemoryStats(c.id);
+  if(memStats.count>0){
+    const sum=document.createElement('div');sum.className='contact-storage-summary';
+    const st=document.createElement('div');st.className='css-title';st.textContent='Armazenamento deste contato';sum.appendChild(st);
+    if(memStats.photoCount){
+      const r=document.createElement('div');r.className='css-row';
+      r.innerHTML='<span>📷 Fotos</span><span>'+memStats.photoCount+' · '+formatBytes(memStats.photosBytes)+'</span>';
+      sum.appendChild(r);
+    }
+    if(memStats.videoCount){
+      const r=document.createElement('div');r.className='css-row';
+      r.innerHTML='<span>🎥 Vídeos</span><span>'+memStats.videoCount+' · '+formatBytes(memStats.videosBytes)+'</span>';
+      sum.appendChild(r);
+    }
+    const tot=document.createElement('div');tot.className='css-row total';
+    tot.innerHTML='<span>Total</span><span>'+formatBytes(memStats.total)+'</span>';
+    sum.appendChild(tot);
+    profileScroll.appendChild(sum);
+  }
+
+  const actions=document.createElement('div');actions.className='profile-actions';
+  const editBtn=document.createElement('button');editBtn.className='btn-block';editBtn.textContent='Editar contato';
+  editBtn.addEventListener('click',()=>openContactForm(c.id));actions.appendChild(editBtn);
+  const delBtn=document.createElement('button');delBtn.className='btn-block danger';delBtn.textContent='Excluir contato';
+  delBtn.addEventListener('click',()=>confirmDelete(c));actions.appendChild(delBtn);profileScroll.appendChild(actions);
+}
+
+$('#profileBack').addEventListener('click',closeProfile);
+$('#profileEditBtn').addEventListener('click',()=>{if(activeContactId)openContactForm(activeContactId);});
+
+let avatarProcessing=false;
+function openAvatarSourcePicker(){avatarGalleryInput.value='';avatarGalleryInput.click();}
+async function handleAvatarFile(file){
+  if(!file)return;
+  const okType=(file.type&&file.type.startsWith('image/'))||/\.(jpe?g|png|webp|gif|heic|heif)$/i.test(file.name||'')||!file.type;
+  if(!okType){showToast('Arquivo inválido');return;}
+  if(file.size>25*1024*1024){showToast('Imagem muito grande (máx. 25 MB)');return;}
+  avatarProcessing=true;
+  if(modalSave){modalSave.disabled=true;modalSave.textContent='Processando foto…';}
+  try{
+    let compressed=await compressImage(file,900,.7);
+    compressed=ensureBlob(compressed,compressed&&compressed.type?compressed.type:'image/jpeg');
+    if(!compressed||!compressed.size){showToast('Não foi possível processar a foto');avatarProcessing=false;if(modalSave){modalSave.disabled=false;modalSave.textContent='Salvar';}return;}
+    /* Garante JPEG quando possível para evitar HEIC problemático no IndexedDB */
+    if(compressed.type&&/heic|heif/i.test(compressed.type)&&compressed!==file){
+      /* já convertido */
+    }
+    pendingAvatarBlob=compressed;
+    if(pendingAvatarUrl)revokeObjectURL(pendingAvatarUrl);
+    pendingAvatarUrl=createObjectURL(compressed);
+    const preview=$('#formAvatarPreview');
+    if(preview){
+      preview.querySelectorAll('img').forEach(i=>i.remove());
+      Array.from(preview.childNodes).forEach(n=>{if(n.nodeType===3)n.remove();});
+      const img=document.createElement('img');img.src=pendingAvatarUrl;preview.insertBefore(img,preview.firstChild);
+      preview.classList.add('has-photo');delete preview.dataset.removed;
+    }
+  }catch(err){
+    console.error(err);
+    showToast('Erro ao processar imagem');
+  }finally{
+    avatarProcessing=false;
+    if(modalSave&&!isSaving){modalSave.disabled=false;modalSave.textContent='Salvar';}
+  }
+}
+avatarGalleryInput.addEventListener('change',()=>handleAvatarFile(avatarGalleryInput.files&&avatarGalleryInput.files[0]));
+avatarFileInput.addEventListener('change',()=>handleAvatarFile(avatarFileInput.files&&avatarFileInput.files[0]));
+
+function openContactForm(contactId){
+  pendingAvatarBlob=null;if(pendingAvatarUrl){revokeObjectURL(pendingAvatarUrl);pendingAvatarUrl=null;}
+  const c=contactId?ContactManager.getContact(contactId):null;
+  const wrap=document.createElement('div');
+  const avRow=document.createElement('div');avRow.className='avatar-picker';
+  const preview=document.createElement('div');preview.className='avatar-preview';preview.id='formAvatarPreview';
+  preview.setAttribute('role','button');preview.setAttribute('aria-label','Escolher foto');
+  const hint=document.createElement('span');hint.className='avatar-hint';hint.textContent='Foto';
+  const rmBtn=document.createElement('button');rmBtn.type='button';rmBtn.className='avatar-remove';rmBtn.setAttribute('aria-label','Remover foto');rmBtn.textContent='×';
+  if(c&&c.avatar){const img=document.createElement('img');img.src=createObjectURL(c.avatar);preview.appendChild(img);preview.classList.add('has-photo');}
+  else{preview.textContent=c?initials(c.name):'+';}
+  preview.appendChild(hint);preview.appendChild(rmBtn);
+  preview.addEventListener('click',e=>{if(e.target===rmBtn||rmBtn.contains(e.target))return;openAvatarSourcePicker();});
+  rmBtn.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();pendingAvatarBlob=null;if(pendingAvatarUrl){revokeObjectURL(pendingAvatarUrl);pendingAvatarUrl=null;}preview.querySelectorAll('img').forEach(i=>i.remove());preview.classList.remove('has-photo');const t=document.createTextNode('+');preview.insertBefore(t,hint);preview.dataset.removed='1';});
+  avRow.appendChild(preview);wrap.appendChild(avRow);
+
+  const gName=document.createElement('div');gName.className='form-group';gName.id='fg-name';
+  const lName=document.createElement('label');lName.setAttribute('for','fName');lName.textContent='Nome completo';
+  const iName=document.createElement('input');iName.id='fName';iName.type='text';iName.autocomplete='name';iName.placeholder='Ex: Edcarlos Silva';iName.value=c?(c.name||''):'';
+  const eName=document.createElement('div');eName.className='form-error';eName.textContent='Informe o nome';
+  gName.appendChild(lName);gName.appendChild(iName);gName.appendChild(eName);wrap.appendChild(gName);
+
+  const note=document.createElement('p');note.style.cssText='font-size:.8rem;color:rgba(255,255,255,.45);margin-top:8px';note.textContent='Endereço e redes sociais são adicionados no perfil do contato.';wrap.appendChild(note);
+
+  openModal(c?'Editar contato':'Novo contato',wrap,{
+    showSave:true,saveLabel:'Salvar',
+    onSave:async()=>{
+      if(isSaving)return;
+      if(avatarProcessing){showToast('Aguarde o processamento da foto…');return;}
+      const nameVal=(iName.value||'').trim();gName.classList.remove('has-error');
+      if(!nameVal){gName.classList.add('has-error');iName.focus();return;}
+      isSaving=true;modalSave.disabled=true;modalSave.textContent='Salvando…';
+      try{
+        const data={id:c?c.id:uid(),name:nameVal,address:c?(c.address||''):'',avatar:null,createdAt:c?c.createdAt:Date.now(),updatedAt:Date.now()};
+        if(pendingAvatarBlob){
+          data.avatar=ensureBlob(pendingAvatarBlob,pendingAvatarBlob.type||'image/jpeg');
+          if(!data.avatar){showToast('Foto inválida');isSaving=false;modalSave.disabled=false;modalSave.textContent='Salvar';return;}
+        }else if(preview.dataset.removed==='1')data.avatar=null;
+        else if(c&&c.avatar)data.avatar=c.avatar;
+        const saved=await ContactManager.saveContact(data);
+        closeModal();showToast('Contato salvo com sucesso');AgendaUI.render();
+        if(activeContactId===saved.id)renderProfile();else if(!c)openProfile(saved.id);
+      }catch(err){
+        console.error(err);
+        if(isQuotaError(err))showToast('Armazenamento cheio — tente foto menor');
+        else showToast('Não foi possível salvar o contato');
+        modalSave.disabled=false;modalSave.textContent='Salvar';isSaving=false;
+      }
+    }
+  });
+}
+
+function openAddressForm(contact){
+  const wrap=document.createElement('div');
+  const g=document.createElement('div');g.className='form-group';
+  const lab=document.createElement('label');lab.setAttribute('for','fAddress');lab.textContent='Endereço';
+  const ta=document.createElement('textarea');ta.id='fAddress';ta.placeholder='Ex: Av. Paraná, 1234 — Ibiporã - PR';ta.value=contact.address||'';
+  g.appendChild(lab);g.appendChild(ta);wrap.appendChild(g);
+  if(contact.address&&contact.address.trim()){
+    const rm=document.createElement('button');rm.type='button';rm.className='add-link-btn';rm.style.color='var(--danger)';rm.style.borderColor='rgba(255,69,58,.35)';rm.textContent='Remover endereço';
+    rm.addEventListener('click',async()=>{
+      if(isSaving)return;isSaving=true;
+      try{contact.address='';contact.updatedAt=Date.now();await ContactManager.saveContact(contact);closeModal();showToast('Endereço removido');if(activeContactId===contact.id)renderProfile();}
+      catch(_){showToast('Erro ao remover');isSaving=false;}
+    });wrap.appendChild(rm);
+  }
+  openModal(contact.address?'Editar endereço':'Adicionar endereço',wrap,{
+    showSave:true,saveLabel:'Salvar',
+    onSave:async()=>{
+      if(isSaving)return;isSaving=true;modalSave.disabled=true;modalSave.textContent='Salvando…';
+      try{contact.address=(ta.value||'').trim();contact.updatedAt=Date.now();await ContactManager.saveContact(contact);closeModal();showToast('Endereço salvo');if(activeContactId===contact.id)renderProfile();}
+      catch(err){console.error(err);showToast('Não foi possível salvar');modalSave.disabled=false;modalSave.textContent='Salvar';isSaving=false;}
+    }
+  });
+}
+
+function openAddSocial(contactId){
+  const existing=ContactManager.getLinks(contactId).map(l=>l.platform);
+  const list=document.createElement('div');list.className='platform-list';
+  PLATFORMS.forEach(p=>{if(existing.includes(p.id))return;const item=document.createElement('div');item.className='platform-item';
+    const icon=document.createElement('span');icon.className='pi-icon';icon.textContent=p.icon;const lab=document.createElement('span');lab.textContent=p.label;
+    item.appendChild(icon);item.appendChild(lab);item.addEventListener('click',()=>{closeModal();openSocialForm(contactId,p.id);});list.appendChild(item);});
+  if(!list.children.length){const empty=document.createElement('p');empty.style.cssText='text-align:center;color:rgba(255,255,255,.5);padding:20px';empty.textContent='Todas as redes já foram adicionadas';list.appendChild(empty);}
+  openModal('Adicionar rede',list,{showSave:false});
+}
+
+function openSocialForm(contactId,platformId,existingLink){
+  const meta=platformMeta(platformId);const wrap=document.createElement('div');
+  const gVal=document.createElement('div');gVal.className='form-group';
+  const lVal=document.createElement('label');lVal.setAttribute('for','fSocialVal');lVal.textContent=meta.type==='phone'?'Número (com DDI)':'Username / Identificador';
+  const iVal=document.createElement('input');iVal.id='fSocialVal';iVal.type='text';iVal.placeholder=meta.type==='phone'?'5543991881807':(meta.prefix+'usuario');iVal.autocomplete='off';iVal.autocapitalize='off';
+  if(existingLink)iVal.value=existingLink.value||existingLink.username||'';
+  const eVal=document.createElement('div');eVal.className='form-error';eVal.textContent='Campo obrigatório';
+  gVal.appendChild(lVal);gVal.appendChild(iVal);gVal.appendChild(eVal);wrap.appendChild(gVal);
+  const gUrl=document.createElement('div');gUrl.className='form-group';
+  const lUrl=document.createElement('label');lUrl.setAttribute('for','fSocialUrl');lUrl.textContent='URL personalizada (opcional)';
+  const iUrl=document.createElement('input');iUrl.id='fSocialUrl';iUrl.type='url';iUrl.placeholder='https://…';iUrl.autocomplete='off';
+  if(existingLink&&existingLink.url)iUrl.value=existingLink.url;
+  const eUrl=document.createElement('div');eUrl.className='form-error';eUrl.textContent='URL inválida';
+  gUrl.appendChild(lUrl);gUrl.appendChild(iUrl);gUrl.appendChild(eUrl);wrap.appendChild(gUrl);
+  openModal(meta.label,wrap,{showSave:true,onSave:async()=>{
+    if(isSaving)return;const raw=(iVal.value||'').trim();gVal.classList.remove('has-error');gUrl.classList.remove('has-error');
+    if(!raw&&!(iUrl.value||'').trim()){gVal.classList.add('has-error');iVal.focus();return;}
+    let customUrl=(iUrl.value||'').trim();if(customUrl&&!isValidUrl(customUrl)){gUrl.classList.add('has-error');iUrl.focus();return;}
+    let value=raw,username='';
+    if(meta.type==='phone'){value=normalizePhone(raw);if(!value){gVal.classList.add('has-error');eVal.textContent='Número inválido';return;}}
+    else{username=sanitizeUsername(raw);value=username;}
+    const url=buildPlatformUrl(platformId,value,customUrl||null);
+    isSaving=true;modalSave.disabled=true;modalSave.textContent='Salvando…';
+    try{await ContactManager.saveLink({id:existingLink?existingLink.id:uid(),contactId,platform:platformId,username,value,url:customUrl||url||'',createdAt:existingLink?existingLink.createdAt:Date.now()});
+      closeModal();showToast('Rede salva');if(activeContactId===contactId)renderProfile();AgendaUI.render();}
+    catch(err){console.error(err);showToast('Não foi possível salvar');modalSave.disabled=false;modalSave.textContent='Salvar';isSaving=false;}
+  }});
+}
+
+function openSocialActions(link){
+  const meta=platformMeta(link.platform);const list=document.createElement('div');list.className='action-sheet-list';
+  const openItem=document.createElement('div');openItem.className='action-item';openItem.innerHTML='<span class="ai-icon">'+meta.icon+'</span><span>Abrir '+meta.label+'</span>';
+  openItem.addEventListener('click',()=>{closeModal();const url=link.url||buildPlatformUrl(link.platform,link.value||link.username,link.url);let schemes=[];
+    if(link.platform==='whatsapp')schemes=['whatsapp://send?phone='+normalizePhone(link.value)];
+    else if(link.platform==='instagram')schemes=['instagram://user?username='+sanitizeUsername(link.username||link.value)];
+    else if(link.platform==='telegram')schemes=['tg://resolve?domain='+sanitizeUsername(link.username||link.value)];
+    else if(link.platform==='x')schemes=['twitter://user?screen_name='+sanitizeUsername(link.username||link.value)];
+    openExternal(url,schemes);});list.appendChild(openItem);
+  const editItem=document.createElement('div');editItem.className='action-item';editItem.innerHTML='<span class="ai-icon">✎</span><span>Editar</span>';
+  editItem.addEventListener('click',()=>{closeModal();openSocialForm(link.contactId,link.platform,link);});list.appendChild(editItem);
+  const delItem=document.createElement('div');delItem.className='action-item destructive';delItem.innerHTML='<span class="ai-icon">🗑</span><span>Remover</span>';
+  delItem.addEventListener('click',async()=>{closeModal();try{await ContactManager.deleteLink(link.id);showToast('Rede removida');if(activeContactId)renderProfile();AgendaUI.render();}catch(_){showToast('Erro ao remover');}});list.appendChild(delItem);
+  const cancel=document.createElement('div');cancel.className='action-cancel';cancel.textContent='Cancelar';cancel.addEventListener('click',closeModal);list.appendChild(cancel);
+  openModal(meta.label,list,{showSave:false,closeLabel:' '});modalClose.style.visibility='hidden';
+}
+
+async function openLocationActions(contact){
+  const addr=(contact.address||'').trim();
+  if(!addr){showToast('Nenhum endereço');return;}
+  const ok=await copyText(addr);
+  showToast(ok?'Endereço copiado':'Não foi possível copiar');
+}
+
+function openMemorySourcePicker(contactId){
+  memoryTargetContactId=contactId;
+  memoryFileInput.value='';
+  memoryFileInput.click();
+}
+
+function captureVideoThumbnail(file){
+  return new Promise(resolve=>{
+    try{
+      const url=URL.createObjectURL(file);
+      const video=document.createElement('video');
+      video.muted=true;video.playsInline=true;video.preload='auto';
+      let done=false;
+      const finish=(thumb,duration)=>{
+        if(done)return;done=true;
+        try{URL.revokeObjectURL(url);}catch(_){}
+        resolve({thumbnail:thumb||null,duration:duration||0});
+      };
+      const timeout=setTimeout(()=>finish(null,0),8000);
+      video.onloadeddata=()=>{
+        try{
+          const seekTo=Math.min(0.5,(video.duration&&isFinite(video.duration)?video.duration*0.1:0.5));
+          video.currentTime=seekTo;
+        }catch(_){finish(null,video.duration||0);}
+      };
+      video.onseeked=()=>{
+        try{
+          const w=video.videoWidth||320,h=video.videoHeight||240;
+          const maxW=400;let tw=w,th=h;if(w>maxW){th=Math.round(h*maxW/w);tw=maxW;}
+          const canvas=document.createElement('canvas');canvas.width=tw;canvas.height=th;
+          canvas.getContext('2d').drawImage(video,0,0,tw,th);
+          canvas.toBlob(b=>{clearTimeout(timeout);finish(b,video.duration||0);},'image/jpeg',0.72);
+        }catch(_){clearTimeout(timeout);finish(null,video.duration||0);}
+      };
+      video.onerror=()=>{clearTimeout(timeout);finish(null,0);};
+      video.src=url;
+    }catch(_){resolve({thumbnail:null,duration:0});}
+  });
+}
+function formatDuration(sec){
+  if(!sec||!isFinite(sec)||sec<=0)return'';
+  const s=Math.round(sec);const m=Math.floor(s/60);const r=s%60;
+  return m+':'+String(r).padStart(2,'0');
+}
+
+/* Limites práticos no Safari/iPhone (IndexedDB). 1 GB+ não é viável em Web App. */
+const MAX_MEMORY_IMAGE_BYTES=20*1024*1024;
+const MAX_MEMORY_VIDEO_BYTES=200*1024*1024;
+
+async function handleMemoryFiles(fileList){
+  const contactId=memoryTargetContactId;if(!contactId||!fileList||!fileList.length)return;
+  showToast('Carregando…');let ok=0,fail=0;const reasons=[];
+  for(let i=0;i<fileList.length;i++){
+    const file=fileList[i];
+    try{
+      const name=(file.name||'').toLowerCase();
+      const isImg=(file.type&&file.type.startsWith('image/'))||/\.(jpe?g|png|webp|gif|heic|heif)$/i.test(name);
+      const isVid=(file.type&&file.type.startsWith('video/'))||/\.(mp4|mov|m4v|webm|3gp)$/i.test(name);
+      if(!isImg&&!isVid){fail++;reasons.push('tipo não suportado');continue;}
+      if(isVid&&file.size>MAX_MEMORY_VIDEO_BYTES){
+        fail++;reasons.push('vídeo > '+formatBytes(MAX_MEMORY_VIDEO_BYTES));
+        showToast('Vídeo muito grande (máx. '+formatBytes(MAX_MEMORY_VIDEO_BYTES)+'). No iPhone, use “Vídeo curto” ou comprima antes.');
+        continue;
+      }
+      if(isImg&&file.size>MAX_MEMORY_IMAGE_BYTES){
+        fail++;reasons.push('foto grande demais');continue;
+      }
+      let blob=file;const type=isVid?'video':'image';
+      if(type==='image'){
+        blob=await compressImage(file,1200,.75);
+        blob=ensureBlob(blob,blob&&blob.type?blob.type:'image/jpeg')||file;
+      }
+      let thumbnail=null,duration=0;
+      if(type==='video'){
+        try{
+          const cap=await captureVideoThumbnail(file);
+          thumbnail=cap.thumbnail||null;duration=cap.duration||0;
+        }catch(_){/* thumbnail opcional — não bloqueia o save */}
+      }
+      await ContactManager.saveMemory({
+        id:uid(),contactId,type,name:file.name||(type==='video'?'video':'foto'),
+        mimeType:(blob&&blob.type)||file.type||(type==='video'?'video/mp4':'image/jpeg'),
+        size:blob?blob.size:file.size,blob,thumbnail:thumbnail||null,duration:duration||0,
+        createdAt:Date.now(),storageType:StorageAdapter.backend
+      });
+      ok++;
+    }catch(e){
+      console.error(e);fail++;
+      if(isQuotaError(e)){
+        reasons.push('armazenamento cheio');
+        showToast('Armazenamento cheio. Apague memórias antigas ou use vídeo menor.');
+      }else reasons.push('erro ao salvar');
+    }
+  }
+  if(ok){showToast(ok===1?'Memória adicionada':ok+' memórias adicionadas');if(activeContactId===contactId)renderProfile();}
+  else if(fail&&!reasons.some(r=>/vídeo >|armazenamento/.test(r)))showToast('Não foi possível adicionar. Tente outro arquivo.');
+}
+memoryFileInput.addEventListener('change',()=>handleMemoryFiles(memoryFileInput.files));
+
+function openMemoryViewer(list,index){memoryViewerList=list;memoryViewerIndex=index;showMemoryAt(index);memoryViewer.classList.add('open');memoryViewer.setAttribute('aria-hidden','false');}
+function closeMemoryViewer(){
+  revokeElementMediaUrls(mvContent);
+  memoryViewer.classList.remove('open');memoryViewer.setAttribute('aria-hidden','true');mvContent.innerHTML='';memoryViewerList=[];
+}
+function showMemoryAt(idx){
+  if(!memoryViewerList.length)return;if(idx<0)idx=memoryViewerList.length-1;if(idx>=memoryViewerList.length)idx=0;
+  memoryViewerIndex=idx;const m=memoryViewerList[idx];
+  revokeElementMediaUrls(mvContent);
+  mvContent.innerHTML='';
+  if(m.type==='video'){const v=document.createElement('video');v.src=createObjectURL(m.blob);v.controls=true;v.playsInline=true;v.autoplay=true;mvContent.appendChild(v);}
+  else{const img=document.createElement('img');img.src=createObjectURL(m.blob);img.alt='';mvContent.appendChild(img);}
+}
+$('#mvClose').addEventListener('click',closeMemoryViewer);
+$('#mvPrev').addEventListener('click',()=>showMemoryAt(memoryViewerIndex-1));
+$('#mvNext').addEventListener('click',()=>showMemoryAt(memoryViewerIndex+1));
+
+function confirmDelete(contact){
+  const wrap=document.createElement('div');const msg=document.createElement('div');msg.className='confirm-msg';
+  const strong=document.createElement('strong');strong.textContent=contact.name||'este contato';
+  msg.appendChild(document.createTextNode('Excluir '));msg.appendChild(strong);msg.appendChild(document.createTextNode('?'));
+  msg.appendChild(document.createElement('br'));msg.appendChild(document.createElement('br'));
+  msg.appendChild(document.createTextNode('Esta ação removerá o contato, as redes sociais e as memórias associadas.'));
+  wrap.appendChild(msg);
+  const list=document.createElement('div');list.className='action-sheet-list';
+  const del=document.createElement('div');del.className='action-item destructive';del.style.justifyContent='center';del.textContent='Excluir';
+  del.addEventListener('click',async()=>{closeModal();try{await ContactManager.deleteContact(contact.id);closeProfile();AgendaUI.render();showToast('Contato excluído');}catch(e){console.error(e);showToast('Erro ao excluir');}});
+  list.appendChild(del);const cancel=document.createElement('div');cancel.className='action-cancel';cancel.textContent='Cancelar';cancel.addEventListener('click',closeModal);list.appendChild(cancel);wrap.appendChild(list);
+  openModal('Excluir contato',wrap,{showSave:false,closeLabel:' '});modalClose.style.visibility='hidden';
+}
+
+function confirmDeleteMemory(mem){
+  if(!mem)return;
+  const wrap=document.createElement('div');const msg=document.createElement('div');msg.className='confirm-msg';
+  msg.appendChild(document.createTextNode(mem.type==='video'?'Excluir este vídeo?':'Excluir esta foto?'));
+  msg.appendChild(document.createElement('br'));msg.appendChild(document.createElement('br'));
+  msg.appendChild(document.createTextNode('Somente esta memória será removida.'));
+  wrap.appendChild(msg);
+  const list=document.createElement('div');list.className='action-sheet-list';
+  const del=document.createElement('div');del.className='action-item destructive';del.style.justifyContent='center';del.textContent='Excluir';
+  del.addEventListener('click',async()=>{
+    closeModal();
+    try{
+      await ContactManager.deleteMemory(mem.id);
+      showToast('Memória excluída');
+      if(activeContactId)renderProfile();
+    }catch(e){console.error(e);showToast('Erro ao excluir memória');}
+  });
+  list.appendChild(del);
+  const cancel=document.createElement('div');cancel.className='action-cancel';cancel.textContent='Cancelar';cancel.addEventListener('click',closeModal);list.appendChild(cancel);
+  wrap.appendChild(list);
+  openModal('Excluir memória',wrap,{showSave:false,closeLabel:' '});modalClose.style.visibility='hidden';
+}
+
+/* ========== Manage Storage UI ========== */
+fabAdd.addEventListener('click',()=>openContactForm(null));
+/* busca removida */
+
+/* ========== Init ========== */
+async function init(){
+  StorageAdapter.detect();
+  try{
+    await IDB.open();
+    await migrateFromLegacy();
+    await ContactManager.loadAll();
+    AgendaUI.render();
+  }catch(err){
+    console.error('Init error',err);
+    showToast('Armazenamento indisponível — modo limitado');
+    AgendaUI.render();
+  }
+}
+requestAnimationFrame(()=>updateMorphingBar($('.nav-btn.active')));
+init();
+window.addEventListener('pagehide',()=>revokeAllObjectURLs());
+})();
+</script>
+</body>
+</html>
