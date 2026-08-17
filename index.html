@@ -3,127 +3,315 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#F2F2F7">
+<meta name="color-scheme" content="light">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>ES140826</title>
+<meta name="apple-mobile-web-app-title" content="Agenda">
+<meta name="application-name" content="Agenda">
+<meta name="description" content="Agenda de contatos com redes, memórias e vCard">
+<meta name="format-detection" content="telephone=no">
+<title>Agenda</title>
+<link rel="apple-touch-icon" id="appleTouchIcon" href="">
+<link rel="icon" id="appFavicon" href="">
+<link rel="manifest" id="appManifest" href="">
 <style>
-:root{--glass-bg:rgba(255,255,255,.03);--glass-border:rgba(255,255,255,.2);--glass-shadow:0 8px 32px 0 rgba(31,38,135,.37);--text-color:#fff;--danger:#ff453a;--success:#30d158;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px)}
-*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;-webkit-tap-highlight-color:transparent}
-body{background:linear-gradient(45deg,#0f2027,#203a43,#2c5364);background-size:400% 400%;animation:gradientBG 15s ease infinite;color:var(--text-color);overflow:hidden;height:100vh;height:100dvh;width:100vw;-webkit-font-smoothing:antialiased}
-@keyframes gradientBG{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}body{animation:none}}
-.app-container{position:relative;width:100vw;height:100vh;height:100dvh;background:var(--glass-bg);backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);overflow:hidden}
-@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.app-container,.floating-glass-bar,.modal-sheet,.glass-card{background:rgba(20,40,55,.92)!important}}
+:root{
+  --bg-app:#F2F2F7;
+  --bg-card:#FFFFFF;
+  --bg-elevated:#FFFFFF;
+  --bg-input:#F2F2F7;
+  --separator:rgba(60,60,67,0.12);
+  --text-primary:#1C1C1E;
+  --text-secondary:#8E8E93;
+  --text-tertiary:rgba(60,60,67,0.3);
+  --blue:#007AFF;
+  --blue-soft:rgba(0,122,255,0.12);
+  --green:#34C759;
+  --green-soft:rgba(52,199,89,0.14);
+  --danger:#FF3B30;
+  --danger-soft:rgba(255,59,48,0.12);
+  --shadow-card:0 1px 3px rgba(0,0,0,0.08),0 1px 2px rgba(0,0,0,0.04);
+  --shadow-bar:0 4px 16px rgba(0,0,0,0.1);
+  --radius-sm:10px;
+  --radius-md:12px;
+  --radius-lg:16px;
+  --radius-xl:20px;
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+  --glass-bg:var(--bg-card);
+  --glass-border:var(--separator);
+  --glass-shadow:var(--shadow-card);
+  --text-color:var(--text-primary);
+  --success:var(--green);
+}
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg-app);color:var(--text-primary);overflow:hidden;height:100vh;height:100dvh;width:100vw;-webkit-font-smoothing:antialiased}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+.app-container{position:relative;width:100vw;height:100vh;height:100dvh;background:var(--bg-app);overflow:hidden}
 .screen{position:absolute;top:0;left:0;width:100%;height:100%;padding-bottom:calc(90px + var(--safe-bottom));display:flex;justify-content:center;align-items:center;opacity:0;visibility:hidden;transition:opacity .5s ease,visibility .5s;z-index:1;overflow:hidden}
 .screen.active{opacity:1;visibility:visible;z-index:10}
 .screen-content{opacity:0;transform:scale(.8) translateY(30px);transition:all .7s cubic-bezier(.16,1,.3,1)}
 .screen.active .screen-content{opacity:1;transform:scale(1) translateY(0)}
-.screen h2{font-size:2.5rem;font-weight:300;letter-spacing:3px;text-transform:uppercase;text-shadow:0 4px 10px rgba(0,0,0,.3)}
-.floating-glass-bar{position:fixed;bottom:calc(20px + var(--safe-bottom));left:50%;transform:translateX(-50%);display:flex;background:rgba(255,255,255,.08);backdrop-filter:blur(25px);-webkit-backdrop-filter:blur(25px);border:1px solid var(--glass-border);border-radius:50px;padding:8px;box-shadow:var(--glass-shadow);z-index:100;max-width:calc(100vw - 24px)}
-.morphing-indicator{position:absolute;top:8px;bottom:8px;left:0;background:rgba(255,255,255,.25);border-radius:40px;transition:all .5s cubic-bezier(.25,1,.5,1);z-index:1;box-shadow:0 4px 15px rgba(255,255,255,.15)}
-.nav-btn{position:relative;background:none;border:none;color:rgba(255,255,255,.5);font-size:1rem;font-weight:500;padding:12px 24px;cursor:pointer;z-index:2;transition:color .3s ease;outline:none;white-space:nowrap}
-.nav-btn.active{color:#fff;font-weight:600}.nav-btn:active{opacity:.7}
-@media(max-width:400px){.nav-btn{padding:10px 16px;font-size:.9rem}}
-#screen-2{align-items:stretch;justify-content:flex-start;padding:0;padding-top:var(--safe-top);padding-bottom:calc(90px + var(--safe-bottom))}
-#screen-2 .screen-content{width:100%;height:100%;display:flex;flex-direction:column;transform:none;opacity:1;overflow:hidden}
-.contact-storage-summary{margin-top:14px;padding:14px 16px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1)}
-.contact-storage-summary .css-title{font-size:.75rem;font-weight:600;color:rgba(255,255,255,.45);letter-spacing:.6px;text-transform:uppercase;margin-bottom:10px}
-.contact-storage-summary .css-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:.9rem;color:rgba(255,255,255,.8)}
-.contact-storage-summary .css-row.total{margin-top:6px;padding-top:8px;border-top:1px solid rgba(255,255,255,.08);font-weight:600;color:#fff}
-.btn-block{width:100%;padding:14px;border-radius:14px;border:1px solid var(--glass-border);background:rgba(255,255,255,.08);color:#fff;font-size:1rem;font-weight:500;cursor:pointer;text-align:center}
-.btn-block:active{opacity:.8}
-.btn-block.danger{color:var(--danger);border-color:rgba(255,69,58,.3);background:rgba(255,69,58,.1)}
-.btn-block.primary{color:#64d2ff;border-color:rgba(100,210,255,.3);background:rgba(100,210,255,.1)}
+.screen h2{font-size:2rem;font-weight:700;letter-spacing:-.02em;color:var(--text-primary)}
+
+/* ===== Bottom bar + selector ===== */
+.floating-glass-bar{position:fixed;bottom:calc(20px + var(--safe-bottom));left:50%;transform:translateX(-50%);display:flex;align-items:center;justify-content:center;background:#FFFFFF;border:1px solid var(--separator);border-radius:50px;padding:10px 28px;min-width:140px;box-shadow:var(--shadow-bar);z-index:100;max-width:calc(100vw - 24px);cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:manipulation;transition:transform .2s ease,background .2s ease,box-shadow .2s ease}
+.floating-glass-bar:active,.floating-glass-bar.lp-holding{transform:translateX(-50%) scale(.97);background:#F2F2F7}
+.floating-glass-bar .bar-label{font-size:1rem;font-weight:600;color:var(--text-primary);letter-spacing:-.01em;pointer-events:none}
+.screen-selector{position:fixed;bottom:calc(88px + var(--safe-bottom));left:50%;transform:translateX(-50%) translateY(12px);background:#FFFFFF;border:1px solid var(--separator);border-radius:16px;padding:8px;box-shadow:0 8px 28px rgba(0,0,0,0.12);z-index:110;display:flex;gap:4px;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .25s ease,visibility .25s,transform .25s cubic-bezier(.16,1,.3,1);max-width:calc(100vw - 32px)}
+.screen-selector.open{opacity:1;visibility:visible;pointer-events:auto;transform:translateX(-50%) translateY(0)}
+.selector-option{padding:12px 22px;border-radius:12px;border:none;background:transparent;color:var(--text-secondary);font-size:.95rem;font-weight:500;cursor:pointer;white-space:nowrap;transition:background .15s ease,color .15s ease}
+.selector-option:active{background:var(--bg-app);transform:scale(.98)}
+.selector-option.active{background:var(--blue-soft);color:var(--blue);font-weight:600}
+
+/* ===== Agenda screen ===== */
+#screen-agenda{align-items:stretch;justify-content:flex-start;padding:0;padding-top:var(--safe-top);padding-bottom:calc(90px + var(--safe-bottom))}
+#screen-agenda .screen-content{width:100%;height:100%;display:flex;flex-direction:column;transform:none;opacity:1;overflow:hidden}
+.contact-storage-summary{margin-top:14px;padding:14px 16px;border-radius:var(--radius-lg);background:var(--bg-card);border:1px solid var(--separator);box-shadow:var(--shadow-card)}
+.contact-storage-summary .css-title{font-size:.75rem;font-weight:600;color:var(--text-secondary);letter-spacing:.6px;text-transform:uppercase;margin-bottom:10px}
+.contact-storage-summary .css-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:.9rem;color:var(--text-primary)}
+.contact-storage-summary .css-row.total{margin-top:6px;padding-top:8px;border-top:1px solid var(--separator);font-weight:600;color:var(--text-primary)}
+.btn-block{width:100%;padding:14px;border-radius:var(--radius-md);border:1px solid var(--separator);background:var(--bg-card);color:var(--text-primary);font-size:1rem;font-weight:500;cursor:pointer;text-align:center;transition:transform .15s ease,opacity .15s ease;box-shadow:var(--shadow-card)}
+.btn-block:active{opacity:.85;transform:scale(.98)}
+.btn-block.danger{color:var(--danger);border-color:rgba(255,59,48,.25);background:var(--danger-soft)}
+.btn-block.primary{color:var(--blue);border-color:rgba(0,122,255,.25);background:var(--blue-soft)}
 .agenda-header{padding:12px 20px 0;flex-shrink:0}
 .search-wrap{position:relative;margin-bottom:12px}
-.search-wrap input{width:100%;padding:12px 16px 12px 42px;border-radius:14px;border:1px solid var(--glass-border);background:rgba(255,255,255,.08);color:#fff;font-size:1rem;outline:none;-webkit-appearance:none}
-.search-wrap input::placeholder{color:rgba(255,255,255,.4)}
+.search-wrap input{width:100%;padding:12px 16px 12px 42px;border-radius:var(--radius-md);border:1px solid var(--separator);background:var(--bg-input);color:var(--text-primary);font-size:1rem;outline:none;-webkit-appearance:none}
+.search-wrap input::placeholder{color:var(--text-secondary)}
 .search-wrap .search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);opacity:.5;pointer-events:none;font-size:1.1rem}
 .contacts-list{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:8px 16px 24px;overscroll-behavior:contain}
-.contact-item{display:flex;align-items:center;gap:14px;padding:12px 14px;border-radius:16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);margin-bottom:8px;cursor:pointer;transition:background .2s,transform .15s,box-shadow .2s,border-color .2s;min-height:72px;-webkit-user-select:none;user-select:none;touch-action:pan-y}
-.contact-item:active{background:rgba(255,255,255,.12);transform:scale(.985)}
-.contact-item.lp-holding{background:rgba(255,255,255,.1);transform:scale(.99);border-color:rgba(100,210,255,.25)}
-.contact-item.lp-active{background:rgba(255,255,255,.16);transform:scale(.97);border-color:rgba(100,210,255,.45);box-shadow:0 0 0 2px rgba(100,210,255,.28),0 8px 24px rgba(0,0,0,.25)}
-.contact-avatar{width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,.12);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.25rem;font-weight:600;color:rgba(255,255,255,.7);overflow:hidden}
+.contact-item{display:flex;align-items:center;gap:14px;padding:12px 14px;border-radius:var(--radius-lg);background:var(--bg-card);border:1px solid var(--separator);margin-bottom:8px;cursor:pointer;transition:transform .15s ease,box-shadow .2s ease;min-height:72px;-webkit-user-select:none;user-select:none;touch-action:pan-y;box-shadow:var(--shadow-card)}
+.contact-item:active{transform:scale(.985);background:#F9F9FB}
+.contact-item.lp-holding{background:#F2F2F7;transform:scale(.99);border-color:rgba(0,122,255,.25)}
+.contact-item.lp-active{background:#EBF5FF;transform:scale(.97);border-color:rgba(0,122,255,.4);box-shadow:0 0 0 2px rgba(0,122,255,.2)}
+.contact-avatar{width:56px;height:56px;border-radius:50%;background:var(--bg-input);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:600;color:var(--text-secondary);overflow:hidden}
 .contact-avatar img{width:100%;height:100%;object-fit:cover}
 .contact-info{flex:1;min-width:0}
-.contact-name{font-weight:600;font-size:1.05rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.contact-meta{font-size:.8rem;color:rgba(255,255,255,.5);margin-top:2px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.contact-name{font-weight:600;font-size:1.05rem;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.contact-meta{font-size:.8rem;color:var(--text-secondary);margin-top:2px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .social-dots{display:flex;gap:4px}
-.social-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.35)}
+.social-dot{width:6px;height:6px;border-radius:50%;background:var(--text-tertiary)}
 .contact-socials{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
-.contact-social-chip{display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;padding:0 8px;border-radius:14px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.12);font-size:.85rem;color:rgba(255,255,255,.85);cursor:pointer;transition:background .15s;-webkit-user-select:none;user-select:none}
-.contact-social-chip:active{background:rgba(255,255,255,.22)}
+.contact-social-chip{display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;padding:0 8px;border-radius:14px;background:var(--bg-input);border:1px solid var(--separator);font-size:.85rem;color:var(--text-primary);cursor:pointer;transition:background .15s ease,transform .15s ease;-webkit-user-select:none;user-select:none}
+.contact-social-chip:active{background:#E5E5EA;transform:scale(.96)}
 .memory-thumb .mem-del{position:absolute;top:4px;right:4px;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.3);color:#fff;font-size:.85rem;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2;line-height:1;padding:0;-webkit-tap-highlight-color:transparent}
 .memory-thumb .mem-del:active{background:rgba(255,69,58,.9);transform:scale(.92)}
 .memory-thumb .video-duration{position:absolute;bottom:6px;left:6px;background:rgba(0,0,0,.6);border-radius:4px;padding:2px 5px;font-size:.65rem;color:#fff}
-.empty-state,.no-results{text-align:center;padding:48px 24px;color:rgba(255,255,255,.5);font-size:.95rem}
+.empty-state,.no-results{text-align:center;padding:48px 24px;color:var(--text-secondary);font-size:.95rem}
 .empty-state p,.no-results p{margin-top:8px}
-.fab-add{position:absolute;bottom:calc(100px + var(--safe-bottom));right:20px;width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,.18);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--glass-border);color:#fff;font-size:1.8rem;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.3);z-index:50;transition:transform .2s,background .2s}
-.fab-add:active{transform:scale(.92);background:rgba(255,255,255,.28)}
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;opacity:0;visibility:hidden;transition:opacity .3s,visibility .3s;display:flex;align-items:flex-end;justify-content:center}
+.fab-add{position:absolute;bottom:calc(100px + var(--safe-bottom));right:20px;width:56px;height:56px;border-radius:50%;background:var(--blue);border:none;color:#fff;font-size:1.8rem;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 14px rgba(0,122,255,.35);z-index:50;transition:transform .2s ease,opacity .2s ease}
+.fab-add:active{transform:scale(.92);opacity:.9}
+
+
+
+/* ===== Treino (Workout Builder) — iOS Light ===== */
+#screen-treino{align-items:stretch;justify-content:flex-start;padding:0;padding-top:var(--safe-top);padding-bottom:calc(90px + var(--safe-bottom));overflow:hidden}
+#screen-treino .screen-content{width:100%;height:100%;display:flex;flex-direction:column;transform:none;opacity:1;overflow:hidden}
+.treino-header{flex-shrink:0;padding:14px 20px 12px;display:flex;justify-content:space-between;align-items:flex-end;border-bottom:1px solid var(--separator);background:rgba(242,242,247,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+.treino-header-title{font-size:1.55rem;font-weight:700;letter-spacing:-.03em;color:var(--text-primary)}
+.treino-header-action{background:none;border:none;color:var(--blue);font-size:1rem;font-weight:600;cursor:pointer;padding:6px 4px;transition:opacity .15s ease,transform .15s ease}
+.treino-header-action:active{opacity:.55;transform:scale(.97)}
+.treino-header-action.hidden,.treino-fab.hidden{display:none!important}
+.treino-main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px 100px;overscroll-behavior:contain;display:flex;flex-direction:column;gap:12px}
+.treino-status{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:50vh;padding:24px 16px;gap:18px}
+.treino-status-icon{font-size:3.2rem}
+.treino-status-title{font-size:1.35rem;font-weight:700;color:var(--text-primary)}
+.treino-status-desc{font-size:.95rem;color:var(--text-secondary);line-height:1.45;max-width:300px}
+.treino-suggestion-card{background:var(--bg-card);border:1px solid var(--separator);border-radius:var(--radius-lg);padding:14px 16px;width:100%;text-align:left;box-shadow:var(--shadow-card)}
+.treino-suggestion-list{list-style:none;margin-top:10px;display:flex;flex-direction:column;gap:6px}
+.treino-suggestion-item{font-size:.9rem;color:var(--text-secondary);display:flex;align-items:center;gap:8px}
+.treino-suggestion-item::before{content:'•';color:var(--blue)}
+.treino-status-actions{display:flex;flex-direction:column;gap:10px;width:100%;margin-top:6px}
+.treino-btn-primary{width:100%;padding:14px;border:none;border-radius:var(--radius-md);background:var(--blue);color:#fff;font-size:1rem;font-weight:600;cursor:pointer;transition:transform .15s ease,opacity .15s ease;box-shadow:0 2px 8px rgba(0,122,255,.25)}
+.treino-btn-primary:active{opacity:.85;transform:scale(.98)}
+.treino-btn-secondary{width:100%;padding:14px;border:none;border-radius:var(--radius-md);background:var(--bg-card);border:1px solid var(--separator);color:var(--text-primary);font-size:1rem;font-weight:600;cursor:pointer;transition:transform .15s ease,background .15s ease}
+.treino-btn-secondary:active{transform:scale(.98);background:var(--bg-app)}
+.treino-btn-dev{background:none;border:none;color:var(--text-tertiary);font-size:.8rem;margin-top:12px;cursor:pointer}
+.treino-exercise-card{background:var(--bg-card);border:1px solid var(--separator);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-card)}
+.treino-exercise-card.finished{border-color:rgba(52,199,89,.35)}
+.treino-exercise-header{padding:14px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--separator)}
+.treino-exercise-card.finished .treino-exercise-header{border-bottom:none}
+.treino-exercise-meta{font-size:.72rem;color:var(--text-secondary);font-weight:600;letter-spacing:.4px;text-transform:uppercase}
+.treino-exercise-name{font-size:1.05rem;font-weight:600;margin-top:2px;color:var(--text-primary)}
+.treino-exercise-card.finished .treino-exercise-name{color:var(--green)}
+.treino-header-buttons{display:flex;gap:10px;align-items:center}
+.treino-btn-text{background:none;border:none;color:var(--blue);font-size:.9rem;font-weight:600;cursor:pointer}
+.treino-btn-text:active{opacity:.6}
+.treino-exercise-remove{width:30px;height:30px;border-radius:50%;border:none;background:var(--danger-soft);color:var(--danger);font-size:1.1rem;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .15s ease}
+.treino-exercise-remove:active{transform:scale(.9)}
+.treino-exercise-body{padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.treino-set-row{background:var(--bg-app);border-radius:var(--radius-md);padding:12px;display:flex;flex-direction:column;gap:10px;border:1px solid transparent}
+.treino-set-row.completed-view{flex-direction:row;justify-content:space-between;align-items:center;background:var(--green-soft);border-color:rgba(52,199,89,.25);padding:14px}
+.treino-set-header{display:flex;justify-content:space-between;align-items:center;font-size:.75rem;font-weight:700;color:var(--text-secondary);text-transform:uppercase}
+.treino-btn-trash{background:none;border:none;color:var(--danger);font-size:1rem;cursor:pointer;padding:4px}
+.treino-set-summary-title{font-size:.7rem;font-weight:700;color:var(--green);text-transform:uppercase}
+.treino-set-summary-data{font-size:1.05rem;font-weight:700;color:var(--text-primary)}
+.treino-set-controls{display:flex;gap:10px}
+.treino-control-group{flex:1;display:flex;flex-direction:column;gap:5px}
+.treino-control-label{font-size:.7rem;text-align:center;color:var(--text-secondary);font-weight:600}
+.treino-control-stepper{display:flex;align-items:center;background:#fff;border-radius:var(--radius-md);overflow:hidden;border:1px solid var(--separator)}
+.treino-step-btn{background:none;border:none;color:var(--blue);font-size:1.25rem;font-weight:500;width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s ease}
+.treino-step-btn:active{background:var(--bg-app)}
+.treino-step-value{flex:1;text-align:center;font-size:1.15rem;font-weight:700;color:var(--text-primary);background:transparent;border:none;outline:none;width:100%;-moz-appearance:textfield}
+.treino-step-value::-webkit-outer-spin-button,.treino-step-value::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.treino-exercise-actions{display:flex;gap:10px;margin-top:4px}
+.treino-btn-half{flex:1;padding:13px;border:none;border-radius:var(--radius-md);font-size:.95rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s ease,opacity .15s ease}
+.treino-btn-half:active{transform:scale(.97)}
+.treino-btn-add{background:var(--blue-soft);color:var(--blue)}
+.treino-btn-finish{background:var(--green-soft);color:var(--green)}
+.treino-fab{position:absolute;bottom:calc(100px + var(--safe-bottom));left:16px;right:16px;z-index:50}
+.treino-fab button{width:100%;padding:15px;border:none;border-radius:var(--radius-md);background:var(--blue);color:#fff;font-size:1.05rem;font-weight:600;cursor:pointer;box-shadow:0 4px 14px rgba(0,122,255,.3);transition:transform .15s ease,opacity .15s ease}
+.treino-fab button:active{transform:scale(.97);opacity:.9}
+.treino-empty{text-align:center;color:var(--text-secondary);padding:48px 20px;font-size:.95rem;line-height:1.5}
+.treino-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:180;display:flex;align-items:flex-end;justify-content:center;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .3s,visibility .3s}
+.treino-modal-overlay.open{opacity:1;visibility:visible;pointer-events:auto}
+.treino-modal-sheet{width:100%;max-width:520px;height:85dvh;background:var(--bg-card);border-radius:20px 20px 0 0;border:1px solid var(--separator);border-bottom:none;display:flex;flex-direction:column;transform:translateY(100%);transition:transform .4s cubic-bezier(.16,1,.3,1);box-shadow:0 -4px 24px rgba(0,0,0,.08)}
+.treino-modal-overlay.open .treino-modal-sheet{transform:translateY(0)}
+.treino-modal-header{padding:14px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--separator);flex-shrink:0}
+.treino-modal-header h3{font-size:1.1rem;font-weight:600;color:var(--text-primary)}
+.treino-modal-close{background:none;border:none;color:var(--blue);font-size:1rem;font-weight:600;cursor:pointer;padding:8px}
+.treino-modal-search{padding:10px 16px;border-bottom:1px solid var(--separator);flex-shrink:0}
+.treino-search-input{width:100%;padding:11px 14px;border-radius:var(--radius-md);border:1px solid var(--separator);background:var(--bg-input);color:var(--text-primary);font-size:1rem;outline:none;-webkit-appearance:none}
+.treino-search-input::placeholder{color:var(--text-secondary)}
+.treino-chips{display:flex;gap:8px;padding:10px 16px;overflow-x:auto;border-bottom:1px solid var(--separator);flex-shrink:0;-webkit-overflow-scrolling:touch}
+.treino-chips::-webkit-scrollbar{display:none}
+.treino-chip{background:var(--bg-app);color:var(--text-secondary);padding:8px 14px;border-radius:20px;font-size:.85rem;font-weight:600;white-space:nowrap;border:none;cursor:pointer;transition:background .15s ease,color .15s ease}
+.treino-chip.active{background:var(--blue);color:#fff}
+.treino-exercise-list{flex:1;overflow-y:auto;padding:0 16px;overscroll-behavior:contain}
+.treino-list-item{padding:14px 0;border-bottom:1px solid var(--separator);display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:opacity .15s ease}
+.treino-list-item:active{opacity:.55}
+.treino-list-title{font-size:1rem;font-weight:500;color:var(--text-primary)}
+.treino-list-sub{font-size:.8rem;color:var(--text-secondary);margin-top:3px}
+.treino-list-add{color:var(--blue);font-size:1.4rem;font-weight:400}
+
+.treino-rest-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 16px 8px;padding:12px 14px;border-radius:14px;background:var(--blue-soft);border:1px solid rgba(0,122,255,.22);box-shadow:var(--shadow-card)}
+.treino-rest-bar[hidden]{display:none!important}
+.treino-rest-info{display:flex;flex-direction:column;gap:2px}
+.treino-rest-label{font-size:.72rem;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.4px}
+.treino-rest-time{font-size:1.45rem;font-weight:700;color:var(--text-primary);font-variant-numeric:tabular-nums}
+.treino-rest-skip{border:none;background:#fff;color:var(--blue);font-size:.9rem;font-weight:600;padding:10px 14px;border-radius:12px;cursor:pointer;border:1px solid rgba(0,122,255,.2);transition:transform .15s ease,opacity .15s ease}
+.treino-rest-skip:active{transform:scale(.96);opacity:.85}
+.treino-progress-card{width:100%;background:var(--bg-card);border:1px solid var(--separator);border-radius:var(--radius-lg);padding:14px 16px;text-align:left;margin-top:4px;box-shadow:var(--shadow-card)}
+.treino-progress-title{font-size:.75rem;font-weight:700;color:var(--text-secondary);letter-spacing:.6px;text-transform:uppercase;margin-bottom:12px}
+.treino-progress-item{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--separator)}
+.treino-progress-item:last-child{border-bottom:none;padding-bottom:0}
+.treino-progress-name{font-size:.95rem;font-weight:600;color:var(--text-primary)}
+.treino-progress-meta{font-size:.8rem;color:var(--text-secondary);margin-top:3px;line-height:1.35}
+.treino-badge{flex-shrink:0;padding:4px 10px;border-radius:999px;font-size:.72rem;font-weight:700;letter-spacing:.2px}
+.treino-badge.up{background:var(--green-soft);color:var(--green)}
+.treino-badge.down{background:var(--danger-soft);color:var(--danger)}
+.treino-badge.same{background:var(--bg-app);color:var(--text-secondary)}
+.treino-badge.new{background:var(--blue-soft);color:var(--blue)}
+.treino-progress-empty{font-size:.9rem;color:var(--text-secondary);padding:4px 0}
+
+/* Treino settings menu */
+.treino-header-actions{display:flex;align-items:center;gap:4px}
+.treino-settings-btn{width:36px;height:36px;border:none;border-radius:50%;background:transparent;color:var(--blue);font-size:1.15rem;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .15s ease,background .15s ease}
+.treino-settings-btn:active{transform:scale(.92);background:var(--blue-soft)}
+.treino-settings-menu{position:fixed;z-index:160;top:calc(var(--safe-top) + 56px);right:12px;width:min(300px,calc(100vw - 24px));background:var(--bg-card);border:1px solid var(--separator);border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,.14);opacity:0;visibility:hidden;transform:translateY(-8px) scale(.96);transform-origin:top right;transition:opacity .2s ease,visibility .2s,transform .2s cubic-bezier(.16,1,.3,1);overflow:hidden;max-height:min(70dvh,520px);display:flex;flex-direction:column}
+.treino-settings-menu.open{opacity:1;visibility:visible;transform:translateY(0) scale(1)}
+.treino-settings-menu-scroll{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:6px 0 8px}
+.treino-settings-section{padding:10px 14px 4px;font-size:.68rem;font-weight:700;color:var(--text-secondary);letter-spacing:.06em;text-transform:uppercase}
+.treino-settings-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;min-height:44px;cursor:pointer;transition:background .15s ease}
+.treino-settings-row:active{background:var(--bg-app)}
+.treino-settings-row .label{font-size:.95rem;font-weight:500;color:var(--text-primary);line-height:1.25}
+.treino-settings-row .sub{font-size:.75rem;color:var(--text-secondary);margin-top:2px}
+.treino-settings-row.destructive .label{color:var(--danger)}
+.treino-toggle{position:relative;width:51px;height:31px;flex-shrink:0}
+.treino-toggle input{opacity:0;width:0;height:0;position:absolute}
+.treino-toggle span{position:absolute;inset:0;background:#E9E9EB;border-radius:999px;transition:background .2s ease;cursor:pointer}
+.treino-toggle span::after{content:'';position:absolute;width:27px;height:27px;left:2px;top:2px;background:#fff;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.15);transition:transform .2s ease}
+.treino-toggle input:checked+span{background:var(--green)}
+.treino-toggle input:checked+span::after{transform:translateX(20px)}
+.treino-step-picker{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+.treino-step-opt{padding:6px 10px;border-radius:8px;border:1px solid var(--separator);background:var(--bg-app);color:var(--text-secondary);font-size:.8rem;font-weight:600;cursor:pointer;transition:background .15s ease,color .15s ease}
+.treino-step-opt.active{background:var(--blue-soft);color:var(--blue);border-color:rgba(0,122,255,.3)}
+.treino-step-opt:active{transform:scale(.96)}
+.treino-settings-divider{height:1px;background:var(--separator);margin:6px 14px}
+#screen-treino.compact-mode .treino-exercise-card .treino-exercise-header{padding:10px 12px}
+#screen-treino.compact-mode .treino-exercise-body{padding:10px 12px;gap:8px}
+#screen-treino.compact-mode .treino-set-row{padding:8px}
+#screen-treino.compact-mode .treino-exercise-name{font-size:.95rem}
+.treino-card-extra{font-size:.75rem;color:var(--text-secondary);margin-top:3px;font-weight:500}
+.treino-card-extra .up{color:var(--green)}
+.treino-card-extra .down{color:var(--danger)}
+.treino-reorder-bar{display:none;padding:8px 12px;background:var(--blue-soft);border-bottom:1px solid rgba(0,122,255,.2);align-items:center;justify-content:space-between;gap:8px}
+#screen-treino.reorder-mode .treino-reorder-bar{display:flex}
+#screen-treino.reorder-mode .treino-fab{display:none}
+.treino-reorder-bar span{font-size:.85rem;font-weight:600;color:var(--blue)}
+.treino-reorder-bar button{border:none;background:var(--blue);color:#fff;padding:8px 14px;border-radius:10px;font-size:.85rem;font-weight:600;cursor:pointer}
+.treino-reorder-btns{display:flex;flex-direction:column;gap:4px}
+.treino-reorder-btns button{width:32px;height:28px;border:1px solid var(--separator);background:var(--bg-app);border-radius:8px;color:var(--text-primary);font-size:.85rem;cursor:pointer}
+.treino-reorder-btns button:active{background:var(--blue-soft)}
+
+
+/* ===== Profile / Modal / etc (kept from original) ===== */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;opacity:0;visibility:hidden;transition:opacity .3s,visibility .3s;display:flex;align-items:flex-end;justify-content:center}
 .overlay.open{opacity:1;visibility:visible}
-.modal-sheet{width:100%;max-width:520px;max-height:92dvh;background:rgba(22,38,52,.92);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border-radius:24px 24px 0 0;border:1px solid var(--glass-border);border-bottom:none;padding:12px 0 calc(20px + var(--safe-bottom));overflow-y:auto;-webkit-overflow-scrolling:touch;transform:translateY(100%);transition:transform .4s cubic-bezier(.16,1,.3,1);overscroll-behavior:contain}
+.modal-sheet{width:100%;max-width:520px;max-height:92dvh;background:var(--bg-card);border-radius:20px 20px 0 0;border:1px solid var(--separator);border-bottom:none;padding:12px 0 calc(20px + var(--safe-bottom));overflow-y:auto;-webkit-overflow-scrolling:touch;transform:translateY(100%);transition:transform .4s cubic-bezier(.16,1,.3,1);overscroll-behavior:contain;box-shadow:0 -4px 24px rgba(0,0,0,.08)}
 .overlay.open .modal-sheet{transform:translateY(0)}
-.modal-handle{width:36px;height:5px;background:rgba(255,255,255,.25);border-radius:3px;margin:0 auto 12px}
-.modal-header{display:flex;align-items:center;justify-content:space-between;padding:0 20px 12px;position:sticky;top:0;background:inherit;z-index:5}
-.modal-header h3{font-size:1.15rem;font-weight:600}
-.modal-close,.modal-action{background:none;border:none;color:rgba(255,255,255,.7);font-size:1rem;padding:8px 12px;cursor:pointer;border-radius:10px}
-.modal-action.primary{color:#64d2ff;font-weight:600}
+.modal-handle{width:36px;height:5px;background:rgba(60,60,67,.2);border-radius:3px;margin:0 auto 12px}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:0 20px 12px;position:sticky;top:0;background:var(--bg-card);z-index:5}
+.modal-header h3{font-size:1.15rem;font-weight:600;color:var(--text-primary)}
+.modal-close,.modal-action{background:none;border:none;color:var(--blue);font-size:1rem;padding:8px 12px;cursor:pointer;border-radius:10px;transition:opacity .15s ease}
+.modal-action.primary{color:var(--blue);font-weight:600}
 .modal-action:disabled{opacity:.4;pointer-events:none}
 .modal-body{padding:0 20px 12px}
 .form-group{margin-bottom:16px}
-.form-group label{display:block;font-size:.8rem;color:rgba(255,255,255,.55);margin-bottom:6px;font-weight:500}
-.form-group input,.form-group select,.form-group textarea{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--glass-border);background:rgba(255,255,255,.07);color:#fff;font-size:1rem;outline:none;-webkit-appearance:none}
+.form-group label{display:block;font-size:.8rem;color:var(--text-secondary);margin-bottom:6px;font-weight:500}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:12px 14px;border-radius:var(--radius-md);border:1px solid var(--separator);background:var(--bg-input);color:var(--text-primary);font-size:1rem;outline:none;-webkit-appearance:none}
 .form-group textarea{min-height:72px;resize:vertical}
-.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:rgba(100,210,255,.5)}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-soft)}
 .form-error{color:var(--danger);font-size:.8rem;margin-top:4px;display:none}
 .form-group.has-error input,.form-group.has-error select{border-color:var(--danger)}
 .form-group.has-error .form-error{display:block}
 .avatar-picker{display:flex;justify-content:center;margin-bottom:20px}
-.avatar-preview{width:88px;height:88px;border-radius:50%;background:rgba(255,255,255,.12);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:1.8rem;font-weight:600;flex-shrink:0;cursor:pointer;position:relative;border:2px solid rgba(255,255,255,.2);transition:transform .15s,border-color .15s}
+.avatar-preview{width:88px;height:88px;border-radius:50%;background:var(--bg-input);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:1.8rem;font-weight:600;flex-shrink:0;cursor:pointer;position:relative;border:2px solid var(--separator);transition:transform .15s ease,border-color .15s ease;color:var(--text-secondary)}
 .avatar-preview:active{transform:scale(.96);border-color:rgba(255,255,255,.45)}
 .avatar-preview img{width:100%;height:100%;object-fit:cover}
 .avatar-preview .avatar-hint{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.45);font-size:.65rem;text-align:center;padding:3px 0;color:rgba(255,255,255,.85);pointer-events:none}
-.avatar-preview .avatar-remove{position:absolute;top:-4px;right:-4px;width:26px;height:26px;border-radius:50%;background:rgba(255,69,58,.9);border:2px solid rgba(22,38,52,.9);color:#fff;font-size:.85rem;display:none;align-items:center;justify-content:center;cursor:pointer;z-index:2;line-height:1}
+.avatar-preview .avatar-remove{position:absolute;top:-4px;right:-4px;width:26px;height:26px;border-radius:50%;background:rgba(255,69,58,.9);border:2px solid #FFFFFF;color:#fff;font-size:.85rem;display:none;align-items:center;justify-content:center;cursor:pointer;z-index:2;line-height:1}
 .avatar-preview.has-photo .avatar-remove{display:flex}
 .avatar-preview.has-photo .avatar-hint{display:none}
-.profile-view{position:fixed;inset:0;z-index:150;background:linear-gradient(180deg,#0f2027 0%,#1a3340 40%,#203a43 100%);opacity:0;visibility:hidden;transform:translateX(30px);transition:opacity .35s,visibility .35s,transform .35s cubic-bezier(.16,1,.3,1);display:flex;flex-direction:column;padding-top:var(--safe-top);overflow:hidden}
+.profile-view{position:fixed;inset:0;z-index:150;background:var(--bg-app);opacity:0;visibility:hidden;transform:translateX(30px);transition:opacity .35s,visibility .35s,transform .35s cubic-bezier(.16,1,.3,1);display:flex;flex-direction:column;padding-top:var(--safe-top);overflow:hidden}
 .profile-view.open{opacity:1;visibility:visible;transform:translateX(0)}
 .profile-topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;flex-shrink:0}
-.profile-topbar button{background:rgba(255,255,255,.1);border:none;color:#fff;width:40px;height:40px;border-radius:50%;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.profile-topbar button{background:rgba(0,0,0,.06);border:none;color:var(--text-primary);width:40px;height:40px;border-radius:50%;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s ease,background .15s ease}
 .profile-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 20px calc(40px + var(--safe-bottom));overscroll-behavior:contain}
 .profile-header-glass{text-align:center;padding:8px 0 24px}
-.profile-avatar-lg{width:110px;height:110px;border-radius:50%;margin:0 auto 14px;background:rgba(255,255,255,.12);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:2.4rem;font-weight:600;border:3px solid rgba(255,255,255,.2);box-shadow:0 8px 32px rgba(0,0,0,.3)}
+.profile-avatar-lg{width:110px;height:110px;border-radius:50%;margin:0 auto 14px;background:var(--bg-input);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:2.4rem;font-weight:600;border:3px solid #fff;box-shadow:var(--shadow-card);color:var(--text-secondary)}
 .profile-avatar-lg img{width:100%;height:100%;object-fit:cover}
-.profile-name{font-size:1.5rem;font-weight:700;letter-spacing:-.3px}
-.profile-username{color:rgba(255,255,255,.55);font-size:.95rem;margin-top:4px}
+.profile-name{font-size:1.5rem;font-weight:700;letter-spacing:-.3px;color:var(--text-primary)}
+.profile-username{color:var(--text-secondary);font-size:.95rem;margin-top:4px}
 .profile-badges{display:flex;justify-content:center;gap:8px;margin-top:10px;flex-wrap:wrap}
-.badge{padding:4px 12px;border-radius:12px;font-size:.8rem;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15)}
-.section-title{font-size:.8rem;font-weight:600;color:rgba(255,255,255,.45);letter-spacing:.8px;text-transform:uppercase;margin:20px 0 10px}
-.glass-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:background .2s;min-height:56px}
-.glass-card:active{background:rgba(255,255,255,.12)}
+.badge{padding:4px 12px;border-radius:12px;font-size:.8rem;background:var(--bg-app);border:1px solid var(--separator);color:var(--text-secondary)}
+.section-title{font-size:.8rem;font-weight:600;color:var(--text-secondary);letter-spacing:.8px;text-transform:uppercase;margin:20px 0 10px}
+.glass-card{background:var(--bg-card);border:1px solid var(--separator);border-radius:var(--radius-md);padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:background .15s ease,transform .15s ease;min-height:56px;box-shadow:var(--shadow-card)}
+.glass-card:active{background:#F9F9FB;transform:scale(.985)}
 .glass-card .card-icon{font-size:1.4rem;width:36px;text-align:center;flex-shrink:0}
 .glass-card .card-body{flex:1;min-width:0}
-.glass-card .card-label{font-size:.75rem;color:rgba(255,255,255,.5)}
-.glass-card .card-value{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.glass-card .card-label{font-size:.75rem;color:var(--text-secondary)}
+.glass-card .card-value{font-weight:500;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .glass-card .card-chevron{opacity:.4;font-size:1.1rem}
-.add-link-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;border-radius:14px;border:1px dashed rgba(255,255,255,.25);background:transparent;color:rgba(255,255,255,.6);font-size:.95rem;cursor:pointer;width:100%;margin-top:4px}
-.add-link-btn:active{background:rgba(255,255,255,.06)}
+.add-link-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;border-radius:var(--radius-md);border:1px dashed rgba(60,60,67,.25);background:transparent;color:var(--blue);font-size:.95rem;cursor:pointer;width:100%;margin-top:4px;transition:background .15s ease,transform .15s ease}
+.add-link-btn:active{background:var(--blue-soft);transform:scale(.98)}
 .memories-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;border-radius:12px;overflow:hidden}
-.memory-thumb{aspect-ratio:1;background:rgba(255,255,255,.08);position:relative;cursor:pointer;overflow:hidden}
+.memory-thumb{aspect-ratio:1;background:var(--bg-input);position:relative;cursor:pointer;overflow:hidden}
 .memory-thumb img,.memory-thumb video{width:100%;height:100%;object-fit:cover}
 .memory-thumb .video-badge{position:absolute;bottom:6px;right:6px;background:rgba(0,0,0,.6);border-radius:4px;padding:2px 5px;font-size:.7rem}
 .profile-actions{margin-top:28px;display:flex;flex-direction:column;gap:10px}
 .action-sheet-list{padding:0 12px}
-.action-item{display:flex;align-items:center;gap:14px;padding:16px 14px;border-radius:12px;cursor:pointer;font-size:1.05rem;transition:background .15s}
-.action-item:active{background:rgba(255,255,255,.1)}
+.action-item{display:flex;align-items:center;gap:14px;padding:16px 14px;border-radius:12px;cursor:pointer;font-size:1.05rem;color:var(--text-primary);transition:background .15s ease}
+.action-item:active{background:var(--bg-app)}
 .action-item .ai-icon{font-size:1.3rem;width:32px;text-align:center}
 .action-item.destructive{color:var(--danger)}
-.action-cancel{margin:12px 12px 0;padding:14px;text-align:center;border-radius:14px;background:rgba(255,255,255,.1);font-weight:600;cursor:pointer}
+.action-cancel{margin:12px 12px 0;padding:14px;text-align:center;border-radius:var(--radius-md);background:var(--bg-app);font-weight:600;cursor:pointer;color:var(--text-primary);transition:transform .15s ease}
 .platform-list{display:flex;flex-direction:column;gap:4px}
-.platform-item{display:flex;align-items:center;gap:14px;padding:14px 12px;border-radius:12px;cursor:pointer}
-.platform-item:active{background:rgba(255,255,255,.1)}
+.platform-item{display:flex;align-items:center;gap:14px;padding:14px 12px;border-radius:12px;cursor:pointer;color:var(--text-primary)}
+.platform-item:active{background:var(--bg-app)}
 .platform-item .pi-icon{font-size:1.4rem;width:36px;text-align:center}
 .memory-viewer{position:fixed;inset:0;z-index:300;background:#000;display:none;flex-direction:column;align-items:center;justify-content:center}
 .memory-viewer.open{display:flex}
@@ -133,75 +321,136 @@ body{background:linear-gradient(45deg,#0f2027,#203a43,#2c5364);background-size:4
 .mv-content video{max-width:100%;max-height:90%}
 .mv-nav{position:absolute;bottom:calc(24px + var(--safe-bottom));left:0;right:0;display:flex;justify-content:center;gap:24px}
 .mv-nav button{width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.15);border:none;color:#fff;font-size:1.3rem;cursor:pointer}
-.toast{position:fixed;bottom:calc(110px + var(--safe-bottom));left:50%;transform:translateX(-50%) translateY(20px);background:rgba(30,30,30,.92);color:#fff;padding:12px 24px;border-radius:12px;font-size:.9rem;z-index:400;opacity:0;visibility:hidden;transition:all .3s;pointer-events:none;max-width:90vw;text-align:center}
+.toast{position:fixed;bottom:calc(110px + var(--safe-bottom));left:50%;transform:translateX(-50%) translateY(20px);background:rgba(28,28,30,.92);color:#fff;padding:12px 24px;border-radius:12px;font-size:.9rem;z-index:400;opacity:0;visibility:hidden;transition:all .3s ease;pointer-events:none;max-width:90vw;text-align:center}
 .toast.show{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0)}
 .hidden-file{position:fixed!important;top:0!important;left:0!important;width:1px!important;height:1px!important;opacity:.01!important;overflow:hidden!important;z-index:-1!important}
-.confirm-msg{text-align:center;padding:8px 12px 20px;color:rgba(255,255,255,.75);line-height:1.5}
-.confirm-msg strong{color:#fff}
+.confirm-msg{text-align:center;padding:8px 12px 20px;color:var(--text-secondary);line-height:1.5}
+.confirm-msg strong{color:var(--text-primary)}
 .media-manage-item{display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;background:rgba(255,255,255,.05);margin-bottom:8px}
 .media-manage-item img,.media-manage-item video{width:48px;height:48px;border-radius:8px;object-fit:cover;background:#000}
 .media-manage-item .mm-info{flex:1;min-width:0}
 .media-manage-item .mm-name{font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .media-manage-item .mm-size{font-size:.75rem;color:rgba(255,255,255,.45)}
 .media-manage-item input[type=checkbox]{width:22px;height:22px;accent-color:#64d2ff}
-.quota-warn{background:rgba(255,159,10,.15);border:1px solid rgba(255,159,10,.35);border-radius:12px;padding:12px 14px;margin-bottom:12px;font-size:.9rem;color:#ffd60a}
-/* CSS removido do .filter-chips que não é mais usado para não poluir o arquivo */
+.quota-warn{background:rgba(255,149,0,.12);border:1px solid rgba(255,149,0,.3);border-radius:12px;padding:12px 14px;margin-bottom:12px;font-size:.9rem;color:#C93400}
 </style>
 </head>
 <body>
 <div class="app-container">
-<div class="screen active" id="screen-0"><div class="screen-content"><h2>Carteira</h2></div></div>
-<div class="screen" id="screen-1"><div class="screen-content"><h2>Perfil</h2></div></div>
-<div class="screen" id="screen-2">
-<div class="screen-content">
-<div class="agenda-header" id="agendaHeader" style="padding-bottom:4px"></div>
-<div class="contacts-list" id="contactsList" role="list">
-<div class="empty-state" id="emptyState">
-<div style="font-size:2rem;margin-bottom:8px">📇</div>
-<p>Nenhum contato ainda</p>
-<p style="font-size:.85rem;margin-top:4px;opacity:.7">Toque em + para adicionar</p>
+  <!-- Agenda (tela principal) -->
+  <div class="screen active" id="screen-agenda">
+    <div class="screen-content">
+      <div class="agenda-header" id="agendaHeader" style="padding-bottom:4px"></div>
+      <div class="contacts-list" id="contactsList" role="list">
+        <div class="empty-state" id="emptyState">
+          <div style="font-size:2rem;margin-bottom:8px">📇</div>
+          <p>Nenhum contato ainda</p>
+          <p style="font-size:.85rem;margin-top:4px;opacity:.7">Toque em + para adicionar</p>
+        </div>
+      </div>
+      <button class="fab-add" id="fabAdd" aria-label="Adicionar contato">+</button>
+    </div>
+  </div>
+
+
+  <!-- Treino (Workout Builder) -->
+  <div class="screen" id="screen-treino">
+    <div class="screen-content">
+      <div class="treino-header">
+        <div class="treino-header-title" id="treinoMainTitle">Treino</div>
+        <div class="treino-header-actions">
+          <button type="button" class="treino-settings-btn" id="treinoSettingsBtn" aria-label="Configurações">⚙</button>
+          <button type="button" class="treino-header-action" id="treinoBtnFinish">Finalizar</button>
+        </div>
+      </div>
+      <div class="treino-reorder-bar" id="treinoReorderBar">
+        <span>Reordenar exercícios</span>
+        <button type="button" id="treinoReorderDone">Concluir</button>
+      </div>
+      <div class="treino-rest-bar" id="treinoRestBar" hidden>
+        <div class="treino-rest-info">
+          <span class="treino-rest-label">Descanso</span>
+          <span class="treino-rest-time" id="treinoRestTime">1:30</span>
+        </div>
+        <button type="button" class="treino-rest-skip" id="treinoRestSkip">Pular</button>
+      </div>
+      <div class="treino-main" id="treinoAppContent"></div>
+      <div class="treino-fab" id="treinoFab">
+        <button type="button" id="treinoBtnAddEx">+ Adicionar Exercício</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Barra inferior (mostra tela atual) -->
+  <nav class="floating-glass-bar" id="navBar" aria-label="Navegação principal">
+    <span class="bar-label" id="barLabel">Agenda</span>
+  </nav>
+
+  <!-- Seletor acima da barra (abre no long-press) -->
+  <div class="screen-selector" id="screenSelector" aria-hidden="true">
+    <button type="button" class="selector-option active" data-screen="agenda">Agenda</button>
+    <button type="button" class="selector-option" data-screen="treino">Treino</button>
+  </div>
 </div>
-</div>
-<button class="fab-add" id="fabAdd" aria-label="Adicionar contato">+</button>
-</div>
-</div>
-<nav class="floating-glass-bar" id="navBar" aria-label="Navegação principal">
-<div class="morphing-indicator" id="morphingIndicator"></div>
-<button class="nav-btn active" data-index="0">Carteira</button>
-<button class="nav-btn" data-index="1">Perfil</button>
-<button class="nav-btn" data-index="2">Agenda</button>
-</nav>
-</div>
+
 <div class="profile-view" id="profileView" aria-hidden="true">
-<div class="profile-topbar">
-<button id="profileBack" aria-label="Voltar">‹</button>
-<button id="profileEditBtn" aria-label="Editar">✎</button>
+  <div class="profile-topbar">
+    <button id="profileBack" aria-label="Voltar">‹</button>
+    <button id="profileEditBtn" aria-label="Editar">✎</button>
+  </div>
+  <div class="profile-scroll" id="profileScroll"></div>
 </div>
-<div class="profile-scroll" id="profileScroll"></div>
-</div>
+
 <div class="overlay" id="overlay" aria-hidden="true">
-<div class="modal-sheet" id="modalSheet" role="dialog" aria-modal="true">
-<div class="modal-handle"></div>
-<div class="modal-header">
-<button class="modal-close" id="modalClose" aria-label="Fechar">Cancelar</button>
-<h3 id="modalTitle">Título</h3>
-<button class="modal-action primary" id="modalSave" style="visibility:hidden">Salvar</button>
+  <div class="modal-sheet" id="modalSheet" role="dialog" aria-modal="true">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <button class="modal-close" id="modalClose" aria-label="Fechar">Cancelar</button>
+      <h3 id="modalTitle">Título</h3>
+      <button class="modal-action primary" id="modalSave" style="visibility:hidden">Salvar</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
 </div>
-<div class="modal-body" id="modalBody"></div>
-</div>
-</div>
+
 <div class="memory-viewer" id="memoryViewer" aria-hidden="true">
-<button class="mv-close" id="mvClose" aria-label="Fechar">✕</button>
-<div class="mv-content" id="mvContent"></div>
-<div class="mv-nav">
-<button id="mvPrev" aria-label="Anterior">‹</button>
-<button id="mvNext" aria-label="Próxima">›</button>
+  <button class="mv-close" id="mvClose" aria-label="Fechar">✕</button>
+  <div class="mv-content" id="mvContent"></div>
+  <div class="mv-nav">
+    <button id="mvPrev" aria-label="Anterior">‹</button>
+    <button id="mvNext" aria-label="Próxima">›</button>
+  </div>
 </div>
+
+
+
+<!-- Treino settings floating menu -->
+<div class="treino-settings-menu" id="treinoSettingsMenu" aria-hidden="true">
+  <div class="treino-settings-menu-scroll" id="treinoSettingsBody"></div>
 </div>
+
+<!-- Treino: modal banco de exercícios -->
+<div class="treino-modal-overlay" id="treinoExerciseModal" aria-hidden="true">
+  <div class="treino-modal-sheet" role="dialog" aria-modal="true">
+    <div class="treino-modal-header">
+      <h3>Banco de Exercícios</h3>
+      <button type="button" class="treino-modal-close" id="treinoModalClose">Fechar</button>
+    </div>
+    <div class="treino-modal-search">
+      <input type="text" class="treino-search-input" id="treinoSearchBar" placeholder="Buscar exercício..." autocomplete="off">
+    </div>
+    <div class="treino-chips" id="treinoGroupChips"></div>
+    <div class="treino-exercise-list" id="treinoDbList"></div>
+  </div>
+</div>
+
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
 <input type="file" id="avatarGalleryInput" class="hidden-file" accept="image/*">
 <input type="file" id="avatarFileInput" class="hidden-file" accept="image/jpeg,image/png,image/webp,image/gif,.jpg,.jpeg,.png,.webp,.gif">
+<input type="file" id="backupFileInput" class="hidden-file" accept="application/json,.json">
 <input type="file" id="memoryFileInput" class="hidden-file" accept="image/*,video/*,.jpg,.jpeg,.png,.webp,.gif,.heic,.mp4,.mov,.m4v,.qt" multiple>
+
 <script>
 (function(){
 'use strict';
@@ -210,7 +459,6 @@ body{background:linear-gradient(45deg,#0f2027,#203a43,#2c5364);background-size:4
 const LEGACY_DB = 'ES140826DB';
 const DB_NAME = 'AgendaBankProfileDB';
 const DB_VERSION = 1;
-// Categorias removidas pois não usamos mais filtros, simplificando os dados salvos
 const PLATFORMS = [
   {id:'whatsapp',label:'WhatsApp',icon:'💬',prefix:'',type:'phone'},
   {id:'instagram',label:'Instagram',icon:'◎',prefix:'@',type:'username'},
@@ -218,7 +466,6 @@ const PLATFORMS = [
   {id:'tiktok',label:'TikTok',icon:'♪',prefix:'@',type:'username'},
   {id:'x',label:'X',icon:'𝕏',prefix:'@',type:'username'}
 ];
-/* Facebook removido da UI de adição; dados antigos preservados via platformMeta fallback */
 
 let db = null, contacts = [], socialLinks = [], memories = [];
 let searchQuery = '', activeContactId = null;
@@ -226,6 +473,7 @@ let pendingAvatarBlob = null, pendingAvatarUrl = null;
 let memoryViewerList = [], memoryViewerIndex = 0;
 let objectUrls = new Set(), isSaving = false, memoryTargetContactId = null;
 let lastStats = null, quotaInfo = null;
+let currentScreen = 'agenda';
 
 const $ = (s,c)=>(c||document).querySelector(s);
 const $$ = (s,c)=>Array.from((c||document).querySelectorAll(s));
@@ -237,6 +485,7 @@ const modalClose=$('#modalClose'), modalSave=$('#modalSave'), toastEl=$('#toast'
 const memoryViewer=$('#memoryViewer'), mvContent=$('#mvContent');
 const avatarGalleryInput=$('#avatarGalleryInput'), avatarFileInput=$('#avatarFileInput');
 const memoryFileInput=$('#memoryFileInput');
+const navBar=$('#navBar'), barLabel=$('#barLabel'), screenSelector=$('#screenSelector');
 
 /* ========== Utils ========== */
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,9);}
@@ -305,7 +554,6 @@ function compressImage(file,maxW,quality){
   return new Promise(resolve=>{
     if(!file){resolve(null);return;}
     const isHeic=/heic|heif/i.test(file.type||'')||/\.heic$/i.test(file.name||'');
-    /* Tenta decodificar inclusive HEIC no Safari/iOS; se falhar, devolve o original */
     const img=new Image();
     const url=URL.createObjectURL(file);
     let done=false;
@@ -340,7 +588,7 @@ function isQuotaError(err){
   return n==='QuotaExceededError'||n==='NS_ERROR_DOM_QUOTA_REACHED'||/quota/i.test(m);
 }
 
-/* ========== StorageAdapter (hybrid abstraction) ========== */
+/* ========== StorageAdapter ========== */
 const StorageAdapter = {
   backend: 'indexeddb',
   detect(){
@@ -398,7 +646,7 @@ const IDB = {
   deleteByIndex(store,indexName,value){return new Promise((resolve,reject)=>{try{const tx=this._tx(store,'readwrite');const idx=tx.objectStore(store).index(indexName);const r=idx.openCursor(IDBKeyRange.only(value));r.onsuccess=e=>{const c=e.target.result;if(c){c.delete();c.continue();}};tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);}catch(e){reject(e);}});}
 };
 
-/* ========== Migration from legacy ES140826DB ========== */
+/* ========== Migration from legacy ========== */
 async function migrateFromLegacy(){
   return new Promise((resolve)=>{
     if(!window.indexedDB){resolve(false);return;}
@@ -471,7 +719,6 @@ const StorageStats = {
   }
 };
 
-/* storage panel global removido — resumo fica no perfil de cada contato */
 async function checkStorageIntegrity(){
   const issues=[];
   for(const m of memories){
@@ -514,6 +761,7 @@ const ContactManager={
     catch(err){if(isQuotaError(err)){showToast('Armazenamento cheio.');throw err;}throw err;}
     const idx=contacts.findIndex(c=>c.id===record.id);if(idx>=0)contacts[idx]=record;else contacts.push(record);
     contacts.sort((a,b)=>(a.name||'').localeCompare(b.name||'','pt-BR'));
+    if(typeof AppBackup!=='undefined') AppBackup.takeSnapshot('contact-save');
     return record;
   },
   async deleteContact(id){
@@ -523,6 +771,7 @@ const ContactManager={
     contacts=contacts.filter(c=>c.id!==id);
     socialLinks=socialLinks.filter(s=>s.contactId!==id);
     memories=memories.filter(m=>m.contactId!==id);
+    if(typeof AppBackup!=='undefined') AppBackup.takeSnapshot('contact-delete');
   },
   async saveLink(link){if(!link.id)link.id=uid();link.updatedAt=Date.now();if(!link.createdAt)link.createdAt=Date.now();await IDB.put('socialLinks',link);const i=socialLinks.findIndex(s=>s.id===link.id);if(i>=0)socialLinks[i]=link;else socialLinks.push(link);return link;},
   async deleteLink(id){await IDB.delete('socialLinks',id);socialLinks=socialLinks.filter(s=>s.id!==id);},
@@ -536,16 +785,88 @@ const ContactManager={
   async deleteMemory(id){await IDB.delete('memories',id);memories=memories.filter(m=>m.id!==id);}
 };
 
-/* ========== Nav ========== */
-const navBtns=$$('.nav-btn'),indicator=$('#morphingIndicator'),screens=$$('.screen');
-function updateMorphingBar(btn){if(!btn)return;const br=btn.getBoundingClientRect(),nr=btn.parentElement.getBoundingClientRect();indicator.style.width=br.width+'px';indicator.style.left=(br.left-nr.left)+'px';}
-function changeScreen(index){
-  screens.forEach((s,i)=>{if(i===parseInt(index,10))s.classList.add('active');else s.classList.remove('active');});
-  if(parseInt(index,10)!==2)closeProfile();
+/* ========== Screen navigation (new) ========== */
+const SCREEN_LABELS = { agenda: 'Agenda', treino: 'Treino' };
+
+function switchScreen(name){
+  if(!SCREEN_LABELS[name])return;
+  currentScreen = name;
+  $$('.screen').forEach(s=>{
+    s.classList.toggle('active', s.id === 'screen-' + name);
+  });
+  barLabel.textContent = SCREEN_LABELS[name];
+  $$('.selector-option').forEach(btn=>{
+    btn.classList.toggle('active', btn.dataset.screen === name);
+  });
+  closeSelector();
+  if(name !== 'agenda') closeProfile();
+  if(name === 'treino' && typeof TreinoApp !== 'undefined'){
+    TreinoApp.ensureInit();
+  }
+  if(name !== 'treino' && typeof TreinoApp !== 'undefined'){
+    TreinoApp.closeModal();
+    if(TreinoApp.closeSettingsMenu) TreinoApp.closeSettingsMenu();
+    if(TreinoApp.clearRestTimer) TreinoApp.clearRestTimer();
+  }
 }
-navBtns.forEach(btn=>{btn.addEventListener('click',e=>{if(e.currentTarget.classList.contains('active'))return;navBtns.forEach(b=>b.classList.remove('active'));e.currentTarget.classList.add('active');updateMorphingBar(e.currentTarget);changeScreen(e.currentTarget.getAttribute('data-index'));});});
-window.addEventListener('load',()=>updateMorphingBar($('.nav-btn.active')));
-window.addEventListener('resize',()=>updateMorphingBar($('.nav-btn.active')));
+
+function openSelector(){
+  screenSelector.classList.add('open');
+  screenSelector.setAttribute('aria-hidden','false');
+}
+function closeSelector(){
+  screenSelector.classList.remove('open');
+  screenSelector.setAttribute('aria-hidden','true');
+}
+
+/* Long-press on bottom bar */
+(function bindBarLongPress(){
+  const LP = { duration: 480, moveThreshold: 14, timer: null, startX: 0, startY: 0, active: false, triggered: false };
+  function haptic(){ try{ if(navigator.vibrate) navigator.vibrate(14); }catch(_){} }
+  function clear(){
+    if(LP.timer){ clearTimeout(LP.timer); LP.timer = null; }
+    navBar.classList.remove('lp-holding');
+    LP.active = false; LP.triggered = false;
+  }
+  navBar.addEventListener('pointerdown', e=>{
+    if(e.button != null && e.button !== 0) return;
+    const pt = e.touches ? e.touches[0] : e;
+    clear();
+    LP.active = true; LP.triggered = false;
+    LP.startX = pt.clientX; LP.startY = pt.clientY;
+    navBar.classList.add('lp-holding');
+    LP.timer = setTimeout(()=>{
+      if(!LP.active) return;
+      LP.triggered = true;
+      navBar.classList.remove('lp-holding');
+      haptic();
+      openSelector();
+    }, LP.duration);
+  }, { passive: true });
+  navBar.addEventListener('pointermove', e=>{
+    if(!LP.active || !LP.timer) return;
+    const pt = e.touches ? e.touches[0] : e;
+    if(Math.abs(pt.clientX - LP.startX) > LP.moveThreshold || Math.abs(pt.clientY - LP.startY) > LP.moveThreshold) clear();
+  }, { passive: true });
+  navBar.addEventListener('pointerup', ()=> clear(), { passive: true });
+  navBar.addEventListener('pointercancel', ()=> clear(), { passive: true });
+  navBar.addEventListener('contextmenu', e=>{ if(LP.triggered || LP.active) e.preventDefault(); });
+})();
+
+/* Selector options */
+$$('.selector-option').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const name = btn.dataset.screen;
+    if(name) switchScreen(name);
+  });
+});
+
+/* Close selector on outside tap */
+document.addEventListener('pointerdown', e=>{
+  if(!screenSelector.classList.contains('open')) return;
+  if(screenSelector.contains(e.target) || navBar.contains(e.target)) return;
+  closeSelector();
+}, true);
 
 /* ========== Modal ========== */
 let modalOnSave=null;
@@ -562,7 +883,7 @@ modalClose.addEventListener('click',closeModal);
 overlay.addEventListener('click',e=>{if(e.target===overlay)closeModal();});
 modalSave.addEventListener('click',async()=>{if(typeof modalOnSave==='function'&&!isSaving)await modalOnSave();});
 
-/* ========== Long Press (Agenda) ========== */
+/* ========== Long Press (Agenda contacts) ========== */
 const LP = {duration:500, moveThreshold:12, timer:null, startX:0, startY:0, active:false, triggered:false, target:null};
 function hapticLight(){try{if(navigator.vibrate)navigator.vibrate(12);}catch(_){}}
 function clearLongPress(){
@@ -691,7 +1012,6 @@ function openSocialFromChip(link){
 /* ========== Agenda ========== */
 const AgendaUI={
   getFiltered(){
-    /* Busca removida — poucos contatos; lista completa ordenada */
     return contacts.slice();
   },
   render(){
@@ -807,7 +1127,6 @@ function renderProfile(){
   const addMem=document.createElement('button');addMem.className='add-link-btn';addMem.style.marginTop='10px';addMem.textContent='+ Adicionar memória';
   addMem.addEventListener('click',()=>openMemorySourcePicker(c.id));profileScroll.appendChild(addMem);
 
-  // Resumo de armazenamento só deste contato (apenas memórias)
   const memStats=getContactMemoryStats(c.id);
   if(memStats.count>0){
     const sum=document.createElement('div');sum.className='contact-storage-summary';
@@ -851,10 +1170,6 @@ async function handleAvatarFile(file){
     let compressed=await compressImage(file,900,.7);
     compressed=ensureBlob(compressed,compressed&&compressed.type?compressed.type:'image/jpeg');
     if(!compressed||!compressed.size){showToast('Não foi possível processar a foto');avatarProcessing=false;if(modalSave){modalSave.disabled=false;modalSave.textContent='Salvar';}return;}
-    /* Garante JPEG quando possível para evitar HEIC problemático no IndexedDB */
-    if(compressed.type&&/heic|heif/i.test(compressed.type)&&compressed!==file){
-      /* já convertido */
-    }
     pendingAvatarBlob=compressed;
     if(pendingAvatarUrl)revokeObjectURL(pendingAvatarUrl);
     pendingAvatarUrl=createObjectURL(compressed);
@@ -1060,7 +1375,6 @@ function formatDuration(sec){
   return m+':'+String(r).padStart(2,'0');
 }
 
-/* Limites práticos no Safari/iPhone (IndexedDB). 1 GB+ não é viável em Web App. */
 const MAX_MEMORY_IMAGE_BYTES=20*1024*1024;
 const MAX_MEMORY_VIDEO_BYTES=200*1024*1024;
 
@@ -1092,7 +1406,7 @@ async function handleMemoryFiles(fileList){
         try{
           const cap=await captureVideoThumbnail(file);
           thumbnail=cap.thumbnail||null;duration=cap.duration||0;
-        }catch(_){/* thumbnail opcional — não bloqueia o save */}
+        }catch(_){}
       }
       await ContactManager.saveMemory({
         id:uid(),contactId,type,name:file.name||(type==='video'?'video':'foto'),
@@ -1168,12 +1482,1753 @@ function confirmDeleteMemory(mem){
   openModal('Excluir memória',wrap,{showSave:false,closeLabel:' '});modalClose.style.visibility='hidden';
 }
 
-/* ========== Manage Storage UI ========== */
 fabAdd.addEventListener('click',()=>openContactForm(null));
-/* busca removida */
 
-/* ========== Init ========== */
+/* ========== PWA ========== */
+function isStandalonePWA(){
+  return (window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)
+    || window.navigator.standalone===true;
+}
+function makeAppIconDataUrl(size){
+  size=size||180;
+  try{
+    const c=document.createElement('canvas');c.width=size;c.height=size;
+    const ctx=c.getContext('2d');
+    const g=ctx.createLinearGradient(0,0,size,size);
+    g.addColorStop(0,'#007AFF');g.addColorStop(0.5,'#5AC8FA');g.addColorStop(1,'#34C759');
+    ctx.fillStyle=g;ctx.fillRect(0,0,size,size);
+    ctx.fillStyle='#FFFFFF';
+    ctx.font='600 '+Math.round(size*0.38)+'px -apple-system,system-ui,sans-serif';
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText('📇',size/2,size/2+size*0.02);
+    return c.toDataURL('image/png');
+  }catch(_){return'';}
+}
+function setupPWA(){
+  try{
+    const icon180=makeAppIconDataUrl(180);
+    const icon192=makeAppIconDataUrl(192);
+    const icon512=makeAppIconDataUrl(512);
+    const apple=$('#appleTouchIcon'), fav=$('#appFavicon'), man=$('#appManifest');
+    if(apple&&icon180)apple.href=icon180;
+    if(fav&&icon192)fav.href=icon192;
+    const startUrl=(location.protocol==='http:'||location.protocol==='https:')
+      ?(location.pathname||'/')+(location.search||'')
+      :'./';
+    const manifest={
+      name:'Agenda',
+      short_name:'Agenda',
+      description:'Agenda de contatos com redes, memórias e vCard',
+      start_url:startUrl,
+      scope:'./',
+      display:'standalone',
+      orientation:'portrait',
+      background_color:'#F2F2F7',
+      theme_color:'#F2F2F7',
+      lang:'pt-BR',
+      icons:[
+        {src:icon192||icon180,sizes:'192x192',type:'image/png',purpose:'any'},
+        {src:icon512||icon180,sizes:'512x512',type:'image/png',purpose:'any'}
+      ]
+    };
+    if(man){
+      const blob=new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'});
+      man.href=URL.createObjectURL(blob);
+    }
+    if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostname==='localhost'||location.hostname==='127.0.0.1')){
+      const swCode=[
+        "const CACHE='agenda-shell-v1';",
+        "self.addEventListener('install',e=>{self.skipWaiting();});",
+        "self.addEventListener('activate',e=>{e.waitUntil(self.clients.claim());});",
+        "self.addEventListener('fetch',e=>{",
+        "  if(e.request.method!=='GET')return;",
+        "  e.respondWith(fetch(e.request).catch(()=>caches.match(e.request)));",
+        "});"
+      ].join('');
+      const swUrl=URL.createObjectURL(new Blob([swCode],{type:'text/javascript'}));
+      navigator.serviceWorker.register(swUrl,{scope:'./'}).catch(function(err){
+        console.info('[pwa] SW não registrado:',err&&err.message);
+      });
+    }
+    if(isStandalonePWA())document.documentElement.classList.add('pwa-standalone');
+  }catch(err){console.info('[pwa]',err);}
+}
+
+
+
+/* ========== AppBackup (snapshots + export/import) ========== */
+const AppBackup = (function(){
+  const LS_SNAPSHOTS = 'app_backup_snapshots';
+  const LS_LAST_EXPORT = 'app_backup_last_export';
+  const MAX_SNAPSHOTS = 8;
+
+  async function blobToBase64(blob){
+    if(!blob) return null;
+    return new Promise((resolve,reject)=>{
+      const r = new FileReader();
+      r.onload = ()=>{ const s=String(r.result||''); const i=s.indexOf(','); resolve(i>=0?s.slice(i+1):s); };
+      r.onerror = ()=>reject(r.error);
+      r.readAsDataURL(blob);
+    });
+  }
+
+  function base64ToBlob(b64, mime){
+    try{
+      const bin = atob(b64);
+      const arr = new Uint8Array(bin.length);
+      for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
+      return new Blob([arr], {type: mime||'application/octet-stream'});
+    }catch(_){ return null; }
+  }
+
+  function readTreinoLocal(){
+    const keys = [
+      'treino_workout_date','treino_workout_data','treino_history',
+      'treino_last_progress','treino_settings',
+      'workout_date','workout_data'
+    ];
+    const out = {};
+    keys.forEach(k=>{
+      try{ const v=localStorage.getItem(k); if(v!=null) out[k]=v; }catch(_){}
+    });
+    return out;
+  }
+
+  function writeTreinoLocal(map){
+    if(!map) return;
+    Object.keys(map).forEach(k=>{
+      try{
+        if(map[k]==null) localStorage.removeItem(k);
+        else localStorage.setItem(k, map[k]);
+      }catch(_){}
+    });
+  }
+
+  async function serializeContactsLight(){
+    // uses in-memory arrays when available
+    const cList = (typeof contacts!=='undefined' && Array.isArray(contacts)) ? contacts : [];
+    const sList = (typeof socialLinks!=='undefined' && Array.isArray(socialLinks)) ? socialLinks : [];
+    const contactsOut = [];
+    for(const c of cList){
+      const item = {
+        id: c.id, name: c.name||'', address: c.address||'',
+        createdAt: c.createdAt, updatedAt: c.updatedAt,
+        avatar: null, avatarMime: null
+      };
+      if(c.avatar && c.avatar.size && c.avatar.size < 1.5*1024*1024){
+        try{
+          item.avatar = await blobToBase64(c.avatar);
+          item.avatarMime = c.avatar.type||'image/jpeg';
+        }catch(_){}
+      }
+      contactsOut.push(item);
+    }
+    return { contacts: contactsOut, socialLinks: sList.map(s=>({
+      id:s.id, contactId:s.contactId, platform:s.platform,
+      username:s.username||'', value:s.value||'', url:s.url||'',
+      createdAt:s.createdAt, updatedAt:s.updatedAt
+    })) };
+  }
+
+  async function serializeMemoriesLight(){
+    const list = (typeof memories!=='undefined' && Array.isArray(memories)) ? memories : [];
+    const out = [];
+    for(const m of list){
+      const item = {
+        id: m.id, contactId: m.contactId, type: m.type, name: m.name||'',
+        mimeType: m.mimeType||'', size: m.size||0, duration: m.duration||0,
+        createdAt: m.createdAt, blob: null, thumbnail: null
+      };
+      // only embed smaller images; skip large videos in auto/manual to keep file usable
+      if(m.type!=='video' && m.blob && m.blob.size && m.blob.size < 2*1024*1024){
+        try{ item.blob = await blobToBase64(m.blob); }catch(_){}
+      }
+      if(m.thumbnail && m.thumbnail.size && m.thumbnail.size < 300*1024){
+        try{ item.thumbnail = await blobToBase64(m.thumbnail); }catch(_){}
+      }
+      out.push(item);
+    }
+    return out;
+  }
+
+  async function buildPayload(kind){
+    const agenda = await serializeContactsLight();
+    const mems = kind==='full' ? await serializeMemoriesLight() : [];
+    return {
+      app: 'AgendaTreino',
+      version: 1,
+      kind: kind||'full',
+      exportedAt: new Date().toISOString(),
+      treino: readTreinoLocal(),
+      agenda: { contacts: agenda.contacts, socialLinks: agenda.socialLinks, memories: mems }
+    };
+  }
+
+  function loadSnapshots(){
+    try{
+      const raw = localStorage.getItem(LS_SNAPSHOTS);
+      const arr = raw ? JSON.parse(raw) : [];
+      return Array.isArray(arr) ? arr : [];
+    }catch(_){ return []; }
+  }
+
+  function saveSnapshots(arr){
+    try{ localStorage.setItem(LS_SNAPSHOTS, JSON.stringify(arr.slice(0, MAX_SNAPSHOTS))); }catch(_){}
+  }
+
+  async function takeSnapshot(reason){
+    try{
+      // lightweight: treino full + contacts/links without heavy memories
+      const payload = await buildPayload('snapshot');
+      payload.reason = reason||'auto';
+      payload.meta = {
+        contacts: (payload.agenda.contacts||[]).length,
+        links: (payload.agenda.socialLinks||[]).length,
+        treinoKeys: Object.keys(payload.treino||{}).length
+      };
+      const snaps = loadSnapshots();
+      snaps.unshift({ id: Date.now().toString(36), at: Date.now(), reason: payload.reason, payload });
+      saveSnapshots(snaps);
+    }catch(e){ console.warn('[backup snapshot]', e); }
+  }
+
+  function snapshotSummary(){
+    const snaps = loadSnapshots();
+    if(!snaps.length) return 'Nenhum snapshot ainda';
+    const last = snaps[0];
+    const d = new Date(last.at);
+    const when = d.toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
+    return snaps.length + ' salvo(s) · último: ' + when;
+  }
+
+  async function exportAll(){
+    try{
+      if(typeof showToast==='function') showToast('Gerando backup…');
+      const payload = await buildPayload('full');
+      const blob = new Blob([JSON.stringify(payload)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const stamp = new Date().toISOString().slice(0,10);
+      a.href = url;
+      a.download = 'backup-agenda-treino-' + stamp + '.json';
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(()=>{ try{ a.remove(); URL.revokeObjectURL(url); }catch(_){} }, 1500);
+      try{ localStorage.setItem(LS_LAST_EXPORT, String(Date.now())); }catch(_){}
+      if(typeof showToast==='function') showToast('Backup exportado');
+    }catch(e){
+      console.error(e);
+      if(typeof showToast==='function') showToast('Erro ao exportar backup');
+    }
+  }
+
+  function pickImport(){
+    const input = document.getElementById('backupFileInput');
+    if(!input){ if(typeof showToast==='function') showToast('Importação indisponível'); return; }
+    input.value = '';
+    input.onchange = async function(){
+      const file = input.files && input.files[0];
+      if(!file) return;
+      try{
+        const text = await file.text();
+        const data = JSON.parse(text);
+        await importAll(data);
+      }catch(e){
+        console.error(e);
+        if(typeof showToast==='function') showToast('Arquivo de backup inválido');
+      }
+    };
+    input.click();
+  }
+
+  async function importAll(data){
+    if(!data || data.app!=='AgendaTreino'){
+      if(typeof showToast==='function') showToast('Backup incompatível');
+      return;
+    }
+    const ok = confirm('Importar backup? Isso pode substituir contatos, redes e dados de treino atuais.');
+    if(!ok) return;
+    try{
+      // Treino localStorage
+      if(data.treino) writeTreinoLocal(data.treino);
+
+      // Agenda via ContactManager / IDB when available
+      if(data.agenda && typeof ContactManager!=='undefined' && typeof IDB!=='undefined'){
+        const ct = data.agenda.contacts || [];
+        const lk = data.agenda.socialLinks || [];
+        const mm = data.agenda.memories || [];
+
+        for(const c of ct){
+          const rec = {
+            id: c.id, name: c.name||'', address: c.address||'',
+            createdAt: c.createdAt||Date.now(), updatedAt: c.updatedAt||Date.now(),
+            avatar: null
+          };
+          if(c.avatar){
+            const b = base64ToBlob(c.avatar, c.avatarMime||'image/jpeg');
+            if(b) rec.avatar = b;
+          }
+          await IDB.put('contacts', rec);
+        }
+        for(const s of lk){
+          await IDB.put('socialLinks', {
+            id: s.id, contactId: s.contactId, platform: s.platform,
+            username: s.username||'', value: s.value||'', url: s.url||'',
+            createdAt: s.createdAt||Date.now(), updatedAt: s.updatedAt||Date.now()
+          });
+        }
+        for(const m of mm){
+          const rec = {
+            id: m.id, contactId: m.contactId, type: m.type||'image',
+            name: m.name||'', mimeType: m.mimeType||'image/jpeg',
+            size: m.size||0, duration: m.duration||0,
+            createdAt: m.createdAt||Date.now(),
+            blob: null, thumbnail: null
+          };
+          if(m.blob) rec.blob = base64ToBlob(m.blob, m.mimeType||'image/jpeg');
+          if(m.thumbnail) rec.thumbnail = base64ToBlob(m.thumbnail, 'image/jpeg');
+          if(rec.blob) await IDB.put('memories', rec);
+        }
+        if(typeof ContactManager.loadAll==='function'){
+          await ContactManager.loadAll();
+        }
+        if(typeof AgendaUI!=='undefined' && AgendaUI.render) AgendaUI.render();
+      }
+
+      // Reload treino UI if present
+      if(typeof TreinoApp!=='undefined'){
+        // force re-init
+        try{
+          if(TreinoApp.clearRestTimer) TreinoApp.clearRestTimer();
+        }catch(_){}
+      }
+
+      await takeSnapshot('post-import');
+      if(typeof showToast==='function') showToast('Backup importado');
+      // soft reload treino by re-reading settings page next open
+      setTimeout(()=>{ try{ location.reload(); }catch(_){} }, 600);
+    }catch(e){
+      console.error(e);
+      if(typeof showToast==='function') showToast('Erro ao importar backup');
+    }
+  }
+
+  function maybeRemindExport(){
+    try{
+      const last = parseInt(localStorage.getItem(LS_LAST_EXPORT)||'0',10);
+      if(!last){
+        // first week silence
+        return;
+      }
+      const days = (Date.now()-last)/(1000*60*60*24);
+      if(days >= 7 && typeof showToast==='function'){
+        showToast('Faz ' + Math.floor(days) + ' dias que você não exporta um backup', 4000);
+      }
+    }catch(_){}
+  }
+
+  return {
+    takeSnapshot, exportAll, pickImport, importAll,
+    snapshotSummary, maybeRemindExport, loadSnapshots
+  };
+})();
+
+/* ========== TreinoApp (Workout Builder) ========== */
+const TreinoApp = (function(){
+'use strict';
+
+const DB = [
+        // PEITO
+        { id: "peito_1", name: "Supino Reto", group: "Peitoral", equip: "Barra Olímpica" },
+        { id: "peito_2", name: "Supino Inclinado", group: "Peitoral", equip: "Barra Olímpica" },
+        { id: "peito_3", name: "Supino Declinado", group: "Peitoral", equip: "Barra Olímpica" },
+        { id: "peito_4", name: "Supino Fechado", group: "Peitoral", equip: "Barra Olímpica" },
+        { id: "peito_5", name: "Floor Press", group: "Peitoral", equip: "Barra Olímpica" },
+        { id: "peito_6", name: "Guillotine Press", group: "Peitoral", equip: "Barra Olímpica" },
+        { id: "peito_7", name: "Supino Reto", group: "Peitoral", equip: "Halteres" },
+        { id: "peito_8", name: "Supino Inclinado", group: "Peitoral", equip: "Halteres" },
+        { id: "peito_9", name: "Supino Declinado", group: "Peitoral", equip: "Halteres" },
+        { id: "peito_10", name: "Crucifixo Reto", group: "Peitoral", equip: "Halteres" },
+        { id: "peito_11", name: "Crucifixo Inclinado", group: "Peitoral", equip: "Halteres" },
+        { id: "peito_12", name: "Crucifixo Declinado", group: "Peitoral", equip: "Halteres" },
+        { id: "peito_13", name: "Squeeze Press", group: "Peitoral", equip: "Halteres" },
+        { id: "peito_14", name: "Pullover com Halter", group: "Peitoral", equip: "Halteres" },
+        { id: "peito_15", name: "Crossover Alto", group: "Peitoral", equip: "Polias" },
+        { id: "peito_16", name: "Crossover Médio", group: "Peitoral", equip: "Polias" },
+        { id: "peito_17", name: "Crossover Baixo", group: "Peitoral", equip: "Polias" },
+        { id: "peito_18", name: "Crucifixo na Polia", group: "Peitoral", equip: "Polias" },
+        { id: "peito_19", name: "Fly Unilateral na Polia", group: "Peitoral", equip: "Polias" },
+        { id: "peito_20", name: "Press na Polia", group: "Peitoral", equip: "Polias" },
+        { id: "peito_21", name: "Peck Deck", group: "Peitoral", equip: "Máquinas" },
+        { id: "peito_22", name: "Chest Press Horizontal", group: "Peitoral", equip: "Máquinas" },
+        { id: "peito_23", name: "Chest Press Inclinado", group: "Peitoral", equip: "Máquinas" },
+        { id: "peito_24", name: "Chest Press Declinado", group: "Peitoral", equip: "Máquinas" },
+        { id: "peito_25", name: "Chest Press Convergente", group: "Peitoral", equip: "Máquinas" },
+        { id: "peito_26", name: "Chest Press Iso-Lateral", group: "Peitoral", equip: "Máquinas" },
+        { id: "peito_27", name: "Fly Machine", group: "Peitoral", equip: "Máquinas" },
+        { id: "peito_28", name: "Supino Reto", group: "Peitoral", equip: "Smith" },
+        { id: "peito_29", name: "Supino Inclinado", group: "Peitoral", equip: "Smith" },
+        { id: "peito_30", name: "Supino Declinado", group: "Peitoral", equip: "Smith" },
+        { id: "peito_31", name: "Flexão Tradicional", group: "Peitoral", equip: "Peso Corporal" },
+        { id: "peito_32", name: "Flexão Inclinada", group: "Peitoral", equip: "Peso Corporal" },
+        { id: "peito_33", name: "Flexão Declinada", group: "Peitoral", equip: "Peso Corporal" },
+        { id: "peito_34", name: "Flexão Diamante", group: "Peitoral", equip: "Peso Corporal" },
+        { id: "peito_35", name: "Flexão Explosiva", group: "Peitoral", equip: "Peso Corporal" },
+        { id: "peito_36", name: "Flexão Arqueiro", group: "Peitoral", equip: "Peso Corporal" },
+        { id: "peito_37", name: "Flexão com Pegada Aberta", group: "Peitoral", equip: "Peso Corporal" },
+        { id: "peito_38", name: "Flexão com Pegada Fechada", group: "Peitoral", equip: "Peso Corporal" },
+        { id: "peito_39", name: "Paralelas (ênfase no peitoral)", group: "Peitoral", equip: "Peso Corporal" },
+
+        // COSTAS
+        { id: "costas_1", name: "Remada Curvada", group: "Costas", equip: "Barra Olímpica" },
+        { id: "costas_2", name: "Remada Pendlay", group: "Costas", equip: "Barra Olímpica" },
+        { id: "costas_3", name: "Levantamento Terra", group: "Costas", equip: "Barra Olímpica" },
+        { id: "costas_4", name: "Rack Pull", group: "Costas", equip: "Barra Olímpica" },
+        { id: "costas_5", name: "Meadows Row", group: "Costas", equip: "Barra Olímpica" },
+        { id: "costas_6", name: "Remada Unilateral", group: "Costas", equip: "Halteres" },
+        { id: "costas_7", name: "Remada Serrote", group: "Costas", equip: "Halteres" },
+        { id: "costas_8", name: "Remada Apoiada no Banco Inclinado", group: "Costas", equip: "Halteres" },
+        { id: "costas_9", name: "Pullover com Halter", group: "Costas", equip: "Halteres" },
+        { id: "costas_10", name: "Encolhimento com Halteres", group: "Costas", equip: "Halteres" },
+        { id: "costas_11", name: "Puxada Alta Pronada", group: "Costas", equip: "Polias" },
+        { id: "costas_12", name: "Puxada Alta Supinada", group: "Costas", equip: "Polias" },
+        { id: "costas_13", name: "Puxada Alta Neutra", group: "Costas", equip: "Polias" },
+        { id: "costas_14", name: "Puxada Unilateral", group: "Costas", equip: "Polias" },
+        { id: "costas_15", name: "Remada Baixa", group: "Costas", equip: "Polias" },
+        { id: "costas_16", name: "Remada Baixa Unilateral", group: "Costas", equip: "Polias" },
+        { id: "costas_17", name: "Remada Alta Fechada", group: "Costas", equip: "Polias" },
+        { id: "costas_18", name: "Pulldown", group: "Costas", equip: "Polias" },
+        { id: "costas_19", name: "Straight Arm Pulldown", group: "Costas", equip: "Polias" },
+        { id: "costas_20", name: "Pulldown Máquina", group: "Costas", equip: "Máquinas" },
+        { id: "costas_21", name: "Remada Articulada", group: "Costas", equip: "Máquinas" },
+        { id: "costas_22", name: "Remada Iso-Lateral", group: "Costas", equip: "Máquinas" },
+        { id: "costas_23", name: "High Row", group: "Costas", equip: "Máquinas" },
+        { id: "costas_24", name: "Low Row", group: "Costas", equip: "Máquinas" },
+        { id: "costas_25", name: "Pullover Máquina", group: "Costas", equip: "Máquinas" },
+        { id: "costas_26", name: "Remada Sentada Máquina", group: "Costas", equip: "Máquinas" },
+        { id: "costas_27", name: "Encolhimento", group: "Costas", equip: "Smith" },
+        { id: "costas_28", name: "Remada Curvada", group: "Costas", equip: "Smith" },
+        { id: "costas_29", name: "Barra Fixa Pronada", group: "Costas", equip: "Peso Corporal" },
+        { id: "costas_30", name: "Barra Fixa Supinada", group: "Costas", equip: "Peso Corporal" },
+        { id: "costas_31", name: "Barra Fixa Neutra", group: "Costas", equip: "Peso Corporal" },
+        { id: "costas_32", name: "Barra Fixa Pegada Aberta", group: "Costas", equip: "Peso Corporal" },
+        { id: "costas_33", name: "Barra Fixa Pegada Fechada", group: "Costas", equip: "Peso Corporal" },
+        { id: "costas_34", name: "Australian Pull-Up", group: "Costas", equip: "Peso Corporal" },
+        { id: "costas_35", name: "Muscle-Up", group: "Costas", equip: "Peso Corporal" },
+
+        // OMBROS
+        { id: "ombro_1", name: "Desenvolvimento Militar", group: "Ombros", equip: "Barra Olímpica" },
+        { id: "ombro_2", name: "Desenvolvimento Frontal", group: "Ombros", equip: "Barra Olímpica" },
+        { id: "ombro_3", name: "Push Press", group: "Ombros", equip: "Barra Olímpica" },
+        { id: "ombro_4", name: "Push Jerk", group: "Ombros", equip: "Barra Olímpica" },
+        { id: "ombro_5", name: "Remada Alta", group: "Ombros", equip: "Barra Olímpica" },
+        { id: "ombro_6", name: "Behind the Neck Press", group: "Ombros", equip: "Barra Olímpica" },
+        { id: "ombro_7", name: "Desenvolvimento com Halteres", group: "Ombros", equip: "Halteres" },
+        { id: "ombro_8", name: "Arnold Press", group: "Ombros", equip: "Halteres" },
+        { id: "ombro_9", name: "Elevação Lateral", group: "Ombros", equip: "Halteres" },
+        { id: "ombro_10", name: "Elevação Frontal", group: "Ombros", equip: "Halteres" },
+        { id: "ombro_11", name: "Crucifixo Inverso", group: "Ombros", equip: "Halteres" },
+        { id: "ombro_12", name: "Elevação Lateral Inclinada", group: "Ombros", equip: "Halteres" },
+        { id: "ombro_13", name: "Elevação Frontal Alternada", group: "Ombros", equip: "Halteres" },
+        { id: "ombro_14", name: "Y Raise", group: "Ombros", equip: "Halteres" },
+        { id: "ombro_15", name: "Cuban Press", group: "Ombros", equip: "Halteres" },
+        { id: "ombro_16", name: "Elevação Lateral na Polia", group: "Ombros", equip: "Polias" },
+        { id: "ombro_17", name: "Elevação Lateral Unilateral", group: "Ombros", equip: "Polias" },
+        { id: "ombro_18", name: "Elevação Frontal na Polia", group: "Ombros", equip: "Polias" },
+        { id: "ombro_19", name: "Crucifixo Inverso na Polia", group: "Ombros", equip: "Polias" },
+        { id: "ombro_20", name: "Face Pull", group: "Ombros", equip: "Polias" },
+        { id: "ombro_21", name: "Y Raise na Polia", group: "Ombros", equip: "Polias" },
+        { id: "ombro_22", name: "Shoulder Press", group: "Ombros", equip: "Máquinas" },
+        { id: "ombro_23", name: "Desenvolvimento Articulado", group: "Ombros", equip: "Máquinas" },
+        { id: "ombro_24", name: "Elevação Lateral Máquina", group: "Ombros", equip: "Máquinas" },
+        { id: "ombro_25", name: "Reverse Fly Machine", group: "Ombros", equip: "Máquinas" },
+        { id: "ombro_26", name: "Desenvolvimento Militar", group: "Ombros", equip: "Smith" },
+        { id: "ombro_27", name: "Desenvolvimento Frontal", group: "Ombros", equip: "Smith" },
+        { id: "ombro_28", name: "Push Press", group: "Ombros", equip: "Smith" },
+        { id: "ombro_29", name: "Pike Push-Up", group: "Ombros", equip: "Peso Corporal" },
+        { id: "ombro_30", name: "Handstand Push-Up", group: "Ombros", equip: "Peso Corporal" },
+        { id: "ombro_31", name: "Wall Handstand Push-Up", group: "Ombros", equip: "Peso Corporal" },
+
+        // BÍCEPS
+        { id: "biceps_1", name: "Rosca Direta", group: "Bíceps", equip: "Barra Olímpica" },
+        { id: "biceps_2", name: "Rosca Direta Pegada Fechada", group: "Bíceps", equip: "Barra Olímpica" },
+        { id: "biceps_3", name: "Rosca Direta Pegada Aberta", group: "Bíceps", equip: "Barra Olímpica" },
+        { id: "biceps_4", name: "Rosca Inversa", group: "Bíceps", equip: "Barra Olímpica" },
+        { id: "biceps_5", name: "Drag Curl", group: "Bíceps", equip: "Barra Olímpica" },
+        { id: "biceps_6", name: "Rosca Direta", group: "Bíceps", equip: "Barra W (EZ)" },
+        { id: "biceps_7", name: "Rosca Scott", group: "Bíceps", equip: "Barra W (EZ)" },
+        { id: "biceps_8", name: "Rosca Inversa", group: "Bíceps", equip: "Barra W (EZ)" },
+        { id: "biceps_9", name: "Rosca 21", group: "Bíceps", equip: "Barra W (EZ)" },
+        { id: "biceps_10", name: "Drag Curl", group: "Bíceps", equip: "Barra W (EZ)" },
+        { id: "biceps_11", name: "Rosca Alternada", group: "Bíceps", equip: "Halteres" },
+        { id: "biceps_12", name: "Rosca Simultânea", group: "Bíceps", equip: "Halteres" },
+        { id: "biceps_13", name: "Rosca Martelo", group: "Bíceps", equip: "Halteres" },
+        { id: "biceps_14", name: "Rosca Martelo Cruzada", group: "Bíceps", equip: "Halteres" },
+        { id: "biceps_15", name: "Rosca Concentrada", group: "Bíceps", equip: "Halteres" },
+        { id: "biceps_16", name: "Rosca Inclinada", group: "Bíceps", equip: "Halteres" },
+        { id: "biceps_17", name: "Rosca Spider", group: "Bíceps", equip: "Halteres" },
+        { id: "biceps_18", name: "Rosca Zottman", group: "Bíceps", equip: "Halteres" },
+        { id: "biceps_19", name: "Rosca Scott Unilateral", group: "Bíceps", equip: "Halteres" },
+        { id: "biceps_20", name: "Rosca na Polia Baixa", group: "Bíceps", equip: "Polias" },
+        { id: "biceps_21", name: "Rosca Unilateral", group: "Bíceps", equip: "Polias" },
+        { id: "biceps_22", name: "Rosca com Corda", group: "Bíceps", equip: "Polias" },
+        { id: "biceps_23", name: "Bayesian Curl", group: "Bíceps", equip: "Polias" },
+        { id: "biceps_24", name: "Rosca Scott na Polia", group: "Bíceps", equip: "Polias" },
+        { id: "biceps_25", name: "Rosca Alta na Polia", group: "Bíceps", equip: "Polias" },
+        { id: "biceps_26", name: "Rosca Scott Máquina", group: "Bíceps", equip: "Máquinas" },
+        { id: "biceps_27", name: "Rosca Bíceps Máquina", group: "Bíceps", equip: "Máquinas" },
+        { id: "biceps_28", name: "Rosca Unilateral Máquina", group: "Bíceps", equip: "Máquinas" },
+        { id: "biceps_29", name: "Chin-Up", group: "Bíceps", equip: "Peso Corporal" },
+        { id: "biceps_30", name: "Chin-Up Isométrico", group: "Bíceps", equip: "Peso Corporal" },
+
+        // TRÍCEPS
+        { id: "triceps_1", name: "Tríceps Testa", group: "Tríceps", equip: "Barra Olímpica" },
+        { id: "triceps_2", name: "Tríceps Francês", group: "Tríceps", equip: "Barra Olímpica" },
+        { id: "triceps_3", name: "JM Press", group: "Tríceps", equip: "Barra Olímpica" },
+        { id: "triceps_4", name: "Supino Fechado", group: "Tríceps", equip: "Barra Olímpica" },
+        { id: "triceps_5", name: "Floor Press Pegada Fechada", group: "Tríceps", equip: "Barra Olímpica" },
+        { id: "triceps_6", name: "Tríceps Testa", group: "Tríceps", equip: "Barra W (EZ)" },
+        { id: "triceps_7", name: "Tríceps Francês", group: "Tríceps", equip: "Barra W (EZ)" },
+        { id: "triceps_8", name: "Extensão de Tríceps Deitado", group: "Tríceps", equip: "Barra W (EZ)" },
+        { id: "triceps_9", name: "Tríceps Francês Unilateral", group: "Tríceps", equip: "Halteres" },
+        { id: "triceps_10", name: "Tríceps Francês Bilateral", group: "Tríceps", equip: "Halteres" },
+        { id: "triceps_11", name: "Extensão Acima da Cabeça", group: "Tríceps", equip: "Halteres" },
+        { id: "triceps_12", name: "Coice (Kickback)", group: "Tríceps", equip: "Halteres" },
+        { id: "triceps_13", name: "Tate Press", group: "Tríceps", equip: "Halteres" },
+        { id: "triceps_14", name: "Rolling Triceps Extension", group: "Tríceps", equip: "Halteres" },
+        { id: "triceps_15", name: "Tríceps Corda", group: "Tríceps", equip: "Polias" },
+        { id: "triceps_16", name: "Tríceps Barra Reta", group: "Tríceps", equip: "Polias" },
+        { id: "triceps_17", name: "Tríceps Barra V", group: "Tríceps", equip: "Polias" },
+        { id: "triceps_18", name: "Tríceps Unilateral", group: "Tríceps", equip: "Polias" },
+        { id: "triceps_19", name: "Extensão Acima da Cabeça com Corda", group: "Tríceps", equip: "Polias" },
+        { id: "triceps_20", name: "Extensão Acima da Cabeça Unilateral", group: "Tríceps", equip: "Polias" },
+        { id: "triceps_21", name: "Tríceps Invertido", group: "Tríceps", equip: "Polias" },
+        { id: "triceps_22", name: "Tríceps Máquina Sentado", group: "Tríceps", equip: "Máquinas" },
+        { id: "triceps_23", name: "Tríceps Máquina Articulada", group: "Tríceps", equip: "Máquinas" },
+        { id: "triceps_24", name: "Mergulho Assistido", group: "Tríceps", equip: "Máquinas" },
+        { id: "triceps_25", name: "Supino Fechado", group: "Tríceps", equip: "Smith" },
+        { id: "triceps_26", name: "JM Press", group: "Tríceps", equip: "Smith" },
+        { id: "triceps_27", name: "Paralelas", group: "Tríceps", equip: "Peso Corporal" },
+        { id: "triceps_28", name: "Mergulho entre Bancos", group: "Tríceps", equip: "Peso Corporal" },
+        { id: "triceps_29", name: "Flexão Diamante", group: "Tríceps", equip: "Peso Corporal" },
+        { id: "triceps_30", name: "Bench Dips", group: "Tríceps", equip: "Peso Corporal" },
+
+        // ANTEBRAÇOS
+        { id: "ante_1", name: "Rosca Punho com Barra (Wrist Curl)", group: "Antebraços", equip: "Barra Olímpica" },
+        { id: "ante_2", name: "Rosca Punho Inversa com Barra", group: "Antebraços", equip: "Barra Olímpica" },
+        { id: "ante_3", name: "Sustentação de Barra (Barbell Hold)", group: "Antebraços", equip: "Barra Olímpica" },
+        { id: "ante_4", name: "Farmer’s Walk com Barra", group: "Antebraços", equip: "Barra Olímpica" },
+        { id: "ante_5", name: "Rosca Punho com Barra W", group: "Antebraços", equip: "Barra W (EZ)" },
+        { id: "ante_6", name: "Rosca Inversa com Barra W", group: "Antebraços", equip: "Barra W (EZ)" },
+        { id: "ante_7", name: "Rosca Punho com Halteres", group: "Antebraços", equip: "Halteres" },
+        { id: "ante_8", name: "Rosca Punho Inversa com Halteres", group: "Antebraços", equip: "Halteres" },
+        { id: "ante_9", name: "Rosca Martelo", group: "Antebraços", equip: "Halteres" },
+        { id: "ante_10", name: "Rosca Martelo Cruzada", group: "Antebraços", equip: "Halteres" },
+        { id: "ante_11", name: "Farmer’s Walk com Halteres", group: "Antebraços", equip: "Halteres" },
+        { id: "ante_12", name: "Pinch Grip com Halteres", group: "Antebraços", equip: "Halteres" },
+        { id: "ante_13", name: "Rosca Punho na Polia", group: "Antebraços", equip: "Polias" },
+        { id: "ante_14", name: "Rosca Punho Inversa na Polia", group: "Antebraços", equip: "Polias" },
+        { id: "ante_15", name: "Rosca Martelo na Polia com Corda", group: "Antebraços", equip: "Polias" },
+        { id: "ante_16", name: "Máquina de Rosca Punho", group: "Antebraços", equip: "Máquinas" },
+        { id: "ante_17", name: "Máquina de Pegada (Grip Machine)", group: "Antebraços", equip: "Máquinas" },
+        { id: "ante_18", name: "Dead Hang (Suspensão na Barra)", group: "Antebraços", equip: "Peso Corporal" },
+        { id: "ante_19", name: "Dead Hang com Uma Mão", group: "Antebraços", equip: "Peso Corporal" },
+        { id: "ante_20", name: "Hand Grip Isométrico", group: "Antebraços", equip: "Peso Corporal" },
+
+        // ABDÔMEN
+        { id: "abd_1", name: "Elevação de Pernas na Barra Fixa", group: "Abdômen", equip: "Barra / Equipamentos Livres" },
+        { id: "abd_2", name: "Elevação de Joelhos na Barra Fixa", group: "Abdômen", equip: "Barra / Equipamentos Livres" },
+        { id: "abd_3", name: "Abdominal na Barra Fixa", group: "Abdômen", equip: "Barra / Equipamentos Livres" },
+        { id: "abd_4", name: "Ab Wheel (Roda Abdominal)", group: "Abdômen", equip: "Barra / Equipamentos Livres" },
+        { id: "abd_5", name: "Abdominal com Halter no Peito", group: "Abdômen", equip: "Halteres" },
+        { id: "abd_6", name: "Abdominal Oblíquo com Halter", group: "Abdômen", equip: "Halteres" },
+        { id: "abd_7", name: "Russian Twist com Halter", group: "Abdômen", equip: "Halteres" },
+        { id: "abd_8", name: "Sit-Up com Halter", group: "Abdômen", equip: "Halteres" },
+        { id: "abd_9", name: "Abdominal na Polia Alta (Cable Crunch)", group: "Abdômen", equip: "Polias" },
+        { id: "abd_10", name: "Abdominal Oblíquo na Polia", group: "Abdômen", equip: "Polias" },
+        { id: "abd_11", name: "Woodchopper na Polia Alta", group: "Abdômen", equip: "Polias" },
+        { id: "abd_12", name: "Woodchopper na Polia Baixa", group: "Abdômen", equip: "Polias" },
+        { id: "abd_13", name: "Abdominal Máquina", group: "Abdômen", equip: "Máquinas" },
+        { id: "abd_14", name: "Crunch Máquina", group: "Abdômen", equip: "Máquinas" },
+        { id: "abd_15", name: "Rotação de Tronco Máquina", group: "Abdômen", equip: "Máquinas" },
+        { id: "abd_16", name: "Elevação de Joelhos no Smith", group: "Abdômen", equip: "Smith" },
+        { id: "abd_17", name: "Abdominal Tradicional", group: "Abdômen", equip: "Peso Corporal" },
+        { id: "abd_18", name: "Crunch", group: "Abdômen", equip: "Peso Corporal" },
+        { id: "abd_19", name: "Crunch Inverso", group: "Abdômen", equip: "Peso Corporal" },
+        { id: "abd_20", name: "Sit-Up", group: "Abdômen", equip: "Peso Corporal" },
+        { id: "abd_21", name: "Elevação de Pernas Deitado", group: "Abdômen", equip: "Peso Corporal" },
+        { id: "abd_22", name: "Elevação de Joelhos Deitado", group: "Abdômen", equip: "Peso Corporal" },
+        { id: "abd_23", name: "Prancha Frontal", group: "Abdômen", equip: "Peso Corporal" },
+        { id: "abd_24", name: "Prancha Lateral", group: "Abdômen", equip: "Peso Corporal" },
+        { id: "abd_25", name: "Mountain Climber", group: "Abdômen", equip: "Peso Corporal" },
+        { id: "abd_26", name: "Hollow Body Hold", group: "Abdômen", equip: "Peso Corporal" },
+        { id: "abd_27", name: "V-Up", group: "Abdômen", equip: "Peso Corporal" },
+        { id: "abd_28", name: "Bicicleta no Solo", group: "Abdômen", equip: "Peso Corporal" },
+        { id: "abd_29", name: "Abdominal Canivete", group: "Abdômen", equip: "Peso Corporal" },
+
+        // LOMBAR
+        { id: "lombar_1", name: "Levantamento Terra", group: "Lombar", equip: "Barra Olímpica" },
+        { id: "lombar_2", name: "Rack Pull", group: "Lombar", equip: "Barra Olímpica" },
+        { id: "lombar_3", name: "Good Morning", group: "Lombar", equip: "Barra Olímpica" },
+        { id: "lombar_4", name: "Stiff com Barra", group: "Lombar", equip: "Barra Olímpica" },
+        { id: "lombar_5", name: "Stiff com Halteres", group: "Lombar", equip: "Halteres" },
+        { id: "lombar_6", name: "Good Morning com Halteres", group: "Lombar", equip: "Halteres" },
+        { id: "lombar_7", name: "Extensão Lombar com Halteres", group: "Lombar", equip: "Halteres" },
+        { id: "lombar_8", name: "Farmer’s Walk com Halteres", group: "Lombar", equip: "Halteres" },
+        { id: "lombar_9", name: "Pull Through na Polia", group: "Lombar", equip: "Polias" },
+        { id: "lombar_10", name: "Extensão Lombar na Polia", group: "Lombar", equip: "Polias" },
+        { id: "lombar_11", name: "Banco Romano (Hiperextensão)", group: "Lombar", equip: "Máquinas" },
+        { id: "lombar_12", name: "Máquina de Extensão Lombar", group: "Lombar", equip: "Máquinas" },
+        { id: "lombar_13", name: "Good Morning no Smith", group: "Lombar", equip: "Smith" },
+        { id: "lombar_14", name: "Stiff no Smith", group: "Lombar", equip: "Smith" },
+        { id: "lombar_15", name: "Hiperextensão no Banco Romano", group: "Lombar", equip: "Peso Corporal" },
+        { id: "lombar_16", name: "Superman", group: "Lombar", equip: "Peso Corporal" },
+        { id: "lombar_17", name: "Bird Dog", group: "Lombar", equip: "Peso Corporal" },
+        { id: "lombar_18", name: "Prancha Superman", group: "Lombar", equip: "Peso Corporal" },
+
+        // GLÚTEOS
+        { id: "glut_1", name: "Hip Thrust com Barra", group: "Glúteos", equip: "Barra Olímpica" },
+        { id: "glut_2", name: "Agachamento Livre", group: "Glúteos", equip: "Barra Olímpica" },
+        { id: "glut_3", name: "Agachamento Sumô", group: "Glúteos", equip: "Barra Olímpica" },
+        { id: "glut_4", name: "Levantamento Terra", group: "Glúteos", equip: "Barra Olímpica" },
+        { id: "glut_5", name: "Levantamento Terra Sumô", group: "Glúteos", equip: "Barra Olímpica" },
+        { id: "glut_6", name: "Stiff com Barra", group: "Glúteos", equip: "Barra Olímpica" },
+        { id: "glut_7", name: "Good Morning", group: "Glúteos", equip: "Barra Olímpica" },
+        { id: "glut_8", name: "Hip Thrust com Halter", group: "Glúteos", equip: "Halteres" },
+        { id: "glut_9", name: "Glute Bridge com Halter", group: "Glúteos", equip: "Halteres" },
+        { id: "glut_10", name: "Stiff com Halteres", group: "Glúteos", equip: "Halteres" },
+        { id: "glut_11", name: "Afundo com Halteres", group: "Glúteos", equip: "Halteres" },
+        { id: "glut_12", name: "Passada com Halteres", group: "Glúteos", equip: "Halteres" },
+        { id: "glut_13", name: "Bulgarian Split Squat", group: "Glúteos", equip: "Halteres" },
+        { id: "glut_14", name: "Step-Up com Halteres", group: "Glúteos", equip: "Halteres" },
+        { id: "glut_15", name: "Coice na Polia (Cable Kickback)", group: "Glúteos", equip: "Polias" },
+        { id: "glut_16", name: "Abdução de Quadril na Polia", group: "Glúteos", equip: "Polias" },
+        { id: "glut_17", name: "Pull Through na Polia", group: "Glúteos", equip: "Polias" },
+        { id: "glut_18", name: "Extensão de Quadril na Polia", group: "Glúteos", equip: "Polias" },
+        { id: "glut_19", name: "Hip Thrust Máquina", group: "Glúteos", equip: "Máquinas" },
+        { id: "glut_20", name: "Glute Drive", group: "Glúteos", equip: "Máquinas" },
+        { id: "glut_21", name: "Cadeira Abdutora", group: "Glúteos", equip: "Máquinas" },
+        { id: "glut_22", name: "Leg Press (ênfase em glúteos)", group: "Glúteos", equip: "Máquinas" },
+        { id: "glut_23", name: "Máquina de Coice", group: "Glúteos", equip: "Máquinas" },
+        { id: "glut_24", name: "Hip Thrust no Smith", group: "Glúteos", equip: "Smith" },
+        { id: "glut_25", name: "Agachamento no Smith", group: "Glúteos", equip: "Smith" },
+        { id: "glut_26", name: "Afundo no Smith", group: "Glúteos", equip: "Smith" },
+        { id: "glut_27", name: "Bulgarian Split Squat no Smith", group: "Glúteos", equip: "Smith" },
+        { id: "glut_28", name: "Glute Bridge", group: "Glúteos", equip: "Peso Corporal" },
+        { id: "glut_29", name: "Single Leg Glute Bridge", group: "Glúteos", equip: "Peso Corporal" },
+        { id: "glut_30", name: "Donkey Kick", group: "Glúteos", equip: "Peso Corporal" },
+        { id: "glut_31", name: "Fire Hydrant", group: "Glúteos", equip: "Peso Corporal" },
+        { id: "glut_32", name: "Step-Up", group: "Glúteos", equip: "Peso Corporal" },
+        { id: "glut_33", name: "Frog Pump", group: "Glúteos", equip: "Peso Corporal" },
+        { id: "glut_34", name: "Clamshell", group: "Glúteos", equip: "Peso Corporal" },
+
+        // QUADRÍCEPS
+        { id: "quad_1", name: "Agachamento Livre", group: "Quadríceps", equip: "Barra Olímpica" },
+        { id: "quad_2", name: "Agachamento Frontal", group: "Quadríceps", equip: "Barra Olímpica" },
+        { id: "quad_3", name: "Agachamento High Bar", group: "Quadríceps", equip: "Barra Olímpica" },
+        { id: "quad_4", name: "Agachamento Low Bar", group: "Quadríceps", equip: "Barra Olímpica" },
+        { id: "quad_5", name: "Afundo com Barra", group: "Quadríceps", equip: "Barra Olímpica" },
+        { id: "quad_6", name: "Passada com Barra", group: "Quadríceps", equip: "Barra Olímpica" },
+        { id: "quad_7", name: "Zercher Squat", group: "Quadríceps", equip: "Barra Olímpica" },
+        { id: "quad_8", name: "Goblet Squat", group: "Quadríceps", equip: "Halteres" },
+        { id: "quad_9", name: "Afundo com Halteres", group: "Quadríceps", equip: "Halteres" },
+        { id: "quad_10", name: "Passada com Halteres", group: "Quadríceps", equip: "Halteres" },
+        { id: "quad_11", name: "Bulgarian Split Squat", group: "Quadríceps", equip: "Halteres" },
+        { id: "quad_12", name: "Step-Up com Halteres", group: "Quadríceps", equip: "Halteres" },
+        { id: "quad_13", name: "Agachamento Sumô com Halteres", group: "Quadríceps", equip: "Halteres" },
+        { id: "quad_14", name: "Extensão de Joelho na Polia", group: "Quadríceps", equip: "Polias" },
+        { id: "quad_15", name: "Passada na Polia", group: "Quadríceps", equip: "Polias" },
+        { id: "quad_16", name: "Pull Through (ênfase em cadeia posterior)", group: "Quadríceps", equip: "Polias" },
+        { id: "quad_17", name: "Leg Press 45°", group: "Quadríceps", equip: "Máquinas" },
+        { id: "quad_18", name: "Leg Press Horizontal", group: "Quadríceps", equip: "Máquinas" },
+        { id: "quad_19", name: "Hack Squat", group: "Quadríceps", equip: "Máquinas" },
+        { id: "quad_20", name: "Cadeira Extensora", group: "Quadríceps", equip: "Máquinas" },
+        { id: "quad_21", name: "Agachamento Hack Máquina", group: "Quadríceps", equip: "Máquinas" },
+        { id: "quad_22", name: "Pendulum Squat", group: "Quadríceps", equip: "Máquinas" },
+        { id: "quad_23", name: "Belt Squat", group: "Quadríceps", equip: "Máquinas" },
+        { id: "quad_24", name: "Agachamento no Smith", group: "Quadríceps", equip: "Smith" },
+        { id: "quad_25", name: "Afundo no Smith", group: "Quadríceps", equip: "Smith" },
+        { id: "quad_26", name: "Passada no Smith", group: "Quadríceps", equip: "Smith" },
+        { id: "quad_27", name: "Bulgarian Split Squat no Smith", group: "Quadríceps", equip: "Smith" },
+        { id: "quad_28", name: "Agachamento Livre sem Peso", group: "Quadríceps", equip: "Peso Corporal" },
+        { id: "quad_29", name: "Afundo Corporal", group: "Quadríceps", equip: "Peso Corporal" },
+        { id: "quad_30", name: "Passada Corporal", group: "Quadríceps", equip: "Peso Corporal" },
+        { id: "quad_31", name: "Bulgarian Split Squat Corporal", group: "Quadríceps", equip: "Peso Corporal" },
+        { id: "quad_32", name: "Sissy Squat", group: "Quadríceps", equip: "Peso Corporal" },
+        { id: "quad_33", name: "Wall Sit", group: "Quadríceps", equip: "Peso Corporal" },
+
+        // POSTERIORES DE COXA
+        { id: "post_1", name: "Stiff com Barra", group: "Posteriores de Coxa", equip: "Barra Olímpica" },
+        { id: "post_2", name: "Levantamento Terra Romeno (Romanian Deadlift)", group: "Posteriores de Coxa", equip: "Barra Olímpica" },
+        { id: "post_3", name: "Levantamento Terra Convencional", group: "Posteriores de Coxa", equip: "Barra Olímpica" },
+        { id: "post_4", name: "Levantamento Terra Sumô", group: "Posteriores de Coxa", equip: "Barra Olímpica" },
+        { id: "post_5", name: "Good Morning", group: "Posteriores de Coxa", equip: "Barra Olímpica" },
+        { id: "post_6", name: "Nordic Curl com Barra (assistido)", group: "Posteriores de Coxa", equip: "Barra Olímpica" },
+        { id: "post_7", name: "Stiff com Halteres", group: "Posteriores de Coxa", equip: "Halteres" },
+        { id: "post_8", name: "Terra Romeno com Halteres", group: "Posteriores de Coxa", equip: "Halteres" },
+        { id: "post_9", name: "Good Morning com Halteres", group: "Posteriores de Coxa", equip: "Halteres" },
+        { id: "post_10", name: "Afundo com Passo Longo", group: "Posteriores de Coxa", equip: "Halteres" },
+        { id: "post_11", name: "Bulgarian Split Squat (ênfase posterior)", group: "Posteriores de Coxa", equip: "Halteres" },
+        { id: "post_12", name: "Flexão de Joelho na Polia", group: "Posteriores de Coxa", equip: "Polias" },
+        { id: "post_13", name: "Pull Through na Polia", group: "Posteriores de Coxa", equip: "Polias" },
+        { id: "post_14", name: "Extensão de Quadril na Polia", group: "Posteriores de Coxa", equip: "Polias" },
+        { id: "post_15", name: "Mesa Flexora Deitada", group: "Posteriores de Coxa", equip: "Máquinas" },
+        { id: "post_16", name: "Cadeira Flexora Sentada", group: "Posteriores de Coxa", equip: "Máquinas" },
+        { id: "post_17", name: "Flexora Unilateral", group: "Posteriores de Coxa", equip: "Máquinas" },
+        { id: "post_18", name: "Glute Ham Raise Máquina", group: "Posteriores de Coxa", equip: "Máquinas" },
+        { id: "post_19", name: "Hip Extension Máquina", group: "Posteriores de Coxa", equip: "Máquinas" },
+        { id: "post_20", name: "Stiff no Smith", group: "Posteriores de Coxa", equip: "Smith" },
+        { id: "post_21", name: "Levantamento Terra Romeno no Smith", group: "Posteriores de Coxa", equip: "Smith" },
+        { id: "post_22", name: "Good Morning no Smith", group: "Posteriores de Coxa", equip: "Smith" },
+        { id: "post_23", name: "Nordic Hamstring Curl", group: "Posteriores de Coxa", equip: "Peso Corporal" },
+        { id: "post_24", name: "Glute Ham Raise", group: "Posteriores de Coxa", equip: "Peso Corporal" },
+        { id: "post_25", name: "Ponte de Posterior (Hamstring Bridge)", group: "Posteriores de Coxa", equip: "Peso Corporal" },
+        { id: "post_26", name: "Sliding Leg Curl", group: "Posteriores de Coxa", equip: "Peso Corporal" },
+        { id: "post_27", name: "Single Leg Sliding Curl", group: "Posteriores de Coxa", equip: "Peso Corporal" },
+
+        // PANTURRILHAS
+        { id: "pantu_1", name: "Panturrilha em Pé com Barra", group: "Panturrilhas", equip: "Barra Olímpica" },
+        { id: "pantu_2", name: "Panturrilha Sentado com Barra", group: "Panturrilhas", equip: "Barra Olímpica" },
+        { id: "pantu_3", name: "Farmer Walk na Ponta dos Pés", group: "Panturrilhas", equip: "Barra Olímpica" },
+        { id: "pantu_4", name: "Panturrilha em Pé com Halteres", group: "Panturrilhas", equip: "Halteres" },
+        { id: "pantu_5", name: "Panturrilha Unilateral com Halter", group: "Panturrilhas", equip: "Halteres" },
+        { id: "pantu_6", name: "Panturrilha Sentado com Halter", group: "Panturrilhas", equip: "Halteres" },
+        { id: "pantu_7", name: "Farmer Walk com Halteres", group: "Panturrilhas", equip: "Halteres" },
+        { id: "pantu_8", name: "Panturrilha em Pé na Polia", group: "Panturrilhas", equip: "Polias" },
+        { id: "pantu_9", name: "Panturrilha Unilateral na Polia", group: "Panturrilhas", equip: "Polias" },
+        { id: "pantu_10", name: "Panturrilha Sentado na Polia", group: "Panturrilhas", equip: "Polias" },
+        { id: "pantu_11", name: "Panturrilha em Pé Máquina", group: "Panturrilhas", equip: "Máquinas" },
+        { id: "pantu_12", name: "Panturrilha Sentado Máquina", group: "Panturrilhas", equip: "Máquinas" },
+        { id: "pantu_13", name: "Panturrilha no Leg Press", group: "Panturrilhas", equip: "Máquinas" },
+        { id: "pantu_14", name: "Panturrilha no Hack Squat", group: "Panturrilhas", equip: "Máquinas" },
+        { id: "pantu_15", name: "Donkey Calf Raise Máquina", group: "Panturrilhas", equip: "Máquinas" },
+        { id: "pantu_16", name: "Panturrilha em Pé no Smith", group: "Panturrilhas", equip: "Smith" },
+        { id: "pantu_17", name: "Panturrilha Sentado no Smith", group: "Panturrilhas", equip: "Smith" },
+        { id: "pantu_18", name: "Elevação de Panturrilha em Pé", group: "Panturrilhas", equip: "Peso Corporal" },
+        { id: "pantu_19", name: "Elevação de Panturrilha Unilateral", group: "Panturrilhas", equip: "Peso Corporal" },
+        { id: "pantu_20", name: "Panturrilha no Degrau", group: "Panturrilhas", equip: "Peso Corporal" },
+        { id: "pantu_21", name: "Panturrilha Isométrica", group: "Panturrilhas", equip: "Peso Corporal" },
+        { id: "pantu_22", name: "Saltos na Ponta dos Pés", group: "Panturrilhas", equip: "Peso Corporal" },
+
+        // ADUTORES
+        { id: "adut_1", name: "Agachamento Sumô", group: "Adutores", equip: "Barra Olímpica" },
+        { id: "adut_2", name: "Levantamento Terra Sumô", group: "Adutores", equip: "Barra Olímpica" },
+        { id: "adut_3", name: "Agachamento Livre com Base Ampla", group: "Adutores", equip: "Barra Olímpica" },
+        { id: "adut_4", name: "Good Morning com Base Ampla", group: "Adutores", equip: "Barra Olímpica" },
+        { id: "adut_5", name: "Agachamento Sumô com Halter", group: "Adutores", equip: "Halteres" },
+        { id: "adut_6", name: "Afundo Lateral com Halteres", group: "Adutores", equip: "Halteres" },
+        { id: "adut_7", name: "Cossack Squat com Halteres", group: "Adutores", equip: "Halteres" },
+        { id: "adut_8", name: "Step-Up Lateral com Halteres", group: "Adutores", equip: "Halteres" },
+        { id: "adut_9", name: "Adução de Quadril na Polia", group: "Adutores", equip: "Polias" },
+        { id: "adut_10", name: "Adução Unilateral na Polia", group: "Adutores", equip: "Polias" },
+        { id: "adut_11", name: "Adução Cruzada na Polia", group: "Adutores", equip: "Polias" },
+        { id: "adut_12", name: "Cadeira Adutora", group: "Adutores", equip: "Máquinas" },
+        { id: "adut_13", name: "Máquina Adutora Unilateral", group: "Adutores", equip: "Máquinas" },
+        { id: "adut_14", name: "Adução de Quadril Máquina", group: "Adutores", equip: "Máquinas" },
+        { id: "adut_15", name: "Agachamento Sumô no Smith", group: "Adutores", equip: "Smith" },
+        { id: "adut_16", name: "Afundo Lateral no Smith", group: "Adutores", equip: "Smith" },
+        { id: "adut_17", name: "Cossack Squat", group: "Adutores", equip: "Peso Corporal" },
+        { id: "adut_18", name: "Afundo Lateral", group: "Adutores", equip: "Peso Corporal" },
+        { id: "adut_19", name: "Copenhagen Plank", group: "Adutores", equip: "Peso Corporal" },
+        { id: "adut_20", name: "Adução de Quadril Deitado", group: "Adutores", equip: "Peso Corporal" },
+        { id: "adut_21", name: "Deslizamento Lateral (Sliding Lunge)", group: "Adutores", equip: "Peso Corporal" },
+
+        // ABDUTORES
+        { id: "abdut_1", name: "Agachamento com Base Ampla", group: "Abdutores", equip: "Barra Olímpica" },
+        { id: "abdut_2", name: "Agachamento Sumô", group: "Abdutores", equip: "Barra Olímpica" },
+        { id: "abdut_3", name: "Passada Lateral com Barra", group: "Abdutores", equip: "Barra Olímpica" },
+        { id: "abdut_4", name: "Abdução de Quadril com Halter", group: "Abdutores", equip: "Halteres" },
+        { id: "abdut_5", name: "Afundo Lateral com Halteres", group: "Abdutores", equip: "Halteres" },
+        { id: "abdut_6", name: "Cossack Squat com Halteres", group: "Abdutores", equip: "Halteres" },
+        { id: "abdut_7", name: "Step-Up Lateral com Halteres", group: "Abdutores", equip: "Halteres" },
+        { id: "abdut_8", name: "Abdução de Quadril na Polia", group: "Abdutores", equip: "Polias" },
+        { id: "abdut_9", name: "Abdução Unilateral na Polia", group: "Abdutores", equip: "Polias" },
+        { id: "abdut_10", name: "Abdução Cruzada na Polia", group: "Abdutores", equip: "Polias" },
+        { id: "abdut_11", name: "Cadeira Abdutora", group: "Abdutores", equip: "Máquinas" },
+        { id: "abdut_12", name: "Máquina Abdutora Unilateral", group: "Abdutores", equip: "Máquinas" },
+        { id: "abdut_13", name: "Abdução de Quadril Máquina", group: "Abdutores", equip: "Máquinas" },
+        { id: "abdut_14", name: "Agachamento Sumô no Smith", group: "Abdutores", equip: "Smith" },
+        { id: "abdut_15", name: "Passada Lateral no Smith", group: "Abdutores", equip: "Smith" },
+        { id: "abdut_16", name: "Abdução de Quadril Deitado", group: "Abdutores", equip: "Peso Corporal" },
+        { id: "abdut_17", name: "Elevação Lateral de Perna", group: "Abdutores", equip: "Peso Corporal" },
+        { id: "abdut_18", name: "Fire Hydrant", group: "Abdutores", equip: "Peso Corporal" },
+        { id: "abdut_19", name: "Clamshell", group: "Abdutores", equip: "Peso Corporal" },
+        { id: "abdut_20", name: "Monster Walk", group: "Abdutores", equip: "Peso Corporal" },
+        { id: "abdut_21", name: "Caminhada Lateral com Faixa", group: "Abdutores", equip: "Peso Corporal" },
+        { id: "abdut_22", name: "Side Plank com Abdução de Perna", group: "Abdutores", equip: "Peso Corporal" }
+    ];
+
+const GROUPS = ["Todos", "Peitoral", "Costas", "Ombros", "Bíceps", "Tríceps", "Antebraços", "Abdômen", "Lombar", "Glúteos", "Quadríceps", "Posteriores de Coxa", "Panturrilhas", "Adutores", "Abdutores"];
+
+const LS_DATE = 'treino_workout_date';
+const LS_DATA = 'treino_workout_data';
+const LS_HISTORY = 'treino_history';
+const LS_PROGRESS = 'treino_last_progress';
+const LS_SETTINGS = 'treino_settings';
+const LS_DATE_LEGACY = 'workout_date';
+const LS_DATA_LEGACY = 'workout_data';
+
+const DEFAULT_SETTINGS = {
+  confirmFinish: true,
+  weightStep: 1,
+  repsStep: 1,
+  autoPrefill: true,
+  compactMode: false,
+  autoCompletePrevSet: true,
+  showVolume: true,
+  showCompare: true,
+  wakeLock: false,
+  haptic: true,
+  restTimer: false,
+  restSeconds: 90
+};
+
+let activeWorkout = [];
+let activeGroupFilter = 'Todos';
+let initialized = false;
+let lastProgressSummary = null;
+let settings = Object.assign({}, DEFAULT_SETTINGS);
+let settingsOpen = false;
+let reorderMode = false;
+let wakeLockSentinel = null;
+let restTimerInterval = null;
+let restRemaining = 0;
+
+function $(id){ return document.getElementById(id); }
+
+function getTodayString(){
+  return new Date().toLocaleDateString('pt-BR');
+}
+
+function getDayName(){
+  const days = ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
+  return days[new Date().getDay()] || 'Treino';
+}
+
+function migrateLegacyStorage(){
+  try{
+    if(!localStorage.getItem(LS_DATE) && localStorage.getItem(LS_DATE_LEGACY)){
+      localStorage.setItem(LS_DATE, localStorage.getItem(LS_DATE_LEGACY));
+    }
+    if(!localStorage.getItem(LS_DATA) && localStorage.getItem(LS_DATA_LEGACY)){
+      localStorage.setItem(LS_DATA, localStorage.getItem(LS_DATA_LEGACY));
+    }
+  }catch(_){}
+}
+
+
+function loadSettings(){
+  try{
+    const raw = localStorage.getItem(LS_SETTINGS);
+    if(raw){
+      const parsed = JSON.parse(raw);
+      settings = Object.assign({}, DEFAULT_SETTINGS, parsed);
+    }
+  }catch(_){ settings = Object.assign({}, DEFAULT_SETTINGS); }
+  applySettingsToUI();
+}
+
+function saveSettings(){
+  try{ localStorage.setItem(LS_SETTINGS, JSON.stringify(settings)); }catch(_){}
+  applySettingsToUI();
+  if(typeof AppBackup!=='undefined') AppBackup.takeSnapshot('settings');
+}
+
+function applySettingsToUI(){
+  const screen = document.getElementById('screen-treino');
+  if(screen){
+    screen.classList.toggle('compact-mode', !!settings.compactMode);
+    screen.classList.toggle('reorder-mode', !!reorderMode);
+  }
+  if(settings.wakeLock) requestWakeLock();
+  else releaseWakeLock();
+}
+
+async function requestWakeLock(){
+  try{
+    if('wakeLock' in navigator && !wakeLockSentinel){
+      wakeLockSentinel = await navigator.wakeLock.request('screen');
+      wakeLockSentinel.addEventListener('release', ()=>{ wakeLockSentinel = null; });
+    }
+  }catch(_){ /* unsupported or denied */ }
+}
+
+function releaseWakeLock(){
+  try{
+    if(wakeLockSentinel){ wakeLockSentinel.release(); wakeLockSentinel = null; }
+  }catch(_){}
+}
+
+function hapticTap(){
+  if(!settings.haptic) return;
+  try{ if(navigator.vibrate) navigator.vibrate(12); }catch(_){}
+}
+
+
+function formatRestTime(sec){
+  const s = Math.max(0, Math.floor(sec));
+  const m = Math.floor(s / 60);
+  const r = s % 60;
+  return m + ':' + String(r).padStart(2, '0');
+}
+
+function clearRestTimer(){
+  if(restTimerInterval){ clearInterval(restTimerInterval); restTimerInterval = null; }
+  restRemaining = 0;
+  const bar = $('treinoRestBar');
+  if(bar) bar.hidden = true;
+}
+
+function startRestTimer(){
+  if(!settings.restTimer) return;
+  const total = Number(settings.restSeconds) || 90;
+  restRemaining = total;
+  const bar = $('treinoRestBar');
+  const timeEl = $('treinoRestTime');
+  if(bar) bar.hidden = false;
+  if(timeEl) timeEl.textContent = formatRestTime(restRemaining);
+  if(restTimerInterval) clearInterval(restTimerInterval);
+  restTimerInterval = setInterval(function(){
+    restRemaining -= 1;
+    if(timeEl) timeEl.textContent = formatRestTime(restRemaining);
+    if(restRemaining <= 0){
+      clearRestTimer();
+      hapticTap();
+      if(typeof showToast === 'function') showToast('Descanso finalizado');
+    }
+  }, 1000);
+}
+
+function openSettingsMenu(){
+  settingsOpen = true;
+  renderSettingsMenu();
+  const menu = $('treinoSettingsMenu');
+  if(menu){ menu.classList.add('open'); menu.setAttribute('aria-hidden','false'); }
+}
+
+function closeSettingsMenu(){
+  settingsOpen = false;
+  const menu = $('treinoSettingsMenu');
+  if(menu){ menu.classList.remove('open'); menu.setAttribute('aria-hidden','true'); }
+}
+
+function toggleSettingsMenu(){
+  if(settingsOpen) closeSettingsMenu();
+  else openSettingsMenu();
+}
+
+function renderSettingsMenu(){
+  const body = $('treinoSettingsBody');
+  if(!body) return;
+  const wSteps = [0.5, 1, 2.5, 5];
+  const rSteps = [1, 2];
+  body.innerHTML = `
+    <div class="treino-settings-section">Carga e séries</div>
+    <div class="treino-settings-row" style="cursor:default;flex-direction:column;align-items:stretch">
+      <div class="label">Incremento de peso</div>
+      <div class="treino-step-picker" style="margin-top:8px" id="treinoWeightSteps">
+        ${wSteps.map(v => `<button type="button" class="treino-step-opt ${settings.weightStep===v?'active':''}" data-wstep="${v}">${v}</button>`).join('')}
+      </div>
+    </div>
+    <div class="treino-settings-row" style="cursor:default;flex-direction:column;align-items:stretch">
+      <div class="label">Incremento de reps</div>
+      <div class="treino-step-picker" style="margin-top:8px" id="treinoRepsSteps">
+        ${rSteps.map(v => `<button type="button" class="treino-step-opt ${settings.repsStep===v?'active':''}" data-rstep="${v}">${v}</button>`).join('')}
+      </div>
+    </div>
+    <div class="treino-settings-row" data-toggle="autoPrefill">
+      <div><div class="label">Pré-preencher do histórico</div><div class="sub">Usa kg/reps do último treino</div></div>
+      <label class="treino-toggle"><input type="checkbox" ${settings.autoPrefill?'checked':''} data-key="autoPrefill"><span></span></label>
+    </div>
+    <div class="treino-settings-row" data-toggle="autoCompletePrevSet">
+      <div><div class="label">Auto-concluir série anterior</div><div class="sub">Ao adicionar nova série</div></div>
+      <label class="treino-toggle"><input type="checkbox" ${settings.autoCompletePrevSet?'checked':''} data-key="autoCompletePrevSet"><span></span></label>
+    </div>
+    <div class="treino-settings-divider"></div>
+    <div class="treino-settings-section">Exibição</div>
+    <div class="treino-settings-row" data-toggle="showVolume">
+      <div><div class="label">Mostrar volume</div><div class="sub">kg × reps no card</div></div>
+      <label class="treino-toggle"><input type="checkbox" ${settings.showVolume?'checked':''} data-key="showVolume"><span></span></label>
+    </div>
+    <div class="treino-settings-row" data-toggle="showCompare">
+      <div><div class="label">Comparar com último</div><div class="sub">Indicador no card</div></div>
+      <label class="treino-toggle"><input type="checkbox" ${settings.showCompare?'checked':''} data-key="showCompare"><span></span></label>
+    </div>
+    <div class="treino-settings-row" data-toggle="compactMode">
+      <div><div class="label">Modo compacto</div><div class="sub">Cards mais densos</div></div>
+      <label class="treino-toggle"><input type="checkbox" ${settings.compactMode?'checked':''} data-key="compactMode"><span></span></label>
+    </div>
+    <div class="treino-settings-divider"></div>
+    <div class="treino-settings-section">Experiência</div>
+    <div class="treino-settings-row" data-toggle="confirmFinish">
+      <div><div class="label">Confirmar ao finalizar</div></div>
+      <label class="treino-toggle"><input type="checkbox" ${settings.confirmFinish?'checked':''} data-key="confirmFinish"><span></span></label>
+    </div>
+    <div class="treino-settings-row" data-toggle="restTimer">
+      <div><div class="label">Timer de descanso</div><div class="sub">Após concluir uma série</div></div>
+      <label class="treino-toggle"><input type="checkbox" ${settings.restTimer?'checked':''} data-key="restTimer"><span></span></label>
+    </div>
+    <div class="treino-settings-row" style="cursor:default;flex-direction:column;align-items:stretch">
+      <div class="label">Duração do descanso</div>
+      <div class="treino-step-picker" style="margin-top:8px" id="treinoRestSecs">
+        ${[60,90,120,180].map(v => `<button type="button" class="treino-step-opt ${Number(settings.restSeconds)===v?'active':''}" data-restsec="${v}">${v}s</button>`).join('')}
+      </div>
+    </div>
+    <div class="treino-settings-row" data-toggle="wakeLock">
+      <div><div class="label">Manter tela ativa</div><div class="sub">Durante o uso do treino</div></div>
+      <label class="treino-toggle"><input type="checkbox" ${settings.wakeLock?'checked':''} data-key="wakeLock"><span></span></label>
+    </div>
+    <div class="treino-settings-row" data-toggle="haptic">
+      <div><div class="label">Feedback tátil</div><div class="sub">Ao concluir série/exercício</div></div>
+      <label class="treino-toggle"><input type="checkbox" ${settings.haptic?'checked':''} data-key="haptic"><span></span></label>
+    </div>
+    <div class="treino-settings-divider"></div>
+    <div class="treino-settings-section">Ações</div>
+    <div class="treino-settings-row" data-action="reorder">
+      <div><div class="label">Reordenar exercícios</div></div>
+      <span style="color:var(--text-secondary)">›</span>
+    </div>
+    <div class="treino-settings-row" data-action="viewLast">
+      <div><div class="label">Ver último treino salvo</div></div>
+      <span style="color:var(--text-secondary)">›</span>
+    </div>
+    <div class="treino-settings-row destructive" data-action="clearDay">
+      <div><div class="label">Limpar treino atual</div><div class="sub">Não finaliza o dia</div></div>
+    </div>
+    <div class="treino-settings-divider"></div>
+    <div class="treino-settings-section">Backup</div>
+    <div class="treino-settings-row" data-action="exportBackup">
+      <div><div class="label">Exportar backup</div><div class="sub">Arquivo JSON com Agenda e Treino</div></div>
+      <span style="color:var(--text-secondary)">›</span>
+    </div>
+    <div class="treino-settings-row" data-action="importBackup">
+      <div><div class="label">Importar backup</div><div class="sub">Substitui dados atuais</div></div>
+      <span style="color:var(--text-secondary)">›</span>
+    </div>
+    <div class="treino-settings-row" data-action="restoreSnapshot" style="cursor:default;flex-direction:column;align-items:stretch">
+      <div class="label" style="margin-bottom:6px">Snapshots automáticos</div>
+      <div class="sub" id="treinoSnapshotInfo">Carregando…</div>
+    </div>
+  `;
+
+  body.querySelectorAll('input[data-key]').forEach(inp=>{
+    inp.addEventListener('change', ()=>{
+      const key = inp.getAttribute('data-key');
+      settings[key] = !!inp.checked;
+      saveSettings();
+      if(key==='showVolume'||key==='showCompare'||key==='compactMode') renderWorkout();
+    });
+  });
+  body.querySelectorAll('[data-wstep]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      settings.weightStep = parseFloat(btn.getAttribute('data-wstep'));
+      saveSettings();
+      renderSettingsMenu();
+    });
+  });
+  body.querySelectorAll('[data-rstep]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      settings.repsStep = parseInt(btn.getAttribute('data-rstep'),10);
+      saveSettings();
+      renderSettingsMenu();
+    });
+  });
+  body.querySelectorAll('[data-restsec]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      settings.restSeconds = parseInt(btn.getAttribute('data-restsec'),10) || 90;
+      saveSettings();
+      renderSettingsMenu();
+    });
+  });
+  body.querySelectorAll('[data-action]').forEach(row=>{
+    row.addEventListener('click', ()=>{
+      const a = row.getAttribute('data-action');
+      if(a==='reorder'){ closeSettingsMenu(); enterReorderMode(); }
+      else if(a==='viewLast'){ closeSettingsMenu(); viewLastWorkout(); }
+      else if(a==='clearDay'){ closeSettingsMenu(); clearCurrentWorkout(); }
+      else if(a==='exportBackup'){ closeSettingsMenu(); AppBackup.exportAll(); }
+      else if(a==='importBackup'){ closeSettingsMenu(); AppBackup.pickImport(); }
+      else if(a==='restoreSnapshot'){ /* info only */ }
+    });
+  });
+  const snapInfo = $('treinoSnapshotInfo');
+  if(snapInfo) snapInfo.textContent = AppBackup.snapshotSummary();
+}
+
+function enterReorderMode(){
+  if(activeWorkout.length < 2){
+    if(typeof showToast==='function') showToast('Adicione pelo menos 2 exercícios');
+    return;
+  }
+  reorderMode = true;
+  applySettingsToUI();
+  renderWorkout();
+}
+
+function exitReorderMode(){
+  reorderMode = false;
+  applySettingsToUI();
+  renderWorkout();
+}
+
+function moveExercise(instanceId, dir){
+  const idx = activeWorkout.findIndex(e => e.instanceId === instanceId);
+  if(idx < 0) return;
+  const ni = idx + dir;
+  if(ni < 0 || ni >= activeWorkout.length) return;
+  const tmp = activeWorkout[idx];
+  activeWorkout[idx] = activeWorkout[ni];
+  activeWorkout[ni] = tmp;
+  renderWorkout();
+}
+
+function clearCurrentWorkout(){
+  if(!activeWorkout.length){
+    if(typeof showToast==='function') showToast('Treino já está vazio');
+    return;
+  }
+  if(!confirm('Limpar todos os exercícios do treino atual?')) return;
+  activeWorkout = [];
+  setupActiveWorkoutUI();
+  if(typeof showToast==='function') showToast('Treino limpo');
+}
+
+function viewLastWorkout(){
+  let list = [];
+  try{
+    const raw = localStorage.getItem(LS_DATA);
+    list = raw ? JSON.parse(raw) : [];
+  }catch(_){ list = []; }
+  const date = localStorage.getItem(LS_DATE) || '—';
+  if(!list || !list.length){
+    if(typeof showToast==='function') showToast('Nenhum treino salvo ainda');
+    return;
+  }
+  const lines = list.map((ex,i)=>{
+    const stats = computeExerciseStats(ex);
+    return `${i+1}. ${ex.name} — máx ${stats.maxWeight} kg · vol ${stats.volume}`;
+  }).join('\\n');
+  alert('Último treino ('+date+')\\n\\n'+lines);
+}
+
+
+function loadHistory(){
+  try{
+    const raw = localStorage.getItem(LS_HISTORY);
+    return raw ? JSON.parse(raw) : {};
+  }catch(_){ return {}; }
+}
+
+function saveHistory(hist){
+  try{ localStorage.setItem(LS_HISTORY, JSON.stringify(hist)); }catch(_){}
+}
+
+function computeExerciseStats(ex){
+  const sets = (ex.sets || []).filter(s => s && (s.completed || ex.isFinished));
+  const usable = sets.length ? sets : (ex.sets || []);
+  let maxWeight = 0, volume = 0, setsCount = 0;
+  usable.forEach(s => {
+    const w = Number(s.weight) || 0;
+    const r = Number(s.reps) || 0;
+    if(w > maxWeight) maxWeight = w;
+    volume += w * r;
+    setsCount += 1;
+  });
+  return { maxWeight, volume, setsCount };
+}
+
+function getLastRecord(exerciseId){
+  const hist = loadHistory();
+  const entry = hist[exerciseId];
+  return entry && entry.last ? entry.last : null;
+}
+
+function buildPrefillSets(exerciseId){
+  if(!settings.autoPrefill){
+    return [{ id: 1, weight: 0, reps: 0, completed: false }];
+  }
+  const last = getLastRecord(exerciseId);
+  if(last && Array.isArray(last.sets) && last.sets.length){
+    return last.sets.map((s, i) => ({
+      id: i + 1,
+      weight: Number(s.weight) || 0,
+      reps: Number(s.reps) || 0,
+      completed: false
+    }));
+  }
+  try{
+    const raw = localStorage.getItem(LS_DATA);
+    const list = raw ? JSON.parse(raw) : [];
+    const found = (list || []).find(e => e.id === exerciseId);
+    if(found && found.sets && found.sets.length){
+      return found.sets.map((s, i) => ({
+        id: i + 1,
+        weight: Number(s.weight) || 0,
+        reps: Number(s.reps) || 0,
+        completed: false
+      }));
+    }
+  }catch(_){}
+  return [{ id: 1, weight: 0, reps: 0, completed: false }];
+}
+
+function updateHistoryFromWorkout(workout, dateStr){
+  const hist = loadHistory();
+  const progress = [];
+  (workout || []).forEach(ex => {
+    if(!ex || !ex.id) return;
+    const stats = computeExerciseStats(ex);
+    const prev = hist[ex.id] && hist[ex.id].last ? hist[ex.id].last : null;
+    let status = 'new';
+    if(prev){
+      const volUp = stats.volume > (prev.volume || 0);
+      const volDown = stats.volume < (prev.volume || 0);
+      const maxUp = stats.maxWeight > (prev.maxWeight || 0);
+      const maxDown = stats.maxWeight < (prev.maxWeight || 0);
+      if(volUp || maxUp) status = 'up';
+      else if(volDown && maxDown) status = 'down';
+      else status = 'same';
+    }
+    progress.push({
+      id: ex.id,
+      name: ex.name || ex.id,
+      status,
+      prevMax: prev ? (prev.maxWeight || 0) : null,
+      currMax: stats.maxWeight,
+      prevVol: prev ? (prev.volume || 0) : null,
+      currVol: stats.volume,
+      prevSets: prev ? (prev.setsCount || 0) : null,
+      currSets: stats.setsCount
+    });
+    hist[ex.id] = {
+      name: ex.name || ex.id,
+      group: ex.group || '',
+      last: {
+        date: dateStr,
+        maxWeight: stats.maxWeight,
+        volume: stats.volume,
+        setsCount: stats.setsCount,
+        sets: (ex.sets || []).map(s => ({
+          weight: Number(s.weight) || 0,
+          reps: Number(s.reps) || 0
+        }))
+      }
+    };
+  });
+  saveHistory(hist);
+  lastProgressSummary = progress;
+  try{ localStorage.setItem(LS_PROGRESS, JSON.stringify(progress)); }catch(_){}
+  return progress;
+}
+
+function loadProgressSummary(){
+  if(lastProgressSummary && lastProgressSummary.length) return lastProgressSummary;
+  try{
+    const raw = localStorage.getItem(LS_PROGRESS);
+    lastProgressSummary = raw ? JSON.parse(raw) : null;
+  }catch(_){ lastProgressSummary = null; }
+  return lastProgressSummary;
+}
+
+function formatProgressCardHtml(progress){
+  if(!progress || !progress.length){
+    return `<div class="treino-progress-card"><div class="treino-progress-title">Progresso</div><div class="treino-progress-empty">Sem comparação disponível ainda. Complete mais um treino para ver a evolução.</div></div>`;
+  }
+  const label = { up: 'Progresso', down: 'Abaixo', same: 'Igual', new: 'Novo' };
+  const items = progress.map(p => {
+    let meta = '';
+    if(p.status === 'new'){
+      meta = `Máx ${p.currMax} kg · Vol ${p.currVol} · ${p.currSets} série(s)`;
+    }else{
+      const dMax = (p.currMax - (p.prevMax || 0));
+      const dVol = (p.currVol - (p.prevVol || 0));
+      const maxTxt = dMax === 0 ? 'mesmo peso máx' : (dMax > 0 ? `+${dMax} kg máx` : `${dMax} kg máx`);
+      const volTxt = dVol === 0 ? 'mesmo volume' : (dVol > 0 ? `+${dVol} vol` : `${dVol} vol`);
+      meta = `${maxTxt} · ${volTxt} · ${p.currSets} série(s)`;
+    }
+    return `<div class="treino-progress-item">
+      <div>
+        <div class="treino-progress-name">${escapeHtml(p.name)}</div>
+        <div class="treino-progress-meta">${escapeHtml(meta)}</div>
+      </div>
+      <span class="treino-badge ${p.status}">${label[p.status] || p.status}</span>
+    </div>`;
+  }).join('');
+  return `<div class="treino-progress-card"><div class="treino-progress-title">Progresso vs último</div>${items}</div>`;
+}
+
+function init(){
+  migrateLegacyStorage();
+  loadSettings();
+  const today = getTodayString();
+  let lastSavedDate = null;
+  let savedWorkout = null;
+  try{
+    lastSavedDate = localStorage.getItem(LS_DATE);
+    const raw = localStorage.getItem(LS_DATA);
+    savedWorkout = raw ? JSON.parse(raw) : null;
+  }catch(_){ savedWorkout = null; }
+
+  if(lastSavedDate === today){
+    renderDoneScreen();
+  }else if(savedWorkout && savedWorkout.length > 0){
+    renderSuggestionScreen(savedWorkout, lastSavedDate);
+  }else{
+    startEmptyWorkout();
+  }
+  renderChips();
+  initialized = true;
+}
+
+function ensureInit(){
+  if(!initialized) init();
+}
+
+function renderDoneScreen(){
+  const btnF = $('treinoBtnFinish');
+  const fab = $('treinoFab');
+  if(btnF) btnF.classList.add('hidden');
+  if(fab) fab.classList.add('hidden');
+  const title = $('treinoMainTitle');
+  if(title) title.textContent = 'Excelente!';
+  const container = $('treinoAppContent');
+  if(!container) return;
+  const progress = loadProgressSummary();
+  const progressHtml = formatProgressCardHtml(progress);
+  container.innerHTML = `
+    <div class="treino-status" style="justify-content:flex-start;padding-top:20px;min-height:auto">
+      <div class="treino-status-icon">🏆</div>
+      <div class="treino-status-title">Treino Concluído</div>
+      <div class="treino-status-desc">Você já finalizou e salvou seu treino de hoje. Descanse e volte amanhã para liberar uma nova sessão.</div>
+      ${progressHtml}
+      <button type="button" class="treino-btn-dev" id="treinoDevReset">[Dev] Resetar Dia para Testes</button>
+    </div>`;
+  const resetBtn = $('treinoDevReset');
+  if(resetBtn) resetBtn.onclick = resetDayDev;
+}
+
+function renderSuggestionScreen(savedWorkout, dateStr){
+  const btnF = $('treinoBtnFinish');
+  const fab = $('treinoFab');
+  if(btnF) btnF.classList.add('hidden');
+  if(fab) fab.classList.add('hidden');
+  const title = $('treinoMainTitle');
+  if(title) title.textContent = 'Novo Dia';
+  const previewList = savedWorkout.slice(0,4).map(ex => `<li class="treino-suggestion-item">${escapeHtml(ex.name)}</li>`).join('');
+  const extraCount = savedWorkout.length > 4 ? `<li class="treino-suggestion-item">e mais ${savedWorkout.length - 4}...</li>` : '';
+  const container = $('treinoAppContent');
+  if(!container) return;
+  container.innerHTML = `
+    <div class="treino-status" style="justify-content:flex-start;padding-top:28px;min-height:auto">
+      <div class="treino-status-icon">📅</div>
+      <div class="treino-status-title">Pronto para hoje?</div>
+      <div class="treino-status-desc">Identificamos o seu último treino (${escapeHtml(dateStr||'')}). Gostaria de usá-lo como base para hoje?</div>
+      <div class="treino-suggestion-card">
+        <div style="font-weight:600;font-size:.95rem">Treino Anterior:</div>
+        <ul class="treino-suggestion-list">${previewList}${extraCount}</ul>
+      </div>
+      <div class="treino-status-actions">
+        <button type="button" class="treino-btn-primary" id="treinoLoadSuggested">Sim, Iniciar com esta base</button>
+        <button type="button" class="treino-btn-secondary" id="treinoStartEmpty">Não, Criar um novo do zero</button>
+      </div>
+    </div>`;
+  const b1 = $('treinoLoadSuggested');
+  const b2 = $('treinoStartEmpty');
+  if(b1) b1.onclick = loadSuggestedWorkout;
+  if(b2) b2.onclick = startEmptyWorkout;
+}
+
+function startEmptyWorkout(){
+  activeWorkout = [];
+  setupActiveWorkoutUI();
+}
+
+function loadSuggestedWorkout(){
+  let savedWorkout = [];
+  try{
+    const raw = localStorage.getItem(LS_DATA);
+    savedWorkout = raw ? JSON.parse(raw) : [];
+  }catch(_){ savedWorkout = []; }
+  activeWorkout = (savedWorkout||[]).map(ex => ({
+    ...ex,
+    instanceId: Date.now().toString(36) + Math.random().toString(36).slice(2,7),
+    isFinished: false,
+    sets: (ex.sets||[]).map(set => ({ ...set, completed: false }))
+  }));
+  setupActiveWorkoutUI();
+}
+
+function setupActiveWorkoutUI(){
+  const btnF = $('treinoBtnFinish');
+  const fab = $('treinoFab');
+  if(btnF) btnF.classList.remove('hidden');
+  if(fab) fab.classList.remove('hidden');
+  const title = $('treinoMainTitle');
+  if(title) title.textContent = getDayName();
+  renderWorkout();
+}
+
+function escapeHtml(str){
+  return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function renderWorkout(){
+  const container = $('treinoAppContent');
+  if(!container) return;
+  if(activeWorkout.length === 0){
+    container.innerHTML = `<div class="treino-empty">Nenhum exercício adicionado.<br>Toque abaixo para começar.</div>`;
+    return;
+  }
+  container.innerHTML = activeWorkout.map((ex, index) => {
+    const setsHtml = !ex.isFinished ? ex.sets.map(set => {
+      if(set.completed){
+        return `<div class="treino-set-row completed-view">
+          <div>
+            <div class="treino-set-summary-title">Série ${set.id} Concluída</div>
+            <div class="treino-set-summary-data">${set.weight} kg × ${set.reps} reps</div>
+          </div>
+          <button type="button" class="treino-btn-text" data-action="undo-set" data-iid="${ex.instanceId}" data-sid="${set.id}">Desfazer</button>
+        </div>`;
+      }
+      return `<div class="treino-set-row">
+        <div class="treino-set-header">
+          Série ${set.id}
+          <button type="button" class="treino-btn-trash" data-action="del-set" data-iid="${ex.instanceId}" data-sid="${set.id}" title="Apagar Série">🗑</button>
+        </div>
+        <div class="treino-set-controls">
+          <div class="treino-control-group">
+            <span class="treino-control-label">KG</span>
+            <div class="treino-control-stepper">
+              <button type="button" class="treino-step-btn" data-action="upd" data-iid="${ex.instanceId}" data-sid="${set.id}" data-field="weight" data-delta="-1">−</button>
+              <input type="number" class="treino-step-value" value="${set.weight}" data-action="manual" data-iid="${ex.instanceId}" data-sid="${set.id}" data-field="weight" inputmode="decimal">
+              <button type="button" class="treino-step-btn" data-action="upd" data-iid="${ex.instanceId}" data-sid="${set.id}" data-field="weight" data-delta="1">+</button>
+            </div>
+          </div>
+          <div class="treino-control-group">
+            <span class="treino-control-label">REPS</span>
+            <div class="treino-control-stepper">
+              <button type="button" class="treino-step-btn" data-action="upd" data-iid="${ex.instanceId}" data-sid="${set.id}" data-field="reps" data-delta="-1">−</button>
+              <input type="number" class="treino-step-value" value="${set.reps}" data-action="manual" data-iid="${ex.instanceId}" data-sid="${set.id}" data-field="reps" inputmode="numeric">
+              <button type="button" class="treino-step-btn" data-action="upd" data-iid="${ex.instanceId}" data-sid="${set.id}" data-field="reps" data-delta="1">+</button>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    }).join('') : '';
+
+    const body = !ex.isFinished ? `<div class="treino-exercise-body">
+      ${setsHtml}
+      <div class="treino-exercise-actions">
+        <button type="button" class="treino-btn-half treino-btn-add" data-action="add-set" data-iid="${ex.instanceId}">+ Série</button>
+        <button type="button" class="treino-btn-half treino-btn-finish" data-action="toggle-ex" data-iid="${ex.instanceId}">Finalizar Exercício</button>
+      </div>
+    </div>` : '';
+
+    const stats = computeExerciseStats(ex);
+    let extra = '';
+    if(settings.showVolume || settings.showCompare){
+      const bits = [];
+      if(settings.showVolume) bits.push('Vol '+stats.volume);
+      if(settings.showCompare){
+        const last = getLastRecord(ex.id);
+        if(last){
+          const dMax = stats.maxWeight - (last.maxWeight||0);
+          const dVol = stats.volume - (last.volume||0);
+          if(dMax>0 || dVol>0) bits.push('<span class="up">↑ vs último</span>');
+          else if(dMax<0 && dVol<0) bits.push('<span class="down">↓ vs último</span>');
+          else bits.push('= último');
+        }else{
+          bits.push('Novo');
+        }
+      }
+      extra = `<div class="treino-card-extra">${bits.join(' · ')}</div>`;
+    }
+    const reorderBtns = reorderMode ? `<div class="treino-reorder-btns">
+      <button type="button" data-action="move-up" data-iid="${ex.instanceId}">▲</button>
+      <button type="button" data-action="move-down" data-iid="${ex.instanceId}">▼</button>
+    </div>` : '';
+    return `<div class="treino-exercise-card ${ex.isFinished ? 'finished' : ''}">
+      <div class="treino-exercise-header">
+        <div>
+          <div class="treino-exercise-meta">${escapeHtml(ex.group)} · ${escapeHtml(ex.equip)}</div>
+          <div class="treino-exercise-name">${index+1}. ${escapeHtml(ex.name)}${ex.isFinished ? ' ✓' : ''}</div>
+          ${extra}
+        </div>
+        <div class="treino-header-buttons">
+          ${reorderBtns}
+          ${(!reorderMode && ex.isFinished) ? `<button type="button" class="treino-btn-text" data-action="toggle-ex" data-iid="${ex.instanceId}">Editar</button>` : ''}
+          ${!reorderMode ? `<button type="button" class="treino-exercise-remove" data-action="remove-ex" data-iid="${ex.instanceId}">×</button>` : ''}
+        </div>
+      </div>
+      ${reorderMode ? '' : body}
+    </div>`;
+  }).join('');
+
+  // Event delegation
+  container.onclick = function(e){
+    const t = e.target.closest('[data-action]');
+    if(!t) return;
+    const action = t.getAttribute('data-action');
+    const iid = t.getAttribute('data-iid');
+    const sid = t.getAttribute('data-sid');
+    if(action === 'remove-ex') removeExercise(iid);
+    else if(action === 'toggle-ex') toggleExerciseState(iid);
+    else if(action === 'add-set') addSet(iid);
+    else if(action === 'del-set') deleteSet(iid, parseInt(sid,10));
+    else if(action === 'undo-set') toggleSetCompletion(iid, parseInt(sid,10));
+    else if(action === 'move-up') moveExercise(iid, -1);
+    else if(action === 'move-down') moveExercise(iid, 1);
+    else if(action === 'upd'){
+      const field = t.getAttribute('data-field');
+      const delta = parseFloat(t.getAttribute('data-delta')) || 0;
+      updateSet(iid, parseInt(sid,10), field, delta);
+    }
+  };
+  container.onchange = function(e){
+    const t = e.target;
+    if(t.getAttribute('data-action') !== 'manual') return;
+    const iid = t.getAttribute('data-iid');
+    const sid = parseInt(t.getAttribute('data-sid'),10);
+    const field = t.getAttribute('data-field');
+    let val = parseFloat(t.value) || 0;
+    const ex = activeWorkout.find(e => e.instanceId === iid);
+    if(ex){
+      const set = ex.sets.find(s => s.id === sid);
+      if(set && !set.completed){ set[field] = Math.max(0, val); }
+    }
+  };
+}
+
+function addExerciseToWorkout(id){
+  const exData = DB.find(ex => ex.id === id);
+  if(!exData) return;
+  const sets = buildPrefillSets(id);
+  activeWorkout.push({
+    instanceId: Date.now().toString(36) + Math.random().toString(36).slice(2,7),
+    isFinished: false,
+    ...exData,
+    sets
+  });
+  closeModal();
+  renderWorkout();
+  const last = getLastRecord(id);
+  if(last && typeof showToast === 'function'){
+    showToast('Base: ' + (last.maxWeight || 0) + ' kg · ' + (last.setsCount || sets.length) + ' série(s)');
+  }
+}
+
+function removeExercise(instanceId){
+  activeWorkout = activeWorkout.filter(ex => ex.instanceId !== instanceId);
+  renderWorkout();
+}
+
+function toggleExerciseState(instanceId){
+  const ex = activeWorkout.find(e => e.instanceId === instanceId);
+  if(ex){
+    if(!ex.isFinished){ ex.sets.forEach(s => s.completed = true); hapticTap(); }
+    ex.isFinished = !ex.isFinished;
+    renderWorkout();
+  }
+}
+
+function addSet(instanceId){
+  const ex = activeWorkout.find(e => e.instanceId === instanceId);
+  if(ex){
+    const lastSet = ex.sets[ex.sets.length - 1];
+    if(lastSet && settings.autoCompletePrevSet){
+      const wasCompleted = !!lastSet.completed;
+      lastSet.completed = true;
+      if(!wasCompleted) startRestTimer();
+    }
+    const stepW = Number(settings.weightStep) || 1;
+    ex.sets.push({
+      id: ex.sets.length + 1,
+      weight: lastSet ? lastSet.weight : 0,
+      reps: lastSet ? lastSet.reps : 0,
+      completed: false
+    });
+    renderWorkout();
+    hapticTap();
+  }
+}
+
+function deleteSet(instanceId, setId){
+  const ex = activeWorkout.find(e => e.instanceId === instanceId);
+  if(ex){
+    ex.sets = ex.sets.filter(s => s.id !== setId);
+    ex.sets.forEach((s, idx) => s.id = idx + 1);
+    if(ex.sets.length === 0){
+      ex.sets.push({ id: 1, weight: 0, reps: 0, completed: false });
+    }
+    renderWorkout();
+  }
+}
+
+function updateSet(instanceId, setId, field, delta){
+  const ex = activeWorkout.find(e => e.instanceId === instanceId);
+  if(ex){
+    const set = ex.sets.find(s => s.id === setId);
+    if(set && !set.completed){
+      if(field === 'weight'){
+        const step = Number(settings.weightStep) || 1;
+        const d = delta > 0 ? step : -step;
+        set.weight = Math.max(0, Math.round(((set.weight||0) + d) * 100) / 100);
+      }
+      if(field === 'reps'){
+        const step = Number(settings.repsStep) || 1;
+        const d = delta > 0 ? step : -step;
+        set.reps = Math.max(0, (set.reps||0) + d);
+      }
+      renderWorkout();
+    }
+  }
+}
+
+function toggleSetCompletion(instanceId, setId){
+  const ex = activeWorkout.find(e => e.instanceId === instanceId);
+  if(ex){
+    const set = ex.sets.find(s => s.id === setId);
+    if(set){
+      const wasCompleted = !!set.completed;
+      set.completed = !set.completed;
+      renderWorkout();
+      if(!wasCompleted && set.completed){
+        hapticTap();
+        startRestTimer();
+      }
+    }
+  }
+}
+
+function processWorkoutFinish(){
+  if(activeWorkout.length === 0){
+    if(typeof showToast === 'function') showToast('Adicione exercícios antes de finalizar');
+    else alert('Adicione exercícios antes de finalizar o treino do dia.');
+    return;
+  }
+  if(settings.confirmFinish){
+    const ok = confirm('Deseja finalizar o treino de hoje? Você só poderá iniciar um novo treino amanhã.');
+    if(!ok) return;
+  }
+  const today = getTodayString();
+  try{
+    updateHistoryFromWorkout(activeWorkout, today);
+    localStorage.setItem(LS_DATE, today);
+    localStorage.setItem(LS_DATA, JSON.stringify(activeWorkout));
+  }catch(e){
+    if(typeof showToast === 'function') showToast('Erro ao salvar treino');
+    return;
+  }
+  hapticTap();
+  renderDoneScreen();
+  if(typeof showToast === 'function') showToast('Treino salvo');
+  if(typeof AppBackup!=='undefined') AppBackup.takeSnapshot('workout-finish');
+}
+
+function resetDayDev(){
+  try{ localStorage.removeItem(LS_DATE); }catch(_){}
+  init();
+}
+
+function openModal(){
+  const modal = $('treinoExerciseModal');
+  if(!modal) return;
+  const search = $('treinoSearchBar');
+  if(search) search.value = '';
+  activeGroupFilter = 'Todos';
+  renderChips();
+  renderExerciseList();
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden','false');
+}
+
+function closeModal(){
+  const modal = $('treinoExerciseModal');
+  if(!modal) return;
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden','true');
+}
+
+function renderChips(){
+  const container = $('treinoGroupChips');
+  if(!container) return;
+  container.innerHTML = GROUPS.map(g =>
+    `<button type="button" class="treino-chip ${g === activeGroupFilter ? 'active' : ''}" data-group="${g}">${g}</button>`
+  ).join('');
+  container.onclick = function(e){
+    const btn = e.target.closest('[data-group]');
+    if(!btn) return;
+    activeGroupFilter = btn.getAttribute('data-group');
+    renderChips();
+    renderExerciseList();
+  };
+}
+
+function renderExerciseList(){
+  const searchEl = $('treinoSearchBar');
+  const query = (searchEl && searchEl.value || '').toLowerCase();
+  const container = $('treinoDbList');
+  if(!container) return;
+  const filtered = DB.filter(ex => {
+    const matchGroup = activeGroupFilter === 'Todos' || ex.group === activeGroupFilter;
+    const matchSearch = ex.name.toLowerCase().includes(query) || ex.equip.toLowerCase().includes(query);
+    return matchGroup && matchSearch;
+  });
+  if(filtered.length === 0){
+    container.innerHTML = `<div style="padding:24px;text-align:center;color:rgba(255,255,255,.45)">Nenhum exercício encontrado.</div>`;
+    return;
+  }
+  container.innerHTML = filtered.map(ex => `
+    <div class="treino-list-item" data-add-id="${ex.id}">
+      <div>
+        <div class="treino-list-title">${escapeHtml(ex.name)}</div>
+        <div class="treino-list-sub">${escapeHtml(ex.group)} · ${escapeHtml(ex.equip)}</div>
+      </div>
+      <div class="treino-list-add">⊕</div>
+    </div>
+  `).join('');
+  container.onclick = function(e){
+    const item = e.target.closest('[data-add-id]');
+    if(!item) return;
+    addExerciseToWorkout(item.getAttribute('data-add-id'));
+  };
+}
+
+function bindUI(){
+  const btnFinish = $('treinoBtnFinish');
+  const btnAdd = $('treinoBtnAddEx');
+  const modalClose = $('treinoModalClose');
+  const modal = $('treinoExerciseModal');
+  const search = $('treinoSearchBar');
+  const settingsBtn = $('treinoSettingsBtn');
+  const reorderDone = $('treinoReorderDone');
+  const restSkip = $('treinoRestSkip');
+  if(btnFinish) btnFinish.onclick = processWorkoutFinish;
+  if(btnAdd) btnAdd.onclick = openModal;
+  if(modalClose) modalClose.onclick = closeModal;
+  if(restSkip) restSkip.onclick = function(){ clearRestTimer(); };
+  if(modal) modal.addEventListener('click', function(e){ if(e.target === modal) closeModal(); });
+  if(search) search.addEventListener('input', renderExerciseList);
+  if(settingsBtn) settingsBtn.onclick = function(e){ e.stopPropagation(); toggleSettingsMenu(); };
+  if(reorderDone) reorderDone.onclick = exitReorderMode;
+  document.addEventListener('pointerdown', function(e){
+    if(!settingsOpen) return;
+    const menu = $('treinoSettingsMenu');
+    const btn = $('treinoSettingsBtn');
+    if(menu && !menu.contains(e.target) && btn && !btn.contains(e.target)) closeSettingsMenu();
+  }, true);
+  document.addEventListener('visibilitychange', function(){
+    if(document.visibilityState === 'visible' && settings.wakeLock) requestWakeLock();
+  });
+}
+
+return { init, ensureInit, bindUI, closeModal, clearRestTimer, closeSettingsMenu };
+})();
+
+/* ========== Init (garante dados sempre carregados) ========== */
 async function init(){
+  setupPWA();
   StorageAdapter.detect();
   try{
     await IDB.open();
@@ -1185,11 +3240,17 @@ async function init(){
     showToast('Armazenamento indisponível — modo limitado');
     AgendaUI.render();
   }
+  if(typeof TreinoApp !== 'undefined'){
+    TreinoApp.bindUI();
+  }
+  if(typeof AppBackup!=='undefined'){
+    AppBackup.maybeRemindExport();
+  }
 }
-requestAnimationFrame(()=>updateMorphingBar($('.nav-btn.active')));
 init();
 window.addEventListener('pagehide',()=>revokeAllObjectURLs());
 })();
+
 </script>
 </body>
 </html>
