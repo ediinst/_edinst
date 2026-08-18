@@ -2,9 +2,10 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#F2F2F7">
-<meta name="color-scheme" content="light">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+<meta name="theme-color" content="#F2F2F7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta name="color-scheme" content="light dark">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -12,6 +13,7 @@
 <meta name="application-name" content="Agenda">
 <meta name="description" content="Agenda de contatos com redes, memórias e vCard">
 <meta name="format-detection" content="telephone=no">
+<meta name="msapplication-tap-highlight" content="no">
 <title>Agenda</title>
 <link rel="apple-touch-icon" id="appleTouchIcon" href="">
 <link rel="icon" id="appFavicon" href="">
@@ -40,35 +42,100 @@
   --radius-xl:20px;
   --safe-top:env(safe-area-inset-top,0px);
   --safe-bottom:env(safe-area-inset-bottom,0px);
+  --safe-left:env(safe-area-inset-left,0px);
+  --safe-right:env(safe-area-inset-right,0px);
+  --app-height:100dvh;
   --glass-bg:var(--bg-card);
   --glass-border:var(--separator);
   --glass-shadow:var(--shadow-card);
   --text-color:var(--text-primary);
   --success:var(--green);
 }
-*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
-body{background:var(--bg-app);color:var(--text-primary);overflow:hidden;height:100vh;height:100dvh;width:100vw;-webkit-font-smoothing:antialiased}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{
+  height:100%;
+  width:100%;
+  background:var(--bg-app);
+  overflow:hidden;
+  overscroll-behavior:none;
+  -webkit-text-size-adjust:100%;
+  text-size-adjust:100%;
+}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",system-ui,sans-serif;
+  background:var(--bg-app);
+  color:var(--text-primary);
+  overflow:hidden;
+  overscroll-behavior:none;
+  position:fixed;
+  inset:0;
+  width:100%;
+  height:100%;
+  height:var(--app-height,100dvh);
+  max-height:var(--app-height,100dvh);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  touch-action:manipulation;
+}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
-.app-container{position:relative;width:100vw;height:100vh;height:100dvh;background:var(--bg-app);overflow:hidden}
-.screen{position:absolute;top:0;left:0;width:100%;height:100%;padding-bottom:calc(90px + var(--safe-bottom));display:flex;justify-content:center;align-items:center;opacity:0;visibility:hidden;transition:opacity .5s ease,visibility .5s;z-index:1;overflow:hidden}
+/* Acessibilidade: foco visível (teclado / VoiceOver) sem atrapalhar toque */
+:focus{outline:none}
+:focus-visible{
+  outline:2px solid var(--blue);
+  outline-offset:2px;
+  border-radius:8px;
+}
+button:focus-visible,a:focus-visible,.contact-item:focus-visible,.treino-step-btn:focus-visible{
+  outline:2px solid var(--blue);
+  outline-offset:2px;
+}
+.app-container{
+  position:fixed;
+  inset:0;
+  width:100%;
+  height:100%;
+  height:var(--app-height,100dvh);
+  max-height:var(--app-height,100dvh);
+  background:var(--bg-app);
+  overflow:hidden;
+  overscroll-behavior:none;
+  transform:translateZ(0);
+  -webkit-transform:translateZ(0);
+}
+.screen{
+  position:absolute;
+  top:0;left:0;
+  width:100%;
+  height:100%;
+  padding-bottom:calc(90px + var(--safe-bottom));
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  opacity:0;
+  visibility:hidden;
+  transition:opacity .5s ease,visibility .5s;
+  z-index:1;
+  overflow:hidden;
+  overscroll-behavior:none;
+}
 .screen.active{opacity:1;visibility:visible;z-index:10}
 .screen-content{opacity:0;transform:scale(.8) translateY(30px);transition:all .7s cubic-bezier(.16,1,.3,1)}
 .screen.active .screen-content{opacity:1;transform:scale(1) translateY(0)}
 .screen h2{font-size:2rem;font-weight:700;letter-spacing:-.02em;color:var(--text-primary)}
 
 /* ===== Bottom bar + selector ===== */
-.floating-glass-bar{position:fixed;bottom:calc(20px + var(--safe-bottom));left:50%;transform:translateX(-50%);display:flex;align-items:center;justify-content:center;background:#FFFFFF;border:1px solid var(--separator);border-radius:50px;padding:10px 28px;min-width:140px;box-shadow:var(--shadow-bar);z-index:100;max-width:calc(100vw - 24px);cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:manipulation;transition:transform .2s ease,background .2s ease,box-shadow .2s ease}
-.floating-glass-bar:active,.floating-glass-bar.lp-holding{transform:translateX(-50%) scale(.97);background:#F2F2F7}
+.floating-glass-bar{position:fixed;bottom:calc(20px + var(--safe-bottom));left:50%;transform:translate3d(-50%,0,0);display:flex;align-items:center;justify-content:center;background:#FFFFFF;border:1px solid var(--separator);border-radius:50px;padding:10px 28px;min-width:140px;box-shadow:var(--shadow-bar);z-index:100;max-width:calc(100% - 24px);cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:manipulation;transition:transform .2s ease,background .2s ease,box-shadow .2s ease;will-change:transform}
+.floating-glass-bar:active,.floating-glass-bar.lp-holding{transform:translate3d(-50%,0,0) scale(.97);background:#F2F2F7}
 .floating-glass-bar .bar-label{font-size:1rem;font-weight:600;color:var(--text-primary);letter-spacing:-.01em;pointer-events:none}
-.screen-selector{position:fixed;bottom:calc(88px + var(--safe-bottom));left:50%;transform:translateX(-50%) translateY(12px);background:#FFFFFF;border:1px solid var(--separator);border-radius:16px;padding:8px;box-shadow:0 8px 28px rgba(0,0,0,0.12);z-index:110;display:flex;gap:4px;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .25s ease,visibility .25s,transform .25s cubic-bezier(.16,1,.3,1);max-width:calc(100vw - 32px)}
-.screen-selector.open{opacity:1;visibility:visible;pointer-events:auto;transform:translateX(-50%) translateY(0)}
+.screen-selector{position:fixed;bottom:calc(88px + var(--safe-bottom));left:50%;transform:translate3d(-50%,12px,0);background:#FFFFFF;border:1px solid var(--separator);border-radius:16px;padding:8px;box-shadow:0 8px 28px rgba(0,0,0,0.12);z-index:110;display:flex;gap:4px;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .25s ease,visibility .25s,transform .25s cubic-bezier(.16,1,.3,1);max-width:calc(100% - 32px)}
+.screen-selector.open{opacity:1;visibility:visible;pointer-events:auto;transform:translate3d(-50%,0,0)}
 .selector-option{padding:12px 22px;border-radius:12px;border:none;background:transparent;color:var(--text-secondary);font-size:.95rem;font-weight:500;cursor:pointer;white-space:nowrap;transition:background .15s ease,color .15s ease}
 .selector-option:active{background:var(--bg-app);transform:scale(.98)}
 .selector-option.active{background:var(--blue-soft);color:var(--blue);font-weight:600}
 
 /* ===== Agenda screen ===== */
-#screen-agenda{align-items:stretch;justify-content:flex-start;padding:0;padding-top:var(--safe-top);padding-bottom:calc(90px + var(--safe-bottom))}
-#screen-agenda .screen-content{width:100%;height:100%;display:flex;flex-direction:column;transform:none;opacity:1;overflow:hidden}
+#screen-agenda{align-items:stretch;justify-content:flex-start;padding:0;padding-top:var(--safe-top);padding-bottom:calc(90px + var(--safe-bottom));height:100%;max-height:100%}
+#screen-agenda .screen-content{width:100%;height:100%;max-height:100%;display:flex;flex-direction:column;transform:none;opacity:1;overflow:hidden}
 .contact-storage-summary{margin-top:14px;padding:14px 16px;border-radius:var(--radius-lg);background:var(--bg-card);border:1px solid var(--separator);box-shadow:var(--shadow-card)}
 .contact-storage-summary .css-title{font-size:.75rem;font-weight:600;color:var(--text-secondary);letter-spacing:.6px;text-transform:uppercase;margin-bottom:10px}
 .contact-storage-summary .css-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:.9rem;color:var(--text-primary)}
@@ -77,41 +144,215 @@ body{background:var(--bg-app);color:var(--text-primary);overflow:hidden;height:1
 .btn-block:active{opacity:.85;transform:scale(.98)}
 .btn-block.danger{color:var(--danger);border-color:rgba(255,59,48,.25);background:var(--danger-soft)}
 .btn-block.primary{color:var(--blue);border-color:rgba(0,122,255,.25);background:var(--blue-soft)}
-.agenda-header{padding:12px 20px 0;flex-shrink:0}
-.search-wrap{position:relative;margin-bottom:12px}
-.search-wrap input{width:100%;padding:12px 16px 12px 42px;border-radius:var(--radius-md);border:1px solid var(--separator);background:var(--bg-input);color:var(--text-primary);font-size:1rem;outline:none;-webkit-appearance:none}
+
+/* Header + Large Title + Search */
+.agenda-header{
+  padding:8px 16px 10px;
+  flex-shrink:0;
+  position:sticky;
+  top:0;
+  background:rgba(242,242,247,.88);
+  backdrop-filter:blur(20px) saturate(180%);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
+  border-bottom:1px solid var(--separator);
+  z-index:5;
+}
+@media (prefers-color-scheme: dark){
+  .agenda-header{background:rgba(0,0,0,.82)}
+}
+.agenda-title-row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:4px 4px 10px}
+.agenda-large-title{font-size:2.05rem;font-weight:700;letter-spacing:-.03em;color:var(--text-primary);line-height:1.1}
+.agenda-count{font-size:.8rem;font-weight:500;color:var(--text-secondary);white-space:nowrap}
+.search-wrap{position:relative;margin-bottom:0}
+.search-wrap input{
+  width:100%;
+  padding:11px 36px 11px 38px;
+  border-radius:12px;
+  border:none;
+  background:rgba(118,118,128,.12);
+  color:var(--text-primary);
+  font-size:1.02rem;
+  outline:none;
+  -webkit-appearance:none;
+  transition:background .15s ease;
+}
 .search-wrap input::placeholder{color:var(--text-secondary)}
-.search-wrap .search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);opacity:.5;pointer-events:none;font-size:1.1rem}
-.contacts-list{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:8px 16px 24px;overscroll-behavior:contain}
-.contact-item{display:flex;align-items:center;gap:14px;padding:12px 14px;border-radius:var(--radius-lg);background:var(--bg-card);border:1px solid var(--separator);margin-bottom:8px;cursor:pointer;transition:transform .15s ease,box-shadow .2s ease;min-height:72px;-webkit-user-select:none;user-select:none;touch-action:pan-y;box-shadow:var(--shadow-card)}
-.contact-item:active{transform:scale(.985);background:#F9F9FB}
-.contact-item.lp-holding{background:#F2F2F7;transform:scale(.99);border-color:rgba(0,122,255,.25)}
-.contact-item.lp-active{background:#EBF5FF;transform:scale(.97);border-color:rgba(0,122,255,.4);box-shadow:0 0 0 2px rgba(0,122,255,.2)}
-.contact-avatar{width:56px;height:56px;border-radius:50%;background:var(--bg-input);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:600;color:var(--text-secondary);overflow:hidden}
+.search-wrap input:focus{background:rgba(118,118,128,.18)}
+.search-wrap .search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);opacity:.45;pointer-events:none;font-size:1.05rem;line-height:1}
+.search-wrap .search-clear{
+  position:absolute;right:8px;top:50%;transform:translateY(-50%);
+  width:28px;height:28px;border:none;border-radius:50%;
+  background:rgba(60,60,67,.18);color:var(--text-secondary);
+  font-size:.75rem;display:none;align-items:center;justify-content:center;
+  cursor:pointer;padding:0;line-height:1;
+}
+.search-wrap .search-clear.show{display:flex}
+.search-wrap .search-clear:active{transform:translateY(-50%) scale(.92)}
+
+/* Recents shelf */
+.agenda-recents{padding:12px 0 4px}
+.agenda-recents-label{font-size:.72rem;font-weight:600;color:var(--text-secondary);letter-spacing:.5px;text-transform:uppercase;padding:0 4px 8px}
+.agenda-recents-row{display:flex;gap:12px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding:0 2px 6px;scrollbar-width:none}
+.agenda-recents-row::-webkit-scrollbar{display:none}
+.recent-chip{
+  flex:0 0 auto;width:64px;display:flex;flex-direction:column;align-items:center;gap:6px;
+  background:none;border:none;cursor:pointer;padding:4px 0;color:var(--text-primary);
+  -webkit-user-select:none;user-select:none;
+}
+.recent-chip:active{opacity:.7;transform:scale(.96)}
+.recent-chip .recent-av{
+  width:52px;height:52px;border-radius:50%;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.95rem;font-weight:600;color:#fff;
+  box-shadow:0 1px 3px rgba(0,0,0,.1);
+}
+.recent-chip .recent-av img{width:100%;height:100%;object-fit:cover}
+.recent-chip .recent-name{
+  font-size:.68rem;font-weight:500;color:var(--text-secondary);
+  max-width:64px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center;
+}
+
+/* Lista + seções A–Z */
+.contacts-list{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 0 28px;overscroll-behavior:contain}
+.contact-section{padding:0 16px}
+.contact-section-header{
+  position:sticky;top:0;z-index:2;
+  font-size:.78rem;font-weight:600;color:var(--text-secondary);
+  letter-spacing:.4px;text-transform:uppercase;
+  padding:10px 4px 6px;
+  background:linear-gradient(var(--bg-app) 70%,transparent);
+}
+.contact-item{
+  display:flex;align-items:center;gap:12px;
+  padding:10px 12px;min-height:60px;
+  border-radius:16px;
+  background:var(--bg-card);
+  border:1px solid var(--separator);
+  margin-bottom:6px;
+  cursor:pointer;
+  transition:transform .15s ease,background .15s ease,box-shadow .2s ease;
+  -webkit-user-select:none;user-select:none;touch-action:pan-y;
+  box-shadow:0 1px 2px rgba(0,0,0,.04);
+}
+.contact-item:active{transform:scale(.985);background:var(--bg-input)}
+.contact-item.lp-holding{background:var(--bg-input);transform:scale(.99);border-color:rgba(0,122,255,.25)}
+.contact-item.lp-active{background:var(--blue-soft);transform:scale(.97);border-color:rgba(0,122,255,.35);box-shadow:0 0 0 2px rgba(0,122,255,.15)}
+.contact-avatar{
+  width:48px;height:48px;border-radius:50%;
+  flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  font-size:1.05rem;font-weight:600;color:#fff;overflow:hidden;
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.06);
+}
 .contact-avatar img{width:100%;height:100%;object-fit:cover}
 .contact-info{flex:1;min-width:0}
-.contact-name{font-weight:600;font-size:1.05rem;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.contact-meta{font-size:.8rem;color:var(--text-secondary);margin-top:2px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-.social-dots{display:flex;gap:4px}
-.social-dot{width:6px;height:6px;border-radius:50%;background:var(--text-tertiary)}
+.contact-name{
+  font-weight:600;font-size:1.02rem;letter-spacing:-.01em;
+  color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.contact-meta{font-size:.78rem;color:var(--text-secondary);margin-top:2px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.contact-meta .meta-sep{opacity:.4}
 .contact-socials{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
-.contact-social-chip{display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;padding:0 8px;border-radius:14px;background:var(--bg-input);border:1px solid var(--separator);font-size:.85rem;color:var(--text-primary);cursor:pointer;transition:background .15s ease,transform .15s ease;-webkit-user-select:none;user-select:none}
-.contact-social-chip:active{background:#E5E5EA;transform:scale(.96)}
+.contact-social-chip{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:44px;min-height:32px;padding:0 10px;
+  border-radius:16px;
+  background:var(--bg-input);border:1px solid var(--separator);
+  font-size:.95rem;color:var(--text-primary);
+  cursor:pointer;
+  transition:background .15s ease,transform .15s ease;
+  -webkit-user-select:none;user-select:none;
+}
+.contact-social-chip:active{background:var(--blue-soft);transform:scale(.94)}
+.contact-quick{display:flex;align-items:center;gap:4px;flex-shrink:0}
+.contact-quick-btn{
+  width:40px;height:40px;border-radius:50%;border:none;
+  background:var(--blue-soft);color:var(--blue);
+  font-size:1.05rem;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:transform .15s ease,opacity .15s ease;
+}
+.contact-quick-btn:active{transform:scale(.9);opacity:.85}
+
 .memory-thumb .mem-del{position:absolute;top:4px;right:4px;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.3);color:#fff;font-size:.85rem;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2;line-height:1;padding:0;-webkit-tap-highlight-color:transparent}
 .memory-thumb .mem-del:active{background:rgba(255,69,58,.9);transform:scale(.92)}
 .memory-thumb .video-duration{position:absolute;bottom:6px;left:6px;background:rgba(0,0,0,.6);border-radius:4px;padding:2px 5px;font-size:.65rem;color:#fff}
-.empty-state,.no-results{text-align:center;padding:48px 24px;color:var(--text-secondary);font-size:.95rem}
-.empty-state p,.no-results p{margin-top:8px}
+
+/* Empty / no-results */
+.empty-state,.no-results{
+  text-align:center;padding:56px 28px 32px;color:var(--text-secondary);font-size:.95rem;
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+}
+.empty-state .empty-icon,.no-results .empty-icon{
+  width:72px;height:72px;border-radius:20px;
+  background:var(--bg-card);border:1px solid var(--separator);
+  display:flex;align-items:center;justify-content:center;
+  font-size:2rem;margin-bottom:10px;
+  box-shadow:var(--shadow-card);
+}
+.empty-state .empty-title,.no-results .empty-title{
+  font-size:1.15rem;font-weight:600;color:var(--text-primary);letter-spacing:-.02em;
+}
+.empty-state .empty-desc,.no-results .empty-desc{
+  font-size:.9rem;color:var(--text-secondary);line-height:1.4;max-width:260px;
+}
+.empty-state .empty-cta{
+  margin-top:16px;padding:12px 22px;border:none;border-radius:12px;
+  background:var(--blue);color:#fff;font-size:.95rem;font-weight:600;
+  cursor:pointer;transition:transform .15s ease,opacity .15s ease;
+  box-shadow:0 2px 8px rgba(0,122,255,.25);
+}
+.empty-state .empty-cta:active{transform:scale(.97);opacity:.9}
+.no-results .empty-cta-secondary{
+  margin-top:12px;padding:10px 18px;border:none;border-radius:10px;
+  background:var(--bg-card);border:1px solid var(--separator);
+  color:var(--blue);font-size:.9rem;font-weight:600;cursor:pointer;
+}
+.no-results .empty-cta-secondary:active{transform:scale(.97)}
+
 .fab-add{position:absolute;bottom:calc(100px + var(--safe-bottom));right:20px;width:56px;height:56px;border-radius:50%;background:var(--blue);border:none;color:#fff;font-size:1.8rem;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 14px rgba(0,122,255,.35);z-index:50;transition:transform .2s ease,opacity .2s ease}
 .fab-add:active{transform:scale(.92);opacity:.9}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg-app:#000000;
+    --bg-card:#1C1C1E;
+    --bg-elevated:#2C2C2E;
+    --bg-input:#2C2C2E;
+    --separator:rgba(84,84,88,0.45);
+    --text-primary:#F5F5F7;
+    --text-secondary:#8E8E93;
+    --text-tertiary:rgba(235,235,245,0.3);
+    --blue:#0A84FF;
+    --blue-soft:rgba(10,132,255,0.18);
+    --green:#30D158;
+    --green-soft:rgba(48,209,88,0.18);
+    --danger:#FF453A;
+    --danger-soft:rgba(255,69,58,0.18);
+    --shadow-card:0 1px 3px rgba(0,0,0,0.35),0 1px 2px rgba(0,0,0,0.25);
+    --shadow-bar:0 4px 16px rgba(0,0,0,0.4);
+  }
+  .agenda-header{background:rgba(0,0,0,.82)}
+  .search-wrap input{background:rgba(118,118,128,.24)}
+  .search-wrap input:focus{background:rgba(118,118,128,.32)}
+  .contact-section-header{background:linear-gradient(var(--bg-app) 70%,transparent)}
+  .floating-glass-bar,.screen-selector,.treino-header{background:rgba(28,28,30,.94)}
+  .treino-header{background:rgba(0,0,0,.82)}
+  meta,body{color-scheme:dark}
+}
 
 
 
 /* ===== Treino (Workout Builder) — iOS Light ===== */
-#screen-treino{align-items:stretch;justify-content:flex-start;padding:0;padding-top:var(--safe-top);padding-bottom:calc(90px + var(--safe-bottom));overflow:hidden}
-#screen-treino .screen-content{width:100%;height:100%;display:flex;flex-direction:column;transform:none;opacity:1;overflow:hidden}
+#screen-treino{align-items:stretch;justify-content:flex-start;padding:0;padding-top:var(--safe-top);padding-bottom:calc(90px + var(--safe-bottom));overflow:hidden;height:100%;max-height:100%}
+#screen-treino .screen-content{width:100%;height:100%;max-height:100%;display:flex;flex-direction:column;transform:none;opacity:1;overflow:hidden}
 .treino-header{flex-shrink:0;padding:14px 20px 12px;display:flex;justify-content:space-between;align-items:flex-end;border-bottom:1px solid var(--separator);background:rgba(242,242,247,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+.treino-header-left{display:flex;flex-direction:column;gap:2px;min-width:0}
 .treino-header-title{font-size:1.55rem;font-weight:700;letter-spacing:-.03em;color:var(--text-primary)}
+.treino-save-status{font-size:.72rem;font-weight:500;color:var(--text-secondary);letter-spacing:-.01em;min-height:1em;transition:color .2s ease,opacity .2s ease}
+.treino-save-status.is-pending{color:var(--text-secondary)}
+.treino-save-status.is-saving{color:var(--blue)}
+.treino-save-status.is-saved{color:var(--green)}
+.treino-save-status.is-error{color:var(--danger)}
 .treino-header-action{background:none;border:none;color:var(--blue);font-size:1rem;font-weight:600;cursor:pointer;padding:6px 4px;transition:opacity .15s ease,transform .15s ease}
 .treino-header-action:active{opacity:.55;transform:scale(.97)}
 .treino-header-action.hidden,.treino-fab.hidden{display:none!important}
@@ -168,7 +409,7 @@ body{background:var(--bg-app);color:var(--text-primary);overflow:hidden;height:1
 .treino-empty{text-align:center;color:var(--text-secondary);padding:48px 20px;font-size:.95rem;line-height:1.5}
 .treino-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:180;display:flex;align-items:flex-end;justify-content:center;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .3s,visibility .3s}
 .treino-modal-overlay.open{opacity:1;visibility:visible;pointer-events:auto}
-.treino-modal-sheet{width:100%;max-width:520px;height:85dvh;background:var(--bg-card);border-radius:20px 20px 0 0;border:1px solid var(--separator);border-bottom:none;display:flex;flex-direction:column;transform:translateY(100%);transition:transform .4s cubic-bezier(.16,1,.3,1);box-shadow:0 -4px 24px rgba(0,0,0,.08)}
+.treino-modal-sheet{width:100%;max-width:520px;height:min(85dvh,calc(var(--app-height,100dvh) * 0.85));max-height:calc(var(--app-height,100dvh) - var(--safe-top));background:var(--bg-card);border-radius:20px 20px 0 0;border:1px solid var(--separator);border-bottom:none;display:flex;flex-direction:column;transform:translateY(100%);transition:transform .4s cubic-bezier(.16,1,.3,1);box-shadow:0 -4px 24px rgba(0,0,0,.08);padding-bottom:var(--safe-bottom)}
 .treino-modal-overlay.open .treino-modal-sheet{transform:translateY(0)}
 .treino-modal-header{padding:14px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--separator);flex-shrink:0}
 .treino-modal-header h3{font-size:1.1rem;font-weight:600;color:var(--text-primary)}
@@ -192,8 +433,73 @@ body{background:var(--bg-app);color:var(--text-primary);overflow:hidden;height:1
 .treino-rest-info{display:flex;flex-direction:column;gap:2px}
 .treino-rest-label{font-size:.72rem;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.4px}
 .treino-rest-time{font-size:1.45rem;font-weight:700;color:var(--text-primary);font-variant-numeric:tabular-nums}
-.treino-rest-skip{border:none;background:#fff;color:var(--blue);font-size:.9rem;font-weight:600;padding:10px 14px;border-radius:12px;cursor:pointer;border:1px solid rgba(0,122,255,.2);transition:transform .15s ease,opacity .15s ease}
+.treino-rest-skip{border:none;background:#fff;color:var(--blue);font-size:.9rem;font-weight:600;padding:10px 14px;border-radius:12px;cursor:pointer;border:1px solid rgba(0,122,255,.2);transition:transform .15s ease,opacity .15s ease;min-height:44px}
 .treino-rest-skip:active{transform:scale(.96);opacity:.85}
+
+/* Session strip */
+.treino-session-strip{display:flex;gap:8px;padding:0 16px 8px;flex-wrap:wrap}
+.treino-session-chip{font-size:.72rem;font-weight:600;color:var(--text-secondary);background:var(--bg-card);border:1px solid var(--separator);border-radius:999px;padding:6px 10px;font-variant-numeric:tabular-nums}
+.treino-session-chip strong{color:var(--text-primary);font-weight:700}
+
+/* Rest mode (tela inteira) */
+#screen-treino.rest-mode .treino-main{opacity:.35;pointer-events:none;filter:saturate(.7)}
+#screen-treino.rest-mode .treino-fab{opacity:.35;pointer-events:none}
+.treino-rest-overlay{
+  display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;
+  margin:8px 16px 12px;padding:28px 20px;border-radius:20px;
+  background:var(--bg-card);border:1px solid rgba(0,122,255,.25);
+  box-shadow:0 8px 28px rgba(0,122,255,.12);
+}
+#screen-treino.rest-mode .treino-rest-overlay{display:flex}
+#screen-treino.rest-mode .treino-rest-bar{display:none!important}
+.treino-rest-overlay .ro-label{font-size:.75rem;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.5px}
+.treino-rest-overlay .ro-time{font-size:3.4rem;font-weight:700;color:var(--text-primary);font-variant-numeric:tabular-nums;letter-spacing:-.03em;line-height:1}
+.treino-rest-overlay .ro-bar{width:100%;max-width:240px;height:6px;border-radius:3px;background:var(--bg-app);overflow:hidden}
+.treino-rest-overlay .ro-bar>i{display:block;height:100%;width:100%;background:var(--blue);transform-origin:left center;transition:transform .25s linear;border-radius:3px}
+.treino-rest-overlay .ro-actions{display:flex;gap:10px;margin-top:4px}
+.treino-rest-overlay .ro-actions button{
+  min-height:48px;padding:12px 20px;border-radius:14px;font-size:1rem;font-weight:600;cursor:pointer;
+  border:1px solid var(--separator);background:var(--bg-app);color:var(--text-primary);
+  transition:transform .15s ease,opacity .15s ease;
+}
+.treino-rest-overlay .ro-actions button.primary{background:var(--blue);color:#fff;border-color:transparent}
+.treino-rest-overlay .ro-actions button:active{transform:scale(.97);opacity:.9}
+
+/* Set rows — active / complete */
+.treino-set-row{background:var(--bg-app);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px;border:1px solid transparent;transition:background .2s ease,border-color .2s ease,transform .2s ease}
+.treino-set-row.is-active{border-color:rgba(0,122,255,.35);background:var(--blue-soft);box-shadow:0 0 0 1px rgba(0,122,255,.12)}
+.treino-set-row.just-done{animation:treinoFlash .55s ease}
+@keyframes treinoFlash{0%{background:var(--green-soft)}100%{background:var(--bg-app)}}
+.treino-set-row.completed-view{flex-direction:row;justify-content:space-between;align-items:center;background:var(--green-soft);border-color:rgba(52,199,89,.25);padding:14px}
+.treino-set-complete-btn{
+  width:100%;min-height:48px;margin-top:4px;border:none;border-radius:12px;
+  background:var(--green);color:#fff;font-size:1rem;font-weight:700;cursor:pointer;
+  transition:transform .15s ease,opacity .15s ease;
+}
+.treino-set-complete-btn:active{transform:scale(.97);opacity:.9}
+.treino-prev-line{font-size:.8rem;color:var(--text-secondary);display:flex;align-items:center;justify-content:space-between;gap:8px;padding:2px 0}
+.treino-prev-line button{border:none;background:var(--blue-soft);color:var(--blue);font-size:.75rem;font-weight:600;padding:6px 10px;border-radius:8px;cursor:pointer;min-height:32px}
+.treino-prev-line button:active{transform:scale(.96)}
+.treino-set-tags{display:flex;gap:6px;flex-wrap:wrap}
+.treino-set-tag{
+  border:1px solid var(--separator);background:var(--bg-card);color:var(--text-secondary);
+  font-size:.7rem;font-weight:600;padding:6px 10px;border-radius:8px;cursor:pointer;min-height:32px;
+}
+.treino-set-tag.active{background:var(--blue-soft);color:var(--blue);border-color:rgba(0,122,255,.3)}
+.treino-set-tag.tag-warmup.active{background:rgba(255,149,0,.14);color:#C93400;border-color:rgba(255,149,0,.3)}
+.treino-set-tag.tag-fail.active{background:var(--danger-soft);color:var(--danger);border-color:rgba(255,59,48,.3)}
+.treino-next-preview{font-size:.8rem;color:var(--text-secondary);padding:8px 4px 0;font-weight:500}
+.treino-next-preview strong{color:var(--text-primary)}
+.treino-step-btn{background:none;border:none;color:var(--blue);font-size:1.35rem;font-weight:500;width:48px;height:48px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s ease,transform .15s ease}
+.treino-step-btn:active{background:var(--bg-app);transform:scale(.94)}
+.treino-step-value{flex:1;text-align:center;font-size:1.35rem;font-weight:700;color:var(--text-primary);background:transparent;border:none;outline:none;width:100%;min-height:48px;-moz-appearance:textfield;font-variant-numeric:tabular-nums}
+.treino-exercise-card{background:var(--bg-card);border:1px solid var(--separator);border-radius:16px;overflow:hidden;box-shadow:var(--shadow-card)}
+.treino-exercise-card.is-current{border-color:rgba(0,122,255,.3);box-shadow:0 0 0 1px rgba(0,122,255,.1),var(--shadow-card)}
+.treino-exercise-card.finished{border-color:rgba(52,199,89,.35)}
+.treino-exercise-card.just-finished .treino-exercise-name{color:var(--green)}
+#screen-treino.gym-contrast .treino-step-value{font-size:1.45rem}
+#screen-treino.gym-contrast .treino-exercise-name{font-weight:700}
+#screen-treino.gym-contrast .treino-set-row.is-active{border-width:2px}
 .treino-progress-card{width:100%;background:var(--bg-card);border:1px solid var(--separator);border-radius:var(--radius-lg);padding:14px 16px;text-align:left;margin-top:4px;box-shadow:var(--shadow-card)}
 .treino-progress-title{font-size:.75rem;font-weight:700;color:var(--text-secondary);letter-spacing:.6px;text-transform:uppercase;margin-bottom:12px}
 .treino-progress-item{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--separator)}
@@ -211,7 +517,7 @@ body{background:var(--bg-app);color:var(--text-primary);overflow:hidden;height:1
 .treino-header-actions{display:flex;align-items:center;gap:4px}
 .treino-settings-btn{width:36px;height:36px;border:none;border-radius:50%;background:transparent;color:var(--blue);font-size:1.15rem;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .15s ease,background .15s ease}
 .treino-settings-btn:active{transform:scale(.92);background:var(--blue-soft)}
-.treino-settings-menu{position:fixed;z-index:160;top:calc(var(--safe-top) + 56px);right:12px;width:min(300px,calc(100vw - 24px));background:var(--bg-card);border:1px solid var(--separator);border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,.14);opacity:0;visibility:hidden;transform:translateY(-8px) scale(.96);transform-origin:top right;transition:opacity .2s ease,visibility .2s,transform .2s cubic-bezier(.16,1,.3,1);overflow:hidden;max-height:min(70dvh,520px);display:flex;flex-direction:column}
+.treino-settings-menu{position:fixed;z-index:160;top:calc(var(--safe-top) + 56px);right:12px;width:min(300px,calc(100% - 24px));background:var(--bg-card);border:1px solid var(--separator);border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,.14);opacity:0;visibility:hidden;transform:translateY(-8px) scale(.96);transform-origin:top right;transition:opacity .2s ease,visibility .2s,transform .2s cubic-bezier(.16,1,.3,1);overflow:hidden;max-height:min(70dvh,520px);display:flex;flex-direction:column}
 .treino-settings-menu.open{opacity:1;visibility:visible;transform:translateY(0) scale(1)}
 .treino-settings-menu-scroll{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:6px 0 8px}
 .treino-settings-section{padding:10px 14px 4px;font-size:.68rem;font-weight:700;color:var(--text-secondary);letter-spacing:.06em;text-transform:uppercase}
@@ -251,7 +557,7 @@ body{background:var(--bg-app);color:var(--text-primary);overflow:hidden;height:1
 /* ===== Profile / Modal / etc (kept from original) ===== */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;opacity:0;visibility:hidden;transition:opacity .3s,visibility .3s;display:flex;align-items:flex-end;justify-content:center}
 .overlay.open{opacity:1;visibility:visible}
-.modal-sheet{width:100%;max-width:520px;max-height:92dvh;background:var(--bg-card);border-radius:20px 20px 0 0;border:1px solid var(--separator);border-bottom:none;padding:12px 0 calc(20px + var(--safe-bottom));overflow-y:auto;-webkit-overflow-scrolling:touch;transform:translateY(100%);transition:transform .4s cubic-bezier(.16,1,.3,1);overscroll-behavior:contain;box-shadow:0 -4px 24px rgba(0,0,0,.08)}
+.modal-sheet{width:100%;max-width:520px;max-height:min(92dvh,calc(var(--app-height,100dvh) * 0.92));background:var(--bg-card);border-radius:20px 20px 0 0;border:1px solid var(--separator);border-bottom:none;padding:12px 0 calc(20px + var(--safe-bottom));overflow-y:auto;-webkit-overflow-scrolling:touch;transform:translateY(100%);transition:transform .4s cubic-bezier(.16,1,.3,1);overscroll-behavior:contain;box-shadow:0 -4px 24px rgba(0,0,0,.08)}
 .overlay.open .modal-sheet{transform:translateY(0)}
 .modal-handle{width:36px;height:5px;background:rgba(60,60,67,.2);border-radius:3px;margin:0 auto 12px}
 .modal-header{display:flex;align-items:center;justify-content:space-between;padding:0 20px 12px;position:sticky;top:0;background:var(--bg-card);z-index:5}
@@ -262,9 +568,71 @@ body{background:var(--bg-app);color:var(--text-primary);overflow:hidden;height:1
 .modal-body{padding:0 20px 12px}
 .form-group{margin-bottom:16px}
 .form-group label{display:block;font-size:.8rem;color:var(--text-secondary);margin-bottom:6px;font-weight:500}
-.form-group input,.form-group select,.form-group textarea{width:100%;padding:12px 14px;border-radius:var(--radius-md);border:1px solid var(--separator);background:var(--bg-input);color:var(--text-primary);font-size:1rem;outline:none;-webkit-appearance:none}
+.form-group input,.form-group select,.form-group textarea{width:100%;min-height:44px;padding:12px 14px;border-radius:var(--radius-md);border:1px solid var(--separator);background:var(--bg-input);color:var(--text-primary);font-size:1rem;outline:none;-webkit-appearance:none}
 .form-group textarea{min-height:72px;resize:vertical}
 .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-soft)}
+.modal-close:active,.modal-action:active{opacity:.65;transform:scale(.97)}
+.treino-step-opt:disabled{opacity:.4;pointer-events:none}
+.modal-sheet{scroll-padding-bottom:120px}
+/* Confirm sheet estilo iOS */
+.ios-confirm-msg{font-size:1rem;color:var(--text-primary);line-height:1.45;margin:4px 0 18px;text-align:center;white-space:pre-line}
+.ios-confirm-actions{display:flex;flex-direction:column;gap:10px}
+.ios-confirm-btn{
+  width:100%;min-height:50px;padding:14px 16px;border-radius:14px;border:1px solid var(--separator);
+  background:var(--bg-input);color:var(--text-primary);font-size:1.05rem;font-weight:600;cursor:pointer;
+  transition:transform .15s ease,opacity .15s ease;
+}
+.ios-confirm-btn.primary{background:var(--blue);color:#fff;border-color:transparent}
+.ios-confirm-btn.destructive{background:var(--danger-soft);color:var(--danger);border-color:rgba(255,59,48,.25)}
+.ios-confirm-btn:active{transform:scale(.97);opacity:.9}
+/* Action sheet unificado (Agenda long-press) */
+.action-sheet-list{display:flex;flex-direction:column;gap:0}
+.action-item{
+  display:flex;align-items:center;gap:12px;min-height:52px;padding:14px 16px;
+  font-size:1.05rem;font-weight:500;color:var(--text-primary);cursor:pointer;
+  border-bottom:1px solid var(--separator);transition:background .15s ease,transform .15s ease;
+  -webkit-user-select:none;user-select:none;
+}
+.action-item:last-of-type{border-bottom:none}
+.action-item:active{background:var(--bg-input);transform:scale(.99)}
+.action-item.destructive{color:var(--danger)}
+.action-item .ai-icon{width:28px;text-align:center;font-size:1.15rem}
+.action-cancel{
+  margin-top:12px;min-height:50px;display:flex;align-items:center;justify-content:center;
+  border-radius:14px;background:var(--bg-input);border:1px solid var(--separator);
+  font-size:1.05rem;font-weight:600;color:var(--blue);cursor:pointer;
+  transition:transform .15s ease,opacity .15s ease;
+}
+.action-cancel:active{transform:scale(.97);opacity:.9}
+/* Empty / status Treino alinhado à Agenda */
+.treino-status-icon-wrap{
+  width:72px;height:72px;border-radius:20px;background:var(--bg-card);
+  border:1px solid var(--separator);display:flex;align-items:center;justify-content:center;
+  font-size:2rem;margin-bottom:4px;box-shadow:var(--shadow-card);
+}
+.treino-empty{
+  text-align:center;color:var(--text-secondary);padding:48px 24px;font-size:.95rem;line-height:1.5;
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+}
+.treino-empty .empty-icon{
+  width:72px;height:72px;border-radius:20px;background:var(--bg-card);border:1px solid var(--separator);
+  display:flex;align-items:center;justify-content:center;font-size:2rem;box-shadow:var(--shadow-card);
+}
+.treino-empty .empty-title{font-size:1.15rem;font-weight:600;color:var(--text-primary);letter-spacing:-.02em}
+.treino-pr-badge{
+  display:inline-block;font-size:.65rem;font-weight:700;letter-spacing:.4px;text-transform:uppercase;
+  color:var(--green);background:var(--green-soft);padding:3px 8px;border-radius:6px;margin-left:6px;
+  vertical-align:middle;
+}
+.treino-set-toast{
+  position:fixed;left:50%;bottom:calc(110px + var(--safe-bottom));transform:translateX(-50%) translateY(8px);
+  background:rgba(28,28,30,.92);color:#fff;font-size:.85rem;font-weight:600;padding:10px 16px;border-radius:12px;
+  opacity:0;pointer-events:none;z-index:120;transition:opacity .2s ease,transform .2s ease;
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+}
+.treino-set-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#screen-treino.focus-current-set .treino-set-row:not(.is-active):not(.completed-view){display:none}
+#screen-treino.focus-current-set .treino-exercise-card:not(.is-current):not(.finished){opacity:.55}
 .form-error{color:var(--danger);font-size:.8rem;margin-top:4px;display:none}
 .form-group.has-error input,.form-group.has-error select{border-color:var(--danger)}
 .form-group.has-error .form-error{display:block}
@@ -276,8 +644,8 @@ body{background:var(--bg-app);color:var(--text-primary);overflow:hidden;height:1
 .avatar-preview .avatar-remove{position:absolute;top:-4px;right:-4px;width:26px;height:26px;border-radius:50%;background:rgba(255,69,58,.9);border:2px solid #FFFFFF;color:#fff;font-size:.85rem;display:none;align-items:center;justify-content:center;cursor:pointer;z-index:2;line-height:1}
 .avatar-preview.has-photo .avatar-remove{display:flex}
 .avatar-preview.has-photo .avatar-hint{display:none}
-.profile-view{position:fixed;inset:0;z-index:150;background:var(--bg-app);opacity:0;visibility:hidden;transform:translateX(30px);transition:opacity .35s,visibility .35s,transform .35s cubic-bezier(.16,1,.3,1);display:flex;flex-direction:column;padding-top:var(--safe-top);overflow:hidden}
-.profile-view.open{opacity:1;visibility:visible;transform:translateX(0)}
+.profile-view{position:fixed;inset:0;z-index:150;width:100%;height:100%;height:var(--app-height,100dvh);max-height:var(--app-height,100dvh);background:var(--bg-app);opacity:0;visibility:hidden;transform:translate3d(30px,0,0);transition:opacity .35s,visibility .35s,transform .35s cubic-bezier(.16,1,.3,1);display:flex;flex-direction:column;padding-top:var(--safe-top);overflow:hidden;overscroll-behavior:none}
+.profile-view.open{opacity:1;visibility:visible;transform:translate3d(0,0,0)}
 .profile-topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;flex-shrink:0}
 .profile-topbar button{background:rgba(0,0,0,.06);border:none;color:var(--text-primary);width:40px;height:40px;border-radius:50%;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s ease,background .15s ease}
 .profile-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 20px calc(40px + var(--safe-bottom));overscroll-behavior:contain}
@@ -321,8 +689,8 @@ body{background:var(--bg-app);color:var(--text-primary);overflow:hidden;height:1
 .mv-content video{max-width:100%;max-height:90%}
 .mv-nav{position:absolute;bottom:calc(24px + var(--safe-bottom));left:0;right:0;display:flex;justify-content:center;gap:24px}
 .mv-nav button{width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.15);border:none;color:#fff;font-size:1.3rem;cursor:pointer}
-.toast{position:fixed;bottom:calc(110px + var(--safe-bottom));left:50%;transform:translateX(-50%) translateY(20px);background:rgba(28,28,30,.92);color:#fff;padding:12px 24px;border-radius:12px;font-size:.9rem;z-index:400;opacity:0;visibility:hidden;transition:all .3s ease;pointer-events:none;max-width:90vw;text-align:center}
-.toast.show{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0)}
+.toast{position:fixed;bottom:calc(110px + var(--safe-bottom));left:50%;transform:translate3d(-50%,20px,0);background:rgba(28,28,30,.92);color:#fff;padding:12px 24px;border-radius:12px;font-size:.9rem;z-index:400;opacity:0;visibility:hidden;transition:all .3s ease;pointer-events:none;max-width:min(90%,360px);text-align:center}
+.toast.show{opacity:1;visibility:visible;transform:translate3d(-50%,0,0)}
 .hidden-file{position:fixed!important;top:0!important;left:0!important;width:1px!important;height:1px!important;opacity:.01!important;overflow:hidden!important;z-index:-1!important}
 .confirm-msg{text-align:center;padding:8px 12px 20px;color:var(--text-secondary);line-height:1.5}
 .confirm-msg strong{color:var(--text-primary)}
@@ -340,12 +708,13 @@ body{background:var(--bg-app);color:var(--text-primary);overflow:hidden;height:1
   <!-- Agenda (tela principal) -->
   <div class="screen active" id="screen-agenda">
     <div class="screen-content">
-      <div class="agenda-header" id="agendaHeader" style="padding-bottom:4px"></div>
+      <div class="agenda-header" id="agendaHeader"></div>
       <div class="contacts-list" id="contactsList" role="list">
         <div class="empty-state" id="emptyState">
-          <div style="font-size:2rem;margin-bottom:8px">📇</div>
-          <p>Nenhum contato ainda</p>
-          <p style="font-size:.85rem;margin-top:4px;opacity:.7">Toque em + para adicionar</p>
+          <div class="empty-icon">📇</div>
+          <div class="empty-title">Nenhum contato</div>
+          <div class="empty-desc">Adicione pessoas com redes, endereço e memórias em um só lugar.</div>
+          <button type="button" class="empty-cta" id="emptyAddBtn">Adicionar contato</button>
         </div>
       </div>
       <button class="fab-add" id="fabAdd" aria-label="Adicionar contato">+</button>
@@ -357,11 +726,19 @@ body{background:var(--bg-app);color:var(--text-primary);overflow:hidden;height:1
   <div class="screen" id="screen-treino">
     <div class="screen-content">
       <div class="treino-header">
-        <div class="treino-header-title" id="treinoMainTitle">Treino</div>
+        <div class="treino-header-left">
+          <div class="treino-header-title" id="treinoMainTitle">Treino</div>
+          <div class="treino-save-status" id="treinoSaveStatus" aria-live="polite"></div>
+        </div>
         <div class="treino-header-actions">
           <button type="button" class="treino-settings-btn" id="treinoSettingsBtn" aria-label="Configurações">⚙</button>
-          <button type="button" class="treino-header-action" id="treinoBtnFinish">Finalizar</button>
+          <button type="button" class="treino-header-action" id="treinoBtnFinish" aria-label="Finalizar treino do dia">Finalizar</button>
         </div>
+      </div>
+      <div class="treino-session-strip" id="treinoSessionStrip" hidden>
+        <span class="treino-session-chip">Vol <strong id="treinoStripVol">0</strong></span>
+        <span class="treino-session-chip">Séries <strong id="treinoStripSets">0/0</strong></span>
+        <span class="treino-session-chip">Tempo <strong id="treinoStripTime">0:00</strong></span>
       </div>
       <div class="treino-reorder-bar" id="treinoReorderBar">
         <span>Reordenar exercícios</span>
@@ -372,11 +749,20 @@ body{background:var(--bg-app);color:var(--text-primary);overflow:hidden;height:1
           <span class="treino-rest-label">Descanso</span>
           <span class="treino-rest-time" id="treinoRestTime">1:30</span>
         </div>
-        <button type="button" class="treino-rest-skip" id="treinoRestSkip">Pular</button>
+        <button type="button" class="treino-rest-skip" id="treinoRestSkip" aria-label="Pular descanso">Pular</button>
+      </div>
+      <div class="treino-rest-overlay" id="treinoRestOverlay" aria-live="polite">
+        <div class="ro-label">Descanso</div>
+        <div class="ro-time" id="treinoRestOverlayTime">1:30</div>
+        <div class="ro-bar"><i id="treinoRestProgress" style="transform:scaleX(1)"></i></div>
+        <div class="ro-actions">
+          <button type="button" id="treinoRestPlus30" aria-label="Adicionar 30 segundos de descanso">+30s</button>
+          <button type="button" class="primary" id="treinoRestSkip2" aria-label="Pular descanso">Pular</button>
+        </div>
       </div>
       <div class="treino-main" id="treinoAppContent"></div>
       <div class="treino-fab" id="treinoFab">
-        <button type="button" id="treinoBtnAddEx">+ Adicionar Exercício</button>
+        <button type="button" id="treinoBtnAddEx" aria-label="Adicionar exercício">+ Adicionar Exercício</button>
       </div>
     </div>
   </div>
@@ -454,6 +840,71 @@ body{background:var(--bg-app);color:var(--text-primary);overflow:hidden;height:1
 <script>
 (function(){
 'use strict';
+
+/* ========== ViewportLock (elimina barra branca / 100% tela real) ========== */
+const ViewportLock = (function(){
+  let raf = 0;
+  function measure(){
+    // visualViewport reflete a área útil real (sem chrome do browser)
+    const vv = window.visualViewport;
+    const h = Math.round((vv && vv.height) ? vv.height : window.innerHeight);
+    const w = Math.round((vv && vv.width) ? vv.width : window.innerWidth);
+    const root = document.documentElement;
+    root.style.setProperty('--app-height', h + 'px');
+    root.style.setProperty('--app-width', w + 'px');
+    // sincroniza body/app-container explicitamente (Safari iOS)
+    if(document.body){
+      document.body.style.height = h + 'px';
+      document.body.style.maxHeight = h + 'px';
+    }
+    const app = document.querySelector('.app-container');
+    if(app){
+      app.style.height = h + 'px';
+      app.style.maxHeight = h + 'px';
+    }
+  }
+  function schedule(){
+    if(raf) cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(function(){ raf = 0; measure(); });
+  }
+  function bind(){
+    measure();
+    window.addEventListener('resize', schedule, { passive: true });
+    window.addEventListener('orientationchange', function(){
+      // iOS precisa de um tick após a rotação
+      setTimeout(schedule, 120);
+      setTimeout(schedule, 320);
+    }, { passive: true });
+    if(window.visualViewport){
+      window.visualViewport.addEventListener('resize', schedule, { passive: true });
+      window.visualViewport.addEventListener('scroll', schedule, { passive: true });
+    }
+    // recálculo após paint inicial e quando a barra de URL some/aparece
+    window.addEventListener('pageshow', schedule, { passive: true });
+    document.addEventListener('visibilitychange', function(){
+      if(document.visibilityState === 'visible') schedule();
+    });
+  }
+  /** Fullscreen opcional (melhor após gesto do usuário) */
+  function requestImmersive(el){
+    const node = el || document.documentElement;
+    const req = node.requestFullscreen || node.webkitRequestFullscreen || node.msRequestFullscreen;
+    if(typeof req === 'function'){
+      try{ return req.call(node); }catch(_){ return Promise.reject(_); }
+    }
+    return Promise.reject(new Error('Fullscreen API indisponível'));
+  }
+  function exitImmersive(){
+    const ex = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
+    if(typeof ex === 'function'){
+      try{ return ex.call(document); }catch(_){ return Promise.reject(_); }
+    }
+    return Promise.reject(new Error('Fullscreen API indisponível'));
+  }
+  return { bind: bind, measure: measure, requestImmersive: requestImmersive, exitImmersive: exitImmersive };
+})();
+// aplica imediatamente (antes do paint final) e no DOMContentLoaded
+try{ ViewportLock.bind(); }catch(_){}
 
 /* ========== Constants ========== */
 const LEGACY_DB = 'ES140826DB';
@@ -551,17 +1002,35 @@ function openExternal(url,appSchemes){
 }
 function compressImage(file,maxW,quality){
   maxW=maxW||800;quality=quality||.72;
-  return new Promise(resolve=>{
+  return new Promise(async resolve=>{
     if(!file){resolve(null);return;}
-    const isHeic=/heic|heif/i.test(file.type||'')||/\.heic$/i.test(file.name||'');
+    // Prefer createImageBitmap (melhor suporte HEIC/orientação no Safari iOS)
+    try{
+      if(typeof createImageBitmap==='function'){
+        const bitmap=await createImageBitmap(file);
+        let w=bitmap.width,h=bitmap.height;
+        if(w&&h){
+          if(w>maxW){h=Math.round(h*maxW/w);w=maxW;}
+          const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+          const ctx=canvas.getContext('2d');
+          ctx.drawImage(bitmap,0,0,w,h);
+          try{bitmap.close&&bitmap.close();}catch(_){}
+          canvas.toBlob(b=>{
+            if(b&&b.size) resolve(b);
+            else resolve(file);
+          },'image/jpeg',quality);
+          return;
+        }
+      }
+    }catch(_){/* fallback abaixo */}
     const img=new Image();
     const url=URL.createObjectURL(file);
     let done=false;
     const finish=b=>{if(done)return;done=true;try{URL.revokeObjectURL(url);}catch(_){}resolve(b||file);};
-    const timer=setTimeout(()=>finish(file),12000);
+    const timer=setTimeout(()=>finish(file),15000);
     img.onload=()=>{
       try{
-        let w=img.width,h=img.height;
+        let w=img.naturalWidth||img.width,h=img.naturalHeight||img.height;
         if(!w||!h){clearTimeout(timer);finish(file);return;}
         if(w>maxW){h=Math.round(h*maxW/w);w=maxW;}
         const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
@@ -575,7 +1044,10 @@ function compressImage(file,maxW,quality){
 }
 function ensureBlob(data,mime){
   if(!data)return null;
-  if(data instanceof Blob)return data;
+  if(data instanceof Blob){
+    // Clone defensivo — evita Blob "detached" em alguns WebViews iOS
+    try{return data.slice(0,data.size,data.type||mime||'image/jpeg');}catch(_){return data;}
+  }
   try{return new Blob([data],{type:mime||'application/octet-stream'});}catch(_){return null;}
 }
 async function copyText(text){
@@ -756,12 +1228,29 @@ const ContactManager={
   },
   async saveContact(data){
     if(!data.id)data.id=uid();data.updatedAt=Date.now();if(!data.createdAt)data.createdAt=Date.now();
-    const record={id:data.id,name:data.name||'',address:data.address||'',avatar:data.avatar||null,createdAt:data.createdAt,updatedAt:data.updatedAt};
+    let avatar=data.avatar||null;
+    if(avatar&&!(avatar instanceof Blob)){
+      try{avatar=new Blob([avatar],{type:'image/jpeg'});}catch(_){avatar=null;}
+    }
+    const record={id:data.id,name:data.name||'',address:data.address||'',avatar:avatar,createdAt:data.createdAt,updatedAt:data.updatedAt};
     try{await IDB.put('contacts',record);}
-    catch(err){if(isQuotaError(err)){showToast('Armazenamento cheio.');throw err;}throw err;}
+    catch(err){
+      // Retry sem avatar se quota estourar
+      if(isQuotaError(err)&&record.avatar){
+        const slim={...record,avatar:null};
+        try{
+          await IDB.put('contacts',slim);
+          Object.assign(record,slim);
+          showToast('Salvo sem foto — armazenamento cheio');
+        }catch(e2){throw err;}
+      }else{
+        if(isQuotaError(err))showToast('Armazenamento cheio.');
+        throw err;
+      }
+    }
     const idx=contacts.findIndex(c=>c.id===record.id);if(idx>=0)contacts[idx]=record;else contacts.push(record);
     contacts.sort((a,b)=>(a.name||'').localeCompare(b.name||'','pt-BR'));
-    if(typeof AppBackup!=='undefined') AppBackup.takeSnapshot('contact-save');
+    try{if(typeof AppBackup!=='undefined') AppBackup.takeSnapshot('contact-save');}catch(_){}
     return record;
   },
   async deleteContact(id){
@@ -790,6 +1279,16 @@ const SCREEN_LABELS = { agenda: 'Agenda', treino: 'Treino' };
 
 function switchScreen(name){
   if(!SCREEN_LABELS[name])return;
+  if(name === currentScreen) return;
+  // Ao sair do Treino: flush draft + limpa timers/menus (evita leak e perda de dados)
+  if(currentScreen === 'treino' && name !== 'treino' && typeof TreinoApp !== 'undefined'){
+    if(typeof AutoSaveService !== 'undefined' && AutoSaveService.dirty){
+      try{ AutoSaveService.flushSync(); }catch(_){}
+    }
+    TreinoApp.closeModal();
+    if(TreinoApp.closeSettingsMenu) TreinoApp.closeSettingsMenu();
+    if(TreinoApp.clearRestTimer) TreinoApp.clearRestTimer();
+  }
   currentScreen = name;
   $$('.screen').forEach(s=>{
     s.classList.toggle('active', s.id === 'screen-' + name);
@@ -802,11 +1301,6 @@ function switchScreen(name){
   if(name !== 'agenda') closeProfile();
   if(name === 'treino' && typeof TreinoApp !== 'undefined'){
     TreinoApp.ensureInit();
-  }
-  if(name !== 'treino' && typeof TreinoApp !== 'undefined'){
-    TreinoApp.closeModal();
-    if(TreinoApp.closeSettingsMenu) TreinoApp.closeSettingsMenu();
-    if(TreinoApp.clearRestTimer) TreinoApp.clearRestTimer();
   }
 }
 
@@ -877,11 +1371,80 @@ function openModal(title,bodyHtml,opts){
   modalSave.style.visibility=opts.showSave?'visible':'hidden';modalSave.textContent=opts.saveLabel||'Salvar';modalSave.disabled=false;
   modalClose.textContent=opts.closeLabel||'Cancelar';modalClose.style.visibility='';
   modalOnSave=opts.onSave||null;overlay.classList.add('open');overlay.setAttribute('aria-hidden','false');
+  // Foco no primeiro campo + scroll quando teclado iOS abrir
+  requestAnimationFrame(()=>{
+    const first=modalBody.querySelector('input:not([type="hidden"]):not([disabled]),textarea:not([disabled])');
+    if(first){
+      try{first.focus({preventScroll:false});}catch(_){try{first.focus();}catch(__){}}
+    }
+  });
 }
-function closeModal(){overlay.classList.remove('open');overlay.setAttribute('aria-hidden','true');modalOnSave=null;modalBody.innerHTML='';isSaving=false;}
+function closeModal(){overlay.classList.remove('open');overlay.setAttribute('aria-hidden','true');modalOnSave=null;modalBody.innerHTML='';isSaving=false;if(typeof window.__confirmSheetSettle==='function'){const s=window.__confirmSheetSettle;window.__confirmSheetSettle=null;s(false);}}
 modalClose.addEventListener('click',closeModal);
 overlay.addEventListener('click',e=>{if(e.target===overlay)closeModal();});
 modalSave.addEventListener('click',async()=>{if(typeof modalOnSave==='function'&&!isSaving)await modalOnSave();});
+
+/** Confirmação no estilo iOS (substitui window.confirm) */
+function iosConfirm(opts){
+  opts=opts||{};
+  return new Promise(resolve=>{
+    let settled=false;
+    const settle=v=>{
+      if(settled)return;
+      settled=true;
+      window.__confirmSheetSettle=null;
+      // fecha sem reentrar settle(false)
+      overlay.classList.remove('open');
+      overlay.setAttribute('aria-hidden','true');
+      modalOnSave=null;
+      modalBody.innerHTML='';
+      isSaving=false;
+      resolve(!!v);
+    };
+    window.__confirmSheetSettle=settle;
+    const wrap=document.createElement('div');
+    const msg=document.createElement('p');
+    msg.className='ios-confirm-msg';
+    msg.textContent=opts.message||'Confirmar esta ação?';
+    wrap.appendChild(msg);
+    const actions=document.createElement('div');
+    actions.className='ios-confirm-actions';
+    const btnOk=document.createElement('button');
+    btnOk.type='button';
+    btnOk.className='ios-confirm-btn '+(opts.destructive?'destructive':'primary');
+    btnOk.textContent=opts.confirmText||'Confirmar';
+    const btnCancel=document.createElement('button');
+    btnCancel.type='button';
+    btnCancel.className='ios-confirm-btn';
+    btnCancel.textContent=opts.cancelText||'Cancelar';
+    btnOk.addEventListener('click',()=>settle(true));
+    btnCancel.addEventListener('click',()=>settle(false));
+    actions.appendChild(btnOk);
+    actions.appendChild(btnCancel);
+    wrap.appendChild(actions);
+    openModal(opts.title||'Confirmar',wrap,{showSave:false,closeLabel:'Cancelar'});
+  });
+}
+// Escape fecha modal/perfil (desktop e teclado externo no iPad)
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Escape')return;
+  if(overlay&&overlay.classList.contains('open')){closeModal();e.preventDefault();return;}
+  if(profileView&&profileView.classList.contains('open')){closeProfile();e.preventDefault();return;}
+  if(typeof TreinoApp!=='undefined'&&TreinoApp.closeModal){
+    const tm=document.getElementById('treinoExerciseModal');
+    if(tm&&tm.classList.contains('open')){TreinoApp.closeModal();e.preventDefault();}
+  }
+});
+// Campo focado no modal: garante visibilidade acima do teclado
+modalBody.addEventListener('focusin',e=>{
+  const el=e.target;
+  if(!el||!(el.matches&&el.matches('input,textarea,select')))return;
+  setTimeout(()=>{
+    try{el.scrollIntoView({block:'center',behavior:'smooth'});}catch(_){
+      try{el.scrollIntoView(true);}catch(__){}
+    }
+  },350);
+});
 
 /* ========== Long Press (Agenda contacts) ========== */
 const LP = {duration:500, moveThreshold:12, timer:null, startX:0, startY:0, active:false, triggered:false, target:null};
@@ -987,16 +1550,26 @@ async function saveContactAsVCard(contact){
 function openContactActions(contact){
   if(!contact)return;
   const list=document.createElement('div');list.className='action-sheet-list';
-  const openItem=document.createElement('div');openItem.className='action-item';openItem.innerHTML='<span class="ai-icon">👤</span><span>Abrir perfil</span>';
-  openItem.addEventListener('click',()=>{closeModal();openProfile(contact.id);});list.appendChild(openItem);
-  const editItem=document.createElement('div');editItem.className='action-item';editItem.innerHTML='<span class="ai-icon">✎</span><span>Editar</span>';
-  editItem.addEventListener('click',()=>{closeModal();openContactForm(contact.id);});list.appendChild(editItem);
-  const vcfItem=document.createElement('div');vcfItem.className='action-item';vcfItem.innerHTML='<span class="ai-icon">📇</span><span>Salvar nos Contatos</span>';
-  vcfItem.addEventListener('click',()=>{closeModal();saveContactAsVCard(contact);});list.appendChild(vcfItem);
-  const delItem=document.createElement('div');delItem.className='action-item destructive';delItem.innerHTML='<span class="ai-icon">🗑</span><span>Excluir</span>';
-  delItem.addEventListener('click',()=>{closeModal();confirmDelete(contact);});list.appendChild(delItem);
-  const cancel=document.createElement('div');cancel.className='action-cancel';cancel.textContent='Cancelar';cancel.addEventListener('click',closeModal);list.appendChild(cancel);
-  openModal(contact.name||'Contato',list,{showSave:false,closeLabel:' '});modalClose.style.visibility='hidden';
+  const mk=(label,icon,fn,destructive)=>{
+    const item=document.createElement('button');
+    item.type='button';
+    item.className='action-item'+(destructive?' destructive':'');
+    item.innerHTML='<span class="ai-icon" aria-hidden="true">'+icon+'</span><span>'+label+'</span>';
+    item.addEventListener('click',()=>{closeModal();fn();});
+    list.appendChild(item);
+  };
+  mk('Abrir perfil','👤',()=>openProfile(contact.id));
+  mk('Editar','✎',()=>openContactForm(contact.id));
+  mk('Salvar nos Contatos','📇',()=>saveContactAsVCard(contact));
+  mk('Excluir','🗑',()=>confirmDelete(contact),true);
+  const cancel=document.createElement('button');
+  cancel.type='button';
+  cancel.className='action-cancel';
+  cancel.textContent='Cancelar';
+  cancel.addEventListener('click',closeModal);
+  list.appendChild(cancel);
+  openModal(contact.name||'Contato',list,{showSave:false,closeLabel:' '});
+  modalClose.style.visibility='hidden';
 }
 
 function openSocialFromChip(link){
@@ -1010,51 +1583,342 @@ function openSocialFromChip(link){
 }
 
 /* ========== Agenda ========== */
-const AgendaUI={
-  getFiltered(){
-    return contacts.slice();
+const AVATAR_PALETTE = [
+  ['#007AFF','#5AC8FA'],['#34C759','#30D158'],['#FF9500','#FFCC00'],
+  ['#FF2D55','#FF375F'],['#AF52DE','#BF5AF2'],['#5856D6','#5E5CE6'],
+  ['#FF3B30','#FF453A'],['#00C7BE','#63E6E2'],['#30B0C7','#40C8E0'],
+  ['#FF6482','#FF8AD4']
+];
+function avatarGradient(name){
+  const s = String(name||'');
+  let h = 0;
+  for(let i=0;i<s.length;i++) h = ((h<<5)-h)+s.charCodeAt(i)|0;
+  const pair = AVATAR_PALETTE[Math.abs(h)%AVATAR_PALETTE.length];
+  return 'linear-gradient(135deg,'+pair[0]+','+pair[1]+')';
+}
+
+const RecentsStore = {
+  KEY: 'agenda_recents_v1',
+  MAX: 8,
+  read(){
+    try{
+      const raw = localStorage.getItem(this.KEY);
+      const arr = raw ? JSON.parse(raw) : [];
+      return Array.isArray(arr) ? arr : [];
+    }catch(_){ return []; }
   },
-  render(){
-    revokeElementMediaUrls(contactsList);
-    $$('.contact-item',contactsList).forEach(el=>el.remove());
-    const noRes=$('#noResults');if(noRes)noRes.remove();
-    if(contacts.length===0){emptyState.style.display='';return;}
-    emptyState.style.display='none';
-    const list=this.getFiltered();
-    if(list.length===0){const div=document.createElement('div');div.className='no-results';div.id='noResults';div.innerHTML='<p>Nenhum contato encontrado</p>';contactsList.appendChild(div);return;}
-    const frag=document.createDocumentFragment();
-    list.forEach(c=>{
-      const item=document.createElement('div');item.className='contact-item';item.dataset.id=c.id;
-      const avatar=document.createElement('div');avatar.className='contact-avatar';
-      if(c.avatar){const img=document.createElement('img');img.alt='';img.src=createObjectURL(c.avatar);avatar.appendChild(img);}else avatar.textContent=initials(c.name);
-      const info=document.createElement('div');info.className='contact-info';
-      const nameEl=document.createElement('div');nameEl.className='contact-name';nameEl.textContent=c.name||'Sem nome';
-      const meta=document.createElement('div');meta.className='contact-meta';
-      const uname=ContactManager.primaryUsername(c.id);if(uname){const u=document.createElement('span');u.textContent=uname;meta.appendChild(u);}
-      info.appendChild(nameEl);info.appendChild(meta);
-      const links=ContactManager.getLinks(c.id);
-      if(links.length){
-        const socials=document.createElement('div');socials.className='contact-socials';
-        links.slice(0,6).forEach(link=>{
-          const metaP=platformMeta(link.platform);
-          const chip=document.createElement('button');chip.type='button';chip.className='contact-social-chip';
-          chip.setAttribute('aria-label',metaP.label);chip.textContent=metaP.icon;
-          chip.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();openSocialFromChip(link);});
-          chip.addEventListener('pointerdown',e=>e.stopPropagation());
-          socials.appendChild(chip);
-        });
-        info.appendChild(socials);
+  touch(id){
+    if(!id) return;
+    let arr = this.read().filter(x=>x!==id);
+    arr.unshift(id);
+    if(arr.length>this.MAX) arr = arr.slice(0,this.MAX);
+    try{ localStorage.setItem(this.KEY, JSON.stringify(arr)); }catch(_){}
+  },
+  listContacts(){
+    const ids = this.read();
+    const out = [];
+    ids.forEach(id=>{
+      const c = contacts.find(x=>x.id===id);
+      if(c) out.push(c);
+    });
+    return out;
+  }
+};
+
+const AgendaUI = {
+  searchQuery: '',
+  _searchTimer: null,
+  _headerBuilt: false,
+
+  ensureHeader(){
+    const header = document.getElementById('agendaHeader');
+    if(!header || this._headerBuilt) return header;
+    header.innerHTML =
+      '<div class="agenda-title-row">'+
+        '<h1 class="agenda-large-title">Agenda</h1>'+
+        '<span class="agenda-count" id="agendaCount"></span>'+
+      '</div>'+
+      '<div class="search-wrap">'+
+        '<span class="search-icon" aria-hidden="true">🔍</span>'+
+        '<input type="search" id="agendaSearch" placeholder="Buscar" autocomplete="off" enterkeyhint="search" aria-label="Buscar contatos">'+
+        '<button type="button" class="search-clear" id="agendaSearchClear" aria-label="Limpar busca">✕</button>'+
+      '</div>'+
+      '<div class="agenda-recents" id="agendaRecents" hidden></div>';
+    const input = document.getElementById('agendaSearch');
+    const clearBtn = document.getElementById('agendaSearchClear');
+    if(input){
+      input.addEventListener('input', ()=>{
+        const v = input.value || '';
+        if(clearBtn) clearBtn.classList.toggle('show', v.length>0);
+        clearTimeout(this._searchTimer);
+        this._searchTimer = setTimeout(()=>{
+          this.searchQuery = v.trim();
+          this.render();
+        }, 120);
+      });
+    }
+    if(clearBtn){
+      clearBtn.addEventListener('click', ()=>{
+        if(input){ input.value=''; input.focus(); }
+        clearBtn.classList.remove('show');
+        this.searchQuery = '';
+        this.render();
+      });
+    }
+    const emptyBtn = document.getElementById('emptyAddBtn');
+    if(emptyBtn) emptyBtn.addEventListener('click', ()=>openContactForm(null));
+    this._headerBuilt = true;
+    return header;
+  },
+
+  getFiltered(){
+    const q = (this.searchQuery||'').toLowerCase();
+    if(!q) return contacts.slice();
+    return contacts.filter(c=>{
+      const name = (c.name||'').toLowerCase();
+      if(name.includes(q)) return true;
+      const uname = (ContactManager.primaryUsername(c.id)||'').toLowerCase();
+      if(uname.includes(q)) return true;
+      const addr = (c.address||'').toLowerCase();
+      if(addr.includes(q)) return true;
+      const links = ContactManager.getLinks(c.id);
+      return links.some(l=>{
+        const v = ((l.username||l.value||'')+'').toLowerCase();
+        return v.includes(q) || (l.platform||'').includes(q);
+      });
+    });
+  },
+
+  sectionLetter(name){
+    const ch = (name||'').trim().charAt(0).toLocaleUpperCase('pt-BR');
+    if(!ch) return '#';
+    try{
+      const base = ch.normalize('NFD').replace(/[\u0300-\u036f]/g,'').charAt(0).toUpperCase();
+      if(base >= 'A' && base <= 'Z') return base;
+    }catch(_){}
+    if(/[A-Z]/i.test(ch)) return ch.toUpperCase();
+    return '#';
+  },
+
+  buildAvatarEl(contact, sizeClass){
+    const avatar = document.createElement('div');
+    avatar.className = sizeClass || 'contact-avatar';
+    if(contact.avatar){
+      const img = document.createElement('img');
+      img.alt = '';
+      img.src = createObjectURL(contact.avatar);
+      avatar.appendChild(img);
+    }else{
+      avatar.textContent = initials(contact.name);
+      avatar.style.background = avatarGradient(contact.name);
+    }
+    return avatar;
+  },
+
+  renderRecents(){
+    const wrap = document.getElementById('agendaRecents');
+    if(!wrap) return;
+    // Esconde recents durante busca
+    if(this.searchQuery){
+      wrap.hidden = true;
+      wrap.innerHTML = '';
+      return;
+    }
+    const recents = RecentsStore.listContacts().slice(0,6);
+    if(!recents.length || contacts.length < 3){
+      wrap.hidden = true;
+      wrap.innerHTML = '';
+      return;
+    }
+    wrap.hidden = false;
+    wrap.innerHTML = '';
+    const label = document.createElement('div');
+    label.className = 'agenda-recents-label';
+    label.textContent = 'Recentes';
+    wrap.appendChild(label);
+    const row = document.createElement('div');
+    row.className = 'agenda-recents-row';
+    recents.forEach(c=>{
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'recent-chip';
+      btn.setAttribute('aria-label', c.name||'Contato');
+      const av = this.buildAvatarEl(c, 'recent-av');
+      const nm = document.createElement('span');
+      nm.className = 'recent-name';
+      nm.textContent = (c.name||'?').split(/\s+/)[0];
+      btn.appendChild(av);
+      btn.appendChild(nm);
+      btn.addEventListener('click', ()=>openProfile(c.id));
+      row.appendChild(btn);
+    });
+    wrap.appendChild(row);
+  },
+
+  buildContactItem(c){
+    const item = document.createElement('div');
+    item.className = 'contact-item';
+    item.dataset.id = c.id;
+    item.setAttribute('role','listitem');
+
+    const avatar = this.buildAvatarEl(c);
+    const info = document.createElement('div');
+    info.className = 'contact-info';
+
+    const nameEl = document.createElement('div');
+    nameEl.className = 'contact-name';
+    nameEl.textContent = c.name || 'Sem nome';
+
+    const meta = document.createElement('div');
+    meta.className = 'contact-meta';
+    const uname = ContactManager.primaryUsername(c.id);
+    const links = ContactManager.getLinks(c.id);
+    if(uname){
+      const u = document.createElement('span');
+      u.textContent = uname;
+      meta.appendChild(u);
+    }
+    if(links.length){
+      if(uname){
+        const sep = document.createElement('span');
+        sep.className = 'meta-sep';
+        sep.textContent = '·';
+        meta.appendChild(sep);
       }
-      item.appendChild(avatar);item.appendChild(info);
-      bindLongPress(item,()=>openContactActions(c),()=>openProfile(c.id));
-      frag.appendChild(item);
+      const n = document.createElement('span');
+      n.textContent = links.length + (links.length===1 ? ' rede' : ' redes');
+      meta.appendChild(n);
+    }
+
+    info.appendChild(nameEl);
+    if(meta.childNodes.length) info.appendChild(meta);
+
+    if(links.length){
+      const socials = document.createElement('div');
+      socials.className = 'contact-socials';
+      links.slice(0,5).forEach(link=>{
+        const metaP = platformMeta(link.platform);
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'contact-social-chip';
+        chip.setAttribute('aria-label', 'Abrir '+metaP.label);
+        chip.textContent = metaP.icon;
+        chip.addEventListener('click', e=>{ e.preventDefault(); e.stopPropagation(); openSocialFromChip(link); });
+        chip.addEventListener('pointerdown', e=>e.stopPropagation());
+        socials.appendChild(chip);
+      });
+      info.appendChild(socials);
+    }
+
+    item.appendChild(avatar);
+    item.appendChild(info);
+
+    // Atalho rápido WhatsApp se existir
+    const wa = links.find(l=>l.platform==='whatsapp');
+    if(wa){
+      const quick = document.createElement('div');
+      quick.className = 'contact-quick';
+      const qbtn = document.createElement('button');
+      qbtn.type = 'button';
+      qbtn.className = 'contact-quick-btn';
+      qbtn.setAttribute('aria-label','WhatsApp');
+      qbtn.textContent = '💬';
+      qbtn.addEventListener('click', e=>{ e.preventDefault(); e.stopPropagation(); openSocialFromChip(wa); });
+      qbtn.addEventListener('pointerdown', e=>e.stopPropagation());
+      quick.appendChild(qbtn);
+      item.appendChild(quick);
+    }
+
+    bindLongPress(item, ()=>openContactActions(c), ()=>openProfile(c.id));
+    return item;
+  },
+
+  render(){
+    this.ensureHeader();
+    revokeElementMediaUrls(contactsList);
+
+    // limpa itens/seções/no-results (mantém emptyState no DOM)
+    Array.from(contactsList.children).forEach(el=>{
+      if(el.id !== 'emptyState') el.remove();
+    });
+
+    const countEl = document.getElementById('agendaCount');
+    if(countEl){
+      const n = contacts.length;
+      countEl.textContent = n ? (n + (n===1 ? ' contato' : ' contatos')) : '';
+    }
+
+    this.renderRecents();
+
+    if(contacts.length===0){
+      if(emptyState) emptyState.style.display = '';
+      return;
+    }
+    if(emptyState) emptyState.style.display = 'none';
+
+    const list = this.getFiltered();
+    if(list.length===0){
+      const div = document.createElement('div');
+      div.className = 'no-results';
+      div.id = 'noResults';
+      div.innerHTML =
+        '<div class="empty-icon">🔍</div>'+
+        '<div class="empty-title">Sem resultados</div>'+
+        '<div class="empty-desc">Nenhum contato corresponde a “'+(this.searchQuery||'').replace(/</g,'')+'”.</div>';
+      const clear = document.createElement('button');
+      clear.type = 'button';
+      clear.className = 'empty-cta-secondary';
+      clear.textContent = 'Limpar busca';
+      clear.addEventListener('click', ()=>{
+        const input = document.getElementById('agendaSearch');
+        const clearBtn = document.getElementById('agendaSearchClear');
+        if(input) input.value = '';
+        if(clearBtn) clearBtn.classList.remove('show');
+        this.searchQuery = '';
+        this.render();
+      });
+      div.appendChild(clear);
+      contactsList.appendChild(div);
+      return;
+    }
+
+    // Agrupa A–Z
+    const groups = {};
+    list.forEach(c=>{
+      const letter = this.sectionLetter(c.name);
+      if(!groups[letter]) groups[letter] = [];
+      groups[letter].push(c);
+    });
+    const letters = Object.keys(groups).sort((a,b)=>{
+      if(a==='#') return 1;
+      if(b==='#') return -1;
+      return a.localeCompare(b,'pt-BR');
+    });
+
+    const frag = document.createDocumentFragment();
+    letters.forEach(letter=>{
+      const section = document.createElement('div');
+      section.className = 'contact-section';
+      section.dataset.letter = letter;
+      const head = document.createElement('div');
+      head.className = 'contact-section-header';
+      head.textContent = letter;
+      section.appendChild(head);
+      groups[letter].forEach(c=> section.appendChild(this.buildContactItem(c)));
+      frag.appendChild(section);
     });
     contactsList.appendChild(frag);
   }
 };
 
 /* ========== Profile ========== */
-function openProfile(id){activeContactId=id;renderProfile();profileView.classList.add('open');profileView.setAttribute('aria-hidden','false');}
+function openProfile(id){
+  activeContactId = id;
+  if(typeof RecentsStore !== 'undefined') RecentsStore.touch(id);
+  renderProfile();
+  profileView.classList.add('open');
+  profileView.setAttribute('aria-hidden','false');
+}
 function closeProfile(){
   revokeElementMediaUrls(profileScroll);
   profileView.classList.remove('open');profileView.setAttribute('aria-hidden','true');activeContactId=null;
@@ -1066,7 +1930,8 @@ function renderProfile(){
   profileScroll.innerHTML='';
   const header=document.createElement('div');header.className='profile-header-glass';
   const av=document.createElement('div');av.className='profile-avatar-lg';
-  if(c.avatar){const img=document.createElement('img');img.alt='';img.src=createObjectURL(c.avatar);av.appendChild(img);}else av.textContent=initials(c.name);
+  if(c.avatar){const img=document.createElement('img');img.alt='';img.src=createObjectURL(c.avatar);av.appendChild(img);}
+  else{av.textContent=initials(c.name);av.style.background=avatarGradient(c.name);av.style.color='#fff';}
   header.appendChild(av);
   const name=document.createElement('div');name.className='profile-name';name.textContent=c.name||'Sem nome';header.appendChild(name);
   const uname=ContactManager.primaryUsername(c.id);if(uname){const u=document.createElement('div');u.className='profile-username';u.textContent=uname;header.appendChild(u);}
@@ -1162,14 +2027,18 @@ function openAvatarSourcePicker(){avatarGalleryInput.value='';avatarGalleryInput
 async function handleAvatarFile(file){
   if(!file)return;
   const okType=(file.type&&file.type.startsWith('image/'))||/\.(jpe?g|png|webp|gif|heic|heif)$/i.test(file.name||'')||!file.type;
-  if(!okType){showToast('Arquivo inválido');return;}
+  if(!okType){showToast('Arquivo inválido — use JPG, PNG ou HEIC');return;}
   if(file.size>25*1024*1024){showToast('Imagem muito grande (máx. 25 MB)');return;}
   avatarProcessing=true;
   if(modalSave){modalSave.disabled=true;modalSave.textContent='Processando foto…';}
   try{
-    let compressed=await compressImage(file,900,.7);
-    compressed=ensureBlob(compressed,compressed&&compressed.type?compressed.type:'image/jpeg');
-    if(!compressed||!compressed.size){showToast('Não foi possível processar a foto');avatarProcessing=false;if(modalSave){modalSave.disabled=false;modalSave.textContent='Salvar';}return;}
+    let compressed=await compressImage(file,900,.72);
+    if(!compressed||!(compressed instanceof Blob)||!compressed.size){
+      // fallback: arquivo original
+      compressed=file;
+    }
+    compressed=ensureBlob(compressed,compressed.type||'image/jpeg');
+    if(!compressed||!compressed.size){showToast('Não foi possível processar a foto');return;}
     pendingAvatarBlob=compressed;
     if(pendingAvatarUrl)revokeObjectURL(pendingAvatarUrl);
     pendingAvatarUrl=createObjectURL(compressed);
@@ -1177,9 +2046,10 @@ async function handleAvatarFile(file){
     if(preview){
       preview.querySelectorAll('img').forEach(i=>i.remove());
       Array.from(preview.childNodes).forEach(n=>{if(n.nodeType===3)n.remove();});
-      const img=document.createElement('img');img.src=pendingAvatarUrl;preview.insertBefore(img,preview.firstChild);
+      const img=document.createElement('img');img.alt='';img.src=pendingAvatarUrl;preview.insertBefore(img,preview.firstChild);
       preview.classList.add('has-photo');delete preview.dataset.removed;
     }
+    showToast('Foto pronta — toque em Salvar');
   }catch(err){
     console.error(err);
     showToast('Erro ao processar imagem');
@@ -1213,7 +2083,7 @@ function openContactForm(contactId){
   const eName=document.createElement('div');eName.className='form-error';eName.textContent='Informe o nome';
   gName.appendChild(lName);gName.appendChild(iName);gName.appendChild(eName);wrap.appendChild(gName);
 
-  const note=document.createElement('p');note.style.cssText='font-size:.8rem;color:rgba(255,255,255,.45);margin-top:8px';note.textContent='Endereço e redes sociais são adicionados no perfil do contato.';wrap.appendChild(note);
+  const note=document.createElement('p');note.style.cssText='font-size:.8rem;color:var(--text-secondary);margin-top:8px;line-height:1.4';note.textContent='Endereço e redes sociais são adicionados no perfil do contato.';wrap.appendChild(note);
 
   openModal(c?'Editar contato':'Novo contato',wrap,{
     showSave:true,saveLabel:'Salvar',
@@ -1227,16 +2097,25 @@ function openContactForm(contactId){
         const data={id:c?c.id:uid(),name:nameVal,address:c?(c.address||''):'',avatar:null,createdAt:c?c.createdAt:Date.now(),updatedAt:Date.now()};
         if(pendingAvatarBlob){
           data.avatar=ensureBlob(pendingAvatarBlob,pendingAvatarBlob.type||'image/jpeg');
-          if(!data.avatar){showToast('Foto inválida');isSaving=false;modalSave.disabled=false;modalSave.textContent='Salvar';return;}
-        }else if(preview.dataset.removed==='1')data.avatar=null;
-        else if(c&&c.avatar)data.avatar=c.avatar;
+          if(!data.avatar||!data.avatar.size){
+            showToast('Foto inválida — escolha outra imagem');
+            isSaving=false;modalSave.disabled=false;modalSave.textContent='Salvar';return;
+          }
+        }else if(preview.dataset.removed==='1'){
+          data.avatar=null;
+        }else if(c&&c.avatar){
+          // Reutiliza blob existente (clone se possível)
+          data.avatar=ensureBlob(c.avatar,c.avatar.type||'image/jpeg')||c.avatar;
+        }
         const saved=await ContactManager.saveContact(data);
-        closeModal();showToast('Contato salvo com sucesso');AgendaUI.render();
+        pendingAvatarBlob=null;
+        if(pendingAvatarUrl){try{revokeObjectURL(pendingAvatarUrl);}catch(_){}pendingAvatarUrl=null;}
+        closeModal();showToast(data.avatar?'Contato e foto salvos':'Contato salvo com sucesso');AgendaUI.render();
         if(activeContactId===saved.id)renderProfile();else if(!c)openProfile(saved.id);
       }catch(err){
-        console.error(err);
-        if(isQuotaError(err))showToast('Armazenamento cheio — tente foto menor');
-        else showToast('Não foi possível salvar o contato');
+        console.error('[saveContact]',err);
+        if(isQuotaError(err))showToast('Armazenamento cheio — tente foto menor ou apague memórias');
+        else showToast('Não foi possível salvar — '+((err&&err.message)||'erro desconhecido'));
         modalSave.disabled=false;modalSave.textContent='Salvar';isSaving=false;
       }
     }
@@ -1747,7 +2626,20 @@ const AppBackup = (function(){
       if(typeof showToast==='function') showToast('Backup incompatível');
       return;
     }
-    const ok = confirm('Importar backup? Isso pode substituir contatos, redes e dados de treino atuais.');
+    const nC = (data.agenda && data.agenda.contacts) ? data.agenda.contacts.length : 0;
+    const nL = (data.agenda && data.agenda.socialLinks) ? data.agenda.socialLinks.length : 0;
+    const nM = (data.agenda && data.agenda.memories) ? data.agenda.memories.length : 0;
+    const hasTreino = !!(data.treino && (data.treino.workout || data.treino.data || data.treino[Object.keys(data.treino||{})[0]]));
+    const summary = 'Este backup contém:\n• '+nC+' contato(s)\n• '+nL+' rede(s)\n• '+nM+' memória(s)\n• Treino: '+(hasTreino?'sim':'não')+'\n\nIsso pode substituir os dados atuais.';
+    const ok = typeof iosConfirm==='function'
+      ? await iosConfirm({
+          title: 'Importar backup',
+          message: summary,
+          confirmText: 'Importar',
+          cancelText: 'Cancelar',
+          destructive: true
+        })
+      : window.confirm(summary);
     if(!ok) return;
     try{
       // Treino localStorage
@@ -1831,6 +2723,162 @@ const AppBackup = (function(){
   return {
     takeSnapshot, exportAll, pickImport, importAll,
     snapshotSummary, maybeRemindExport, loadSnapshots
+  };
+})();
+
+/* ========== AutoSaveService (draft resiliente do treino em andamento) ========== */
+const AutoSaveService = (function () {
+  'use strict';
+
+  const DRAFT_KEY = 'treino_draft_v1';
+  const CLIENT_ID = (function () {
+    try {
+      let id = localStorage.getItem('treino_client_id');
+      if (!id) {
+        id = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+        localStorage.setItem('treino_client_id', id);
+      }
+      return id;
+    } catch (_) { return 'anon'; }
+  })();
+
+  let dirty = false;
+  let lastHash = '';
+  let saveTimer = null;
+  let status = 'idle'; // idle | pending | saving | saved | error
+  let lastSavedAt = null;
+  const listeners = new Set();
+  const DEBOUNCE_MS = 800;
+  let getStateFn = null;
+
+  function hashState(state) {
+    try { return JSON.stringify(state); }
+    catch (_) { return String(Date.now()); }
+  }
+
+  function notify() {
+    const payload = { status: status, lastSavedAt: lastSavedAt, dirty: dirty };
+    listeners.forEach(function (fn) {
+      try { fn(payload); } catch (_) {}
+    });
+  }
+
+  function setStatus(s) {
+    status = s;
+    notify();
+  }
+
+  function subscribe(fn) {
+    listeners.add(fn);
+    try { fn({ status: status, lastSavedAt: lastSavedAt, dirty: dirty }); } catch (_) {}
+    return function () { listeners.delete(fn); };
+  }
+
+  function setStateProvider(fn) {
+    getStateFn = typeof fn === 'function' ? fn : null;
+  }
+
+  function currentState() {
+    if (getStateFn) {
+      try { return getStateFn(); } catch (_) { return null; }
+    }
+    return null;
+  }
+
+  function markDirty(state) {
+    const snapshot = state != null ? state : currentState();
+    if (snapshot == null) return;
+    const h = hashState(snapshot);
+    if (h === lastHash) return;
+    dirty = true;
+    lastHash = h;
+    setStatus('pending');
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(function () {
+      saveDraft(snapshot);
+    }, DEBOUNCE_MS);
+  }
+
+  function saveDraft(state) {
+    const snapshot = state != null ? state : currentState();
+    if (snapshot == null) return Promise.resolve(false);
+    setStatus('saving');
+    const payload = {
+      v: 1,
+      clientId: CLIENT_ID,
+      updatedAt: Date.now(),
+      day: new Date().toLocaleDateString('pt-BR'),
+      workout: snapshot
+    };
+    try {
+      localStorage.setItem(DRAFT_KEY, JSON.stringify(payload));
+      dirty = false;
+      lastSavedAt = payload.updatedAt;
+      lastHash = hashState(snapshot);
+      setStatus('saved');
+      return Promise.resolve(true);
+    } catch (err) {
+      console.warn('[AutoSave] falha ao gravar draft', err);
+      setStatus('error');
+      if (typeof showToast === 'function') {
+        showToast('Não foi possível salvar o rascunho');
+      }
+      return Promise.resolve(false);
+    }
+  }
+
+  function flushSync(state) {
+    if (!dirty && state == null) return;
+    clearTimeout(saveTimer);
+    saveDraft(state != null ? state : currentState());
+  }
+
+  function getDraft() {
+    try {
+      const raw = localStorage.getItem(DRAFT_KEY);
+      if (!raw) return null;
+      const data = JSON.parse(raw);
+      if (!data || data.v !== 1) return null;
+      return data;
+    } catch (_) { return null; }
+  }
+
+  function clearDraft() {
+    try { localStorage.removeItem(DRAFT_KEY); } catch (_) {}
+    dirty = false;
+    lastHash = '';
+    lastSavedAt = null;
+    setStatus('idle');
+  }
+
+  function bindLifecycle() {
+    window.addEventListener('beforeunload', function (e) {
+      if (dirty) {
+        flushSync();
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    });
+    window.addEventListener('pagehide', function () {
+      if (dirty) flushSync();
+    });
+    document.addEventListener('visibilitychange', function () {
+      if (document.visibilityState === 'hidden' && dirty) flushSync();
+    });
+  }
+
+  return {
+    markDirty: markDirty,
+    saveDraft: saveDraft,
+    flushSync: flushSync,
+    getDraft: getDraft,
+    clearDraft: clearDraft,
+    subscribe: subscribe,
+    bindLifecycle: bindLifecycle,
+    setStateProvider: setStateProvider,
+    get status() { return status; },
+    get lastSavedAt() { return lastSavedAt; },
+    get dirty() { return dirty; }
   };
 })();
 
@@ -2278,9 +3326,12 @@ const DEFAULT_SETTINGS = {
   autoCompletePrevSet: true,
   showVolume: true,
   showCompare: true,
+  showSessionStrip: true,
+  warnWeightJump: true,
+  focusCurrentSet: false,
   wakeLock: false,
   haptic: true,
-  restTimer: false,
+  restTimer: true,
   restSeconds: 90
 };
 
@@ -2339,6 +3390,7 @@ function applySettingsToUI(){
   const screen = document.getElementById('screen-treino');
   if(screen){
     screen.classList.toggle('compact-mode', !!settings.compactMode);
+    screen.classList.toggle('focus-current-set', !!settings.focusCurrentSet);
     screen.classList.toggle('reorder-mode', !!reorderMode);
   }
   if(settings.wakeLock) requestWakeLock();
@@ -2373,30 +3425,101 @@ function formatRestTime(sec){
   return m + ':' + String(r).padStart(2, '0');
 }
 
+let restTotalSeconds = 90;
+let sessionStartedAt = null;
+let sessionTickInterval = null;
+
 function clearRestTimer(){
   if(restTimerInterval){ clearInterval(restTimerInterval); restTimerInterval = null; }
   restRemaining = 0;
   const bar = $('treinoRestBar');
   if(bar) bar.hidden = true;
+  const screen = document.getElementById('screen-treino');
+  if(screen) screen.classList.remove('rest-mode');
+  updateRestProgress(0, 1);
+}
+
+function updateRestProgress(remaining, total){
+  const timeEl = $('treinoRestTime');
+  const overlayTime = $('treinoRestOverlayTime');
+  const prog = $('treinoRestProgress');
+  const txt = formatRestTime(remaining);
+  if(timeEl) timeEl.textContent = txt;
+  if(overlayTime) overlayTime.textContent = txt;
+  if(prog && total > 0){
+    const ratio = Math.max(0, Math.min(1, remaining / total));
+    prog.style.transform = 'scaleX(' + ratio + ')';
+  }
 }
 
 function startRestTimer(){
   if(!settings.restTimer) return;
-  const total = Number(settings.restSeconds) || 90;
-  restRemaining = total;
+  restTotalSeconds = Number(settings.restSeconds) || 90;
+  restRemaining = restTotalSeconds;
   const bar = $('treinoRestBar');
-  const timeEl = $('treinoRestTime');
   if(bar) bar.hidden = false;
-  if(timeEl) timeEl.textContent = formatRestTime(restRemaining);
+  const screen = document.getElementById('screen-treino');
+  if(screen) screen.classList.add('rest-mode');
+  updateRestProgress(restRemaining, restTotalSeconds);
   if(restTimerInterval) clearInterval(restTimerInterval);
   restTimerInterval = setInterval(function(){
     restRemaining -= 1;
-    if(timeEl) timeEl.textContent = formatRestTime(restRemaining);
+    updateRestProgress(restRemaining, restTotalSeconds);
     if(restRemaining <= 0){
       clearRestTimer();
       hapticTap();
       if(typeof showToast === 'function') showToast('Descanso finalizado');
     }
+  }, 1000);
+}
+
+function addRestSeconds(sec){
+  if(restRemaining <= 0 && !restTimerInterval) return;
+  restRemaining += sec;
+  restTotalSeconds += sec;
+  updateRestProgress(restRemaining, restTotalSeconds);
+}
+
+function formatSessionTime(ms){
+  const s = Math.max(0, Math.floor(ms / 1000));
+  const m = Math.floor(s / 60);
+  const r = s % 60;
+  return m + ':' + String(r).padStart(2, '0');
+}
+
+function updateSessionStrip(){
+  const strip = $('treinoSessionStrip');
+  if(!strip) return;
+  if(!activeWorkout.length || settings.showSessionStrip === false){
+    strip.hidden = true;
+    return;
+  }
+  strip.hidden = false;
+  let volume = 0, done = 0, total = 0;
+  activeWorkout.forEach(ex=>{
+    (ex.sets || []).forEach(s=>{
+      total += 1;
+      if(s.completed || ex.isFinished){
+        done += 1;
+        volume += (Number(s.weight)||0) * (Number(s.reps)||0);
+      }
+    });
+  });
+  const volEl = $('treinoStripVol');
+  const setsEl = $('treinoStripSets');
+  const timeEl = $('treinoStripTime');
+  if(volEl) volEl.textContent = volume >= 1000 ? (volume/1000).toFixed(1)+'t' : String(Math.round(volume));
+  if(setsEl) setsEl.textContent = done + '/' + total;
+  if(timeEl && sessionStartedAt){
+    timeEl.textContent = formatSessionTime(Date.now() - sessionStartedAt);
+  }
+}
+
+function ensureSessionTimer(){
+  if(!sessionStartedAt) sessionStartedAt = Date.now();
+  if(sessionTickInterval) return;
+  sessionTickInterval = setInterval(function(){
+    if(currentScreen === 'treino') updateSessionStrip();
   }, 1000);
 }
 
@@ -2423,11 +3546,27 @@ function renderSettingsMenu(){
   if(!body) return;
   const wSteps = [0.5, 1, 2.5, 5];
   const rSteps = [1, 2];
+  const restOn = !!settings.restTimer;
   body.innerHTML = `
-    <div class="treino-settings-section">Carga e séries</div>
+    <div class="treino-settings-section">Descanso</div>
+    <div class="treino-settings-row" data-toggle="restTimer">
+      <div><div class="label">Timer de descanso</div><div class="sub">Inicia automaticamente ao concluir uma série</div></div>
+      <label class="treino-toggle"><input type="checkbox" ${restOn?'checked':''} data-key="restTimer"><span></span></label>
+    </div>
+    <div class="treino-settings-row" style="cursor:default;flex-direction:column;align-items:stretch;${restOn?'':'opacity:.45'}">
+      <div class="label">Duração do descanso</div>
+      <div class="sub" style="margin-bottom:6px">${restOn ? 'Tempo entre séries' : 'Ative o timer acima para usar'}</div>
+      <div class="treino-step-picker" id="treinoRestSecs">
+        ${[60,90,120,180].map(v => `<button type="button" class="treino-step-opt ${Number(settings.restSeconds)===v?'active':''}" data-restsec="${v}" ${restOn?'':'disabled'}>${v < 60 ? v+'s' : (v/60)+' min'}</button>`).join('')}
+      </div>
+    </div>
+
+    <div class="treino-settings-divider"></div>
+    <div class="treino-settings-section">Carga</div>
     <div class="treino-settings-row" style="cursor:default;flex-direction:column;align-items:stretch">
       <div class="label">Incremento de peso</div>
-      <div class="treino-step-picker" style="margin-top:8px" id="treinoWeightSteps">
+      <div class="sub" style="margin-bottom:6px">Passo dos botões − / + em kg</div>
+      <div class="treino-step-picker" id="treinoWeightSteps">
         ${wSteps.map(v => `<button type="button" class="treino-step-opt ${settings.weightStep===v?'active':''}" data-wstep="${v}">${v}</button>`).join('')}
       </div>
     </div>
@@ -2438,55 +3577,60 @@ function renderSettingsMenu(){
       </div>
     </div>
     <div class="treino-settings-row" data-toggle="autoPrefill">
-      <div><div class="label">Pré-preencher do histórico</div><div class="sub">Usa kg/reps do último treino</div></div>
+      <div><div class="label">Pré-preencher do histórico</div><div class="sub">Usa kg/reps do último treino ao adicionar exercício</div></div>
       <label class="treino-toggle"><input type="checkbox" ${settings.autoPrefill?'checked':''} data-key="autoPrefill"><span></span></label>
     </div>
+    <div class="treino-settings-row" data-toggle="warnWeightJump">
+      <div><div class="label">Avisar salto grande de carga</div><div class="sub">Confirma se o peso subir muito vs último treino</div></div>
+      <label class="treino-toggle"><input type="checkbox" ${settings.warnWeightJump!==false?'checked':''} data-key="warnWeightJump"><span></span></label>
+    </div>
     <div class="treino-settings-row" data-toggle="autoCompletePrevSet">
-      <div><div class="label">Auto-concluir série anterior</div><div class="sub">Ao adicionar nova série</div></div>
+      <div><div class="label">Auto-concluir série anterior</div><div class="sub">Ao adicionar nova série no mesmo exercício</div></div>
       <label class="treino-toggle"><input type="checkbox" ${settings.autoCompletePrevSet?'checked':''} data-key="autoCompletePrevSet"><span></span></label>
     </div>
+
     <div class="treino-settings-divider"></div>
     <div class="treino-settings-section">Exibição</div>
+    <div class="treino-settings-row" data-toggle="showSessionStrip">
+      <div><div class="label">Faixa de sessão</div><div class="sub">Volume, séries e tempo no topo</div></div>
+      <label class="treino-toggle"><input type="checkbox" ${settings.showSessionStrip!==false?'checked':''} data-key="showSessionStrip"><span></span></label>
+    </div>
     <div class="treino-settings-row" data-toggle="showVolume">
-      <div><div class="label">Mostrar volume</div><div class="sub">kg × reps no card</div></div>
+      <div><div class="label">Mostrar volume</div><div class="sub">kg × reps no card do exercício</div></div>
       <label class="treino-toggle"><input type="checkbox" ${settings.showVolume?'checked':''} data-key="showVolume"><span></span></label>
     </div>
     <div class="treino-settings-row" data-toggle="showCompare">
-      <div><div class="label">Comparar com último</div><div class="sub">Indicador no card</div></div>
+      <div><div class="label">Comparar com último</div><div class="sub">Indicador ↑ ↓ no card</div></div>
       <label class="treino-toggle"><input type="checkbox" ${settings.showCompare?'checked':''} data-key="showCompare"><span></span></label>
     </div>
     <div class="treino-settings-row" data-toggle="compactMode">
-      <div><div class="label">Modo compacto</div><div class="sub">Cards mais densos</div></div>
+      <div><div class="label">Modo compacto</div><div class="sub">Cards mais densos na lista</div></div>
       <label class="treino-toggle"><input type="checkbox" ${settings.compactMode?'checked':''} data-key="compactMode"><span></span></label>
     </div>
+    <div class="treino-settings-row" data-toggle="focusCurrentSet">
+      <div><div class="label">Focar série atual</div><div class="sub">Oculta séries futuras até concluir a de agora</div></div>
+      <label class="treino-toggle"><input type="checkbox" ${settings.focusCurrentSet?'checked':''} data-key="focusCurrentSet"><span></span></label>
+    </div>
+
     <div class="treino-settings-divider"></div>
-    <div class="treino-settings-section">Experiência</div>
+    <div class="treino-settings-section">Sessão</div>
     <div class="treino-settings-row" data-toggle="confirmFinish">
-      <div><div class="label">Confirmar ao finalizar</div></div>
+      <div><div class="label">Confirmar ao finalizar</div><div class="sub">Pede confirmação antes de encerrar o dia</div></div>
       <label class="treino-toggle"><input type="checkbox" ${settings.confirmFinish?'checked':''} data-key="confirmFinish"><span></span></label>
     </div>
-    <div class="treino-settings-row" data-toggle="restTimer">
-      <div><div class="label">Timer de descanso</div><div class="sub">Após concluir uma série</div></div>
-      <label class="treino-toggle"><input type="checkbox" ${settings.restTimer?'checked':''} data-key="restTimer"><span></span></label>
-    </div>
-    <div class="treino-settings-row" style="cursor:default;flex-direction:column;align-items:stretch">
-      <div class="label">Duração do descanso</div>
-      <div class="treino-step-picker" style="margin-top:8px" id="treinoRestSecs">
-        ${[60,90,120,180].map(v => `<button type="button" class="treino-step-opt ${Number(settings.restSeconds)===v?'active':''}" data-restsec="${v}">${v}s</button>`).join('')}
-      </div>
-    </div>
     <div class="treino-settings-row" data-toggle="wakeLock">
-      <div><div class="label">Manter tela ativa</div><div class="sub">Durante o uso do treino</div></div>
+      <div><div class="label">Manter tela ativa</div><div class="sub">Evita apagar a tela durante o treino</div></div>
       <label class="treino-toggle"><input type="checkbox" ${settings.wakeLock?'checked':''} data-key="wakeLock"><span></span></label>
     </div>
     <div class="treino-settings-row" data-toggle="haptic">
-      <div><div class="label">Feedback tátil</div><div class="sub">Ao concluir série/exercício</div></div>
+      <div><div class="label">Feedback tátil</div><div class="sub">Vibração ao concluir série</div></div>
       <label class="treino-toggle"><input type="checkbox" ${settings.haptic?'checked':''} data-key="haptic"><span></span></label>
     </div>
+
     <div class="treino-settings-divider"></div>
     <div class="treino-settings-section">Ações</div>
     <div class="treino-settings-row" data-action="reorder">
-      <div><div class="label">Reordenar exercícios</div></div>
+      <div><div class="label">Reordenar exercícios</div><div class="sub">Altera a ordem na lista</div></div>
       <span style="color:var(--text-secondary)">›</span>
     </div>
     <div class="treino-settings-row" data-action="viewLast">
@@ -2496,10 +3640,11 @@ function renderSettingsMenu(){
     <div class="treino-settings-row destructive" data-action="clearDay">
       <div><div class="label">Limpar treino atual</div><div class="sub">Não finaliza o dia</div></div>
     </div>
+
     <div class="treino-settings-divider"></div>
-    <div class="treino-settings-section">Backup</div>
+    <div class="treino-settings-section">Avançado</div>
     <div class="treino-settings-row" data-action="exportBackup">
-      <div><div class="label">Exportar backup</div><div class="sub">Arquivo JSON com Agenda e Treino</div></div>
+      <div><div class="label">Exportar backup</div><div class="sub">JSON com Agenda e Treino</div></div>
       <span style="color:var(--text-secondary)">›</span>
     </div>
     <div class="treino-settings-row" data-action="importBackup">
@@ -2517,7 +3662,14 @@ function renderSettingsMenu(){
       const key = inp.getAttribute('data-key');
       settings[key] = !!inp.checked;
       saveSettings();
-      if(key==='showVolume'||key==='showCompare'||key==='compactMode') renderWorkout();
+      if(key==='showVolume'||key==='showCompare'||key==='compactMode'||key==='showSessionStrip'||key==='focusCurrentSet'){
+        applySettingsToUI();
+        renderWorkout();
+      }
+      if(key==='restTimer'){
+        if(!settings.restTimer) clearRestTimer();
+        renderSettingsMenu();
+      }
     });
   });
   body.querySelectorAll('[data-wstep]').forEach(btn=>{
@@ -2581,16 +3733,25 @@ function moveExercise(instanceId, dir){
   activeWorkout[idx] = activeWorkout[ni];
   activeWorkout[ni] = tmp;
   renderWorkout();
+  notifyAutoSave();
 }
 
-function clearCurrentWorkout(){
+async function clearCurrentWorkout(){
   if(!activeWorkout.length){
     if(typeof showToast==='function') showToast('Treino já está vazio');
     return;
   }
-  if(!confirm('Limpar todos os exercícios do treino atual?')) return;
+  const ok = await iosConfirm({
+    title: 'Limpar treino',
+    message: 'Remover todos os exercícios do treino atual? O dia não será finalizado.',
+    confirmText: 'Limpar',
+    cancelText: 'Cancelar',
+    destructive: true
+  });
+  if(!ok) return;
   activeWorkout = [];
   setupActiveWorkoutUI();
+  if(typeof AutoSaveService !== 'undefined') AutoSaveService.clearDraft();
   if(typeof showToast==='function') showToast('Treino limpo');
 }
 
@@ -2711,7 +3872,8 @@ function updateHistoryFromWorkout(workout, dateStr){
         setsCount: stats.setsCount,
         sets: (ex.sets || []).map(s => ({
           weight: Number(s.weight) || 0,
-          reps: Number(s.reps) || 0
+          reps: Number(s.reps) || 0,
+          tag: s.tag || 'normal'
         }))
       }
     };
@@ -2758,6 +3920,75 @@ function formatProgressCardHtml(progress){
   return `<div class="treino-progress-card"><div class="treino-progress-title">Progresso vs último</div>${items}</div>`;
 }
 
+function renderDraftRecoveryScreen(draft){
+  const btnF = $('treinoBtnFinish');
+  const fab = $('treinoFab');
+  if(btnF) btnF.classList.add('hidden');
+  if(fab) fab.classList.add('hidden');
+  const title = $('treinoMainTitle');
+  if(title) title.textContent = 'Rascunho';
+  const list = (draft && draft.workout) ? draft.workout : [];
+  const previewList = list.slice(0,4).map(function(ex){
+    return '<li class="treino-suggestion-item">' + escapeHtml(ex.name) + '</li>';
+  }).join('');
+  const extraCount = list.length > 4
+    ? '<li class="treino-suggestion-item">e mais ' + (list.length - 4) + '...</li>'
+    : '';
+  let when = '';
+  try {
+    if(draft && draft.updatedAt){
+      when = new Date(draft.updatedAt).toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
+    }
+  } catch(_){}
+  const container = $('treinoAppContent');
+  if(!container) return;
+  container.innerHTML =
+    '<div class="treino-status" style="justify-content:flex-start;padding-top:28px;min-height:auto">' +
+      '<div class="treino-status-icon-wrap" aria-hidden="true">💾</div>' +
+      '<div class="treino-status-title">Continuar de onde parou?</div>' +
+      '<div class="treino-status-desc">Encontramos um rascunho automático do treino de hoje' +
+        (when ? ' (salvo às ' + escapeHtml(when) + ')' : '') +
+        '. Deseja retomar?</div>' +
+      '<div class="treino-suggestion-card">' +
+        '<div style="font-weight:600;font-size:.95rem">Rascunho:</div>' +
+        '<ul class="treino-suggestion-list">' + previewList + extraCount + '</ul>' +
+      '</div>' +
+      '<div class="treino-status-actions">' +
+        '<button type="button" class="treino-btn-primary" id="treinoResumeDraft">Sim, continuar rascunho</button>' +
+        '<button type="button" class="treino-btn-secondary" id="treinoDiscardDraft">Não, descartar e começar de novo</button>' +
+      '</div>' +
+    '</div>';
+  const b1 = $('treinoResumeDraft');
+  const b2 = $('treinoDiscardDraft');
+  if(b1) b1.onclick = function(){
+    activeWorkout = (list || []).map(function(ex){
+      return Object.assign({}, ex, {
+        instanceId: ex.instanceId || (Date.now().toString(36) + Math.random().toString(36).slice(2,7)),
+        isFinished: !!ex.isFinished,
+        sets: (ex.sets || []).map(function(s){ return Object.assign({}, s); })
+      });
+    });
+    setupActiveWorkoutUI();
+    notifyAutoSave();
+  };
+  if(b2) b2.onclick = function(){
+    if(typeof AutoSaveService !== 'undefined') AutoSaveService.clearDraft();
+    // Segue fluxo normal (sugestão ou vazio)
+    let lastSavedDate = null;
+    let savedWorkout = null;
+    try{
+      lastSavedDate = localStorage.getItem(LS_DATE);
+      const raw = localStorage.getItem(LS_DATA);
+      savedWorkout = raw ? JSON.parse(raw) : null;
+    }catch(_){ savedWorkout = null; }
+    if(savedWorkout && savedWorkout.length > 0 && lastSavedDate !== getTodayString()){
+      renderSuggestionScreen(savedWorkout, lastSavedDate);
+    }else{
+      startEmptyWorkout();
+    }
+  };
+}
+
 function init(){
   migrateLegacyStorage();
   loadSettings();
@@ -2770,12 +4001,20 @@ function init(){
     savedWorkout = raw ? JSON.parse(raw) : null;
   }catch(_){ savedWorkout = null; }
 
+  // Prioridade: se o dia já foi finalizado, mostra concluído.
+  // Caso contrário, se houver draft do mesmo dia, oferece recuperação.
   if(lastSavedDate === today){
+    if(typeof AutoSaveService !== 'undefined') AutoSaveService.clearDraft();
     renderDoneScreen();
-  }else if(savedWorkout && savedWorkout.length > 0){
-    renderSuggestionScreen(savedWorkout, lastSavedDate);
   }else{
-    startEmptyWorkout();
+    const draft = (typeof AutoSaveService !== 'undefined') ? AutoSaveService.getDraft() : null;
+    if(draft && draft.day === today && Array.isArray(draft.workout) && draft.workout.length > 0){
+      renderDraftRecoveryScreen(draft);
+    }else if(savedWorkout && savedWorkout.length > 0){
+      renderSuggestionScreen(savedWorkout, lastSavedDate);
+    }else{
+      startEmptyWorkout();
+    }
   }
   renderChips();
   initialized = true;
@@ -2792,6 +4031,8 @@ function renderDoneScreen(){
   if(fab) fab.classList.add('hidden');
   const title = $('treinoMainTitle');
   if(title) title.textContent = 'Excelente!';
+  const statusEl = $('treinoSaveStatus');
+  if(statusEl){ statusEl.textContent = ''; statusEl.className = 'treino-save-status'; }
   const container = $('treinoAppContent');
   if(!container) return;
   const progress = loadProgressSummary();
@@ -2821,7 +4062,7 @@ function renderSuggestionScreen(savedWorkout, dateStr){
   if(!container) return;
   container.innerHTML = `
     <div class="treino-status" style="justify-content:flex-start;padding-top:28px;min-height:auto">
-      <div class="treino-status-icon">📅</div>
+      <div class="treino-status-icon-wrap" aria-hidden="true">📅</div>
       <div class="treino-status-title">Pronto para hoje?</div>
       <div class="treino-status-desc">Identificamos o seu último treino (${escapeHtml(dateStr||'')}). Gostaria de usá-lo como base para hoje?</div>
       <div class="treino-suggestion-card">
@@ -2867,88 +4108,148 @@ function setupActiveWorkoutUI(){
   const title = $('treinoMainTitle');
   if(title) title.textContent = getDayName();
   renderWorkout();
+  // Garante indicador sincronizado ao entrar no modo ativo
+  if(typeof AutoSaveService !== 'undefined' && activeWorkout.length){
+    notifyAutoSave();
+  }
 }
 
 function escapeHtml(str){
   return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+function findActiveSetTarget(){
+  for(let i=0;i<activeWorkout.length;i++){
+    const ex = activeWorkout[i];
+    if(ex.isFinished) continue;
+    for(let j=0;j<(ex.sets||[]).length;j++){
+      if(!ex.sets[j].completed) return { ex, set: ex.sets[j], exIndex: i };
+    }
+  }
+  return null;
+}
+
 function renderWorkout(){
   const container = $('treinoAppContent');
   if(!container) return;
+  ensureSessionTimer();
+  updateSessionStrip();
+
+  const screen = document.getElementById('screen-treino');
+  if(screen) screen.classList.add('gym-contrast');
+
   if(activeWorkout.length === 0){
-    container.innerHTML = `<div class="treino-empty">Nenhum exercício adicionado.<br>Toque abaixo para começar.</div>`;
+    container.innerHTML = `<div class="treino-empty">
+      <div class="empty-icon" aria-hidden="true">🏋️</div>
+      <div class="empty-title">Comece seu treino</div>
+      <div>Adicione o primeiro exercício e registre séries com um toque.</div>
+    </div>`;
     return;
   }
+
+  const activeTarget = findActiveSetTarget();
+  const lastByEx = {};
+
   container.innerHTML = activeWorkout.map((ex, index) => {
-    const setsHtml = !ex.isFinished ? ex.sets.map(set => {
+    const last = getLastRecord(ex.id);
+    const lastSetHint = last && last.sets && last.sets.length
+      ? last.sets[Math.min((ex.sets||[]).filter(s=>s.completed).length, last.sets.length-1)]
+      : (last ? { weight: last.maxWeight, reps: 0 } : null);
+
+    const setsHtml = !ex.isFinished ? (ex.sets||[]).map(set => {
       if(set.completed){
+        const tagLabel = set.tag === 'warmup' ? ' · Aquecimento' : (set.tag === 'fail' ? ' · Falha' : '');
         return `<div class="treino-set-row completed-view">
           <div>
-            <div class="treino-set-summary-title">Série ${set.id} Concluída</div>
+            <div class="treino-set-summary-title">Série ${set.id} ✓${tagLabel}</div>
             <div class="treino-set-summary-data">${set.weight} kg × ${set.reps} reps</div>
           </div>
           <button type="button" class="treino-btn-text" data-action="undo-set" data-iid="${ex.instanceId}" data-sid="${set.id}">Desfazer</button>
         </div>`;
       }
-      return `<div class="treino-set-row">
+      const isActive = activeTarget && activeTarget.ex.instanceId === ex.instanceId && activeTarget.set.id === set.id;
+      const tag = set.tag || 'normal';
+      let prevHtml = '';
+      if(lastSetHint && (lastSetHint.weight || lastSetHint.reps)){
+        prevHtml = `<div class="treino-prev-line">
+          <span>Antes: <strong>${lastSetHint.weight||0} kg × ${lastSetHint.reps||0}</strong></span>
+          <button type="button" data-action="use-prev" data-iid="${ex.instanceId}" data-sid="${set.id}" data-w="${lastSetHint.weight||0}" data-r="${lastSetHint.reps||0}">Usar</button>
+        </div>`;
+      }
+      return `<div class="treino-set-row ${isActive ? 'is-active' : ''}" data-set-row="${ex.instanceId}-${set.id}">
         <div class="treino-set-header">
-          Série ${set.id}
+          <span>Série ${set.id}${isActive ? ' · agora' : ''} <span style="opacity:.6">(${set.id}/${ex.sets.length})</span></span>
           <button type="button" class="treino-btn-trash" data-action="del-set" data-iid="${ex.instanceId}" data-sid="${set.id}" title="Apagar Série">🗑</button>
+        </div>
+        ${prevHtml}
+        <div class="treino-set-tags">
+          <button type="button" class="treino-set-tag ${tag==='normal'?'active':''}" data-action="set-tag" data-iid="${ex.instanceId}" data-sid="${set.id}" data-tag="normal">Normal</button>
+          <button type="button" class="treino-set-tag tag-warmup ${tag==='warmup'?'active':''}" data-action="set-tag" data-iid="${ex.instanceId}" data-sid="${set.id}" data-tag="warmup">Aquecimento</button>
+          <button type="button" class="treino-set-tag tag-fail ${tag==='fail'?'active':''}" data-action="set-tag" data-iid="${ex.instanceId}" data-sid="${set.id}" data-tag="fail">Falha</button>
         </div>
         <div class="treino-set-controls">
           <div class="treino-control-group">
             <span class="treino-control-label">KG</span>
             <div class="treino-control-stepper">
-              <button type="button" class="treino-step-btn" data-action="upd" data-iid="${ex.instanceId}" data-sid="${set.id}" data-field="weight" data-delta="-1">−</button>
-              <input type="number" class="treino-step-value" value="${set.weight}" data-action="manual" data-iid="${ex.instanceId}" data-sid="${set.id}" data-field="weight" inputmode="decimal">
-              <button type="button" class="treino-step-btn" data-action="upd" data-iid="${ex.instanceId}" data-sid="${set.id}" data-field="weight" data-delta="1">+</button>
+              <button type="button" class="treino-step-btn" data-action="upd" data-iid="${ex.instanceId}" data-sid="${set.id}" data-field="weight" data-delta="-1" aria-label="Diminuir peso">−</button>
+              <input type="number" class="treino-step-value" value="${set.weight}" data-action="manual" data-iid="${ex.instanceId}" data-sid="${set.id}" data-field="weight" inputmode="decimal" aria-label="Peso em kg">
+              <button type="button" class="treino-step-btn" data-action="upd" data-iid="${ex.instanceId}" data-sid="${set.id}" data-field="weight" data-delta="1" aria-label="Aumentar peso">+</button>
             </div>
           </div>
           <div class="treino-control-group">
             <span class="treino-control-label">REPS</span>
             <div class="treino-control-stepper">
-              <button type="button" class="treino-step-btn" data-action="upd" data-iid="${ex.instanceId}" data-sid="${set.id}" data-field="reps" data-delta="-1">−</button>
-              <input type="number" class="treino-step-value" value="${set.reps}" data-action="manual" data-iid="${ex.instanceId}" data-sid="${set.id}" data-field="reps" inputmode="numeric">
-              <button type="button" class="treino-step-btn" data-action="upd" data-iid="${ex.instanceId}" data-sid="${set.id}" data-field="reps" data-delta="1">+</button>
+              <button type="button" class="treino-step-btn" data-action="upd" data-iid="${ex.instanceId}" data-sid="${set.id}" data-field="reps" data-delta="-1" aria-label="Diminuir reps">−</button>
+              <input type="number" class="treino-step-value" value="${set.reps}" data-action="manual" data-iid="${ex.instanceId}" data-sid="${set.id}" data-field="reps" inputmode="numeric" aria-label="Repetições">
+              <button type="button" class="treino-step-btn" data-action="upd" data-iid="${ex.instanceId}" data-sid="${set.id}" data-field="reps" data-delta="1" aria-label="Aumentar reps">+</button>
             </div>
           </div>
         </div>
+        <button type="button" class="treino-set-complete-btn" data-action="complete-set" data-iid="${ex.instanceId}" data-sid="${set.id}" aria-label="Concluir série ${set.id} de ${ex.sets.length}">✓ Concluir série</button>
       </div>`;
     }).join('') : '';
 
+    const nextEx = !ex.isFinished ? null : null;
+    let nextPreview = '';
+    if(!ex.isFinished && index < activeWorkout.length - 1){
+      const n = activeWorkout[index+1];
+      if(n) nextPreview = `<div class="treino-next-preview">Em seguida: <strong>${escapeHtml(n.name)}</strong></div>`;
+    }
+
     const body = !ex.isFinished ? `<div class="treino-exercise-body">
       ${setsHtml}
+      ${nextPreview}
       <div class="treino-exercise-actions">
         <button type="button" class="treino-btn-half treino-btn-add" data-action="add-set" data-iid="${ex.instanceId}">+ Série</button>
         <button type="button" class="treino-btn-half treino-btn-finish" data-action="toggle-ex" data-iid="${ex.instanceId}">Finalizar Exercício</button>
       </div>
-    </div>` : '';
+    </div>` : `<div class="treino-exercise-body"><div class="treino-card-extra">Máx ${computeExerciseStats(ex).maxWeight} kg · Vol ${computeExerciseStats(ex).volume}</div></div>`;
 
     const stats = computeExerciseStats(ex);
+    const isPR = last && (stats.maxWeight > (last.maxWeight||0) || (stats.volume > (last.volume||0) && stats.maxWeight >= (last.maxWeight||0)));
     let extra = '';
-    if(settings.showVolume || settings.showCompare){
+    if(settings.showVolume || settings.showCompare || isPR){
       const bits = [];
+      if(isPR) bits.push('<span class="treino-pr-badge">PR</span>');
       if(settings.showVolume) bits.push('Vol '+stats.volume);
       if(settings.showCompare){
-        const last = getLastRecord(ex.id);
         if(last){
           const dMax = stats.maxWeight - (last.maxWeight||0);
           const dVol = stats.volume - (last.volume||0);
           if(dMax>0 || dVol>0) bits.push('<span class="up">↑ vs último</span>');
           else if(dMax<0 && dVol<0) bits.push('<span class="down">↓ vs último</span>');
           else bits.push('= último');
-        }else{
-          bits.push('Novo');
-        }
+        }else bits.push('Novo');
       }
+      if(last && last.maxWeight) bits.push('Antes máx '+last.maxWeight+' kg');
       extra = `<div class="treino-card-extra">${bits.join(' · ')}</div>`;
     }
     const reorderBtns = reorderMode ? `<div class="treino-reorder-btns">
       <button type="button" data-action="move-up" data-iid="${ex.instanceId}">▲</button>
       <button type="button" data-action="move-down" data-iid="${ex.instanceId}">▼</button>
     </div>` : '';
-    return `<div class="treino-exercise-card ${ex.isFinished ? 'finished' : ''}">
+    const isCurrent = activeTarget && activeTarget.ex.instanceId === ex.instanceId;
+    return `<div class="treino-exercise-card ${ex.isFinished ? 'finished' : ''} ${isCurrent ? 'is-current' : ''}">
       <div class="treino-exercise-header">
         <div>
           <div class="treino-exercise-meta">${escapeHtml(ex.group)} · ${escapeHtml(ex.equip)}</div>
@@ -2977,6 +4278,11 @@ function renderWorkout(){
     else if(action === 'add-set') addSet(iid);
     else if(action === 'del-set') deleteSet(iid, parseInt(sid,10));
     else if(action === 'undo-set') toggleSetCompletion(iid, parseInt(sid,10));
+    else if(action === 'complete-set') completeSetWithGuards(iid, parseInt(sid,10));
+    else if(action === 'use-prev'){
+      applyPreviousToSet(iid, parseInt(sid,10), parseFloat(t.getAttribute('data-w'))||0, parseInt(t.getAttribute('data-r'),10)||0);
+    }
+    else if(action === 'set-tag') setSetTag(iid, parseInt(sid,10), t.getAttribute('data-tag'));
     else if(action === 'move-up') moveExercise(iid, -1);
     else if(action === 'move-down') moveExercise(iid, 1);
     else if(action === 'upd'){
@@ -2995,9 +4301,18 @@ function renderWorkout(){
     const ex = activeWorkout.find(e => e.instanceId === iid);
     if(ex){
       const set = ex.sets.find(s => s.id === sid);
-      if(set && !set.completed){ set[field] = Math.max(0, val); }
+      if(set && !set.completed){
+        set[field] = Math.max(0, val);
+        notifyAutoSave();
+      }
     }
   };
+}
+
+function notifyAutoSave(){
+  if(typeof AutoSaveService !== 'undefined'){
+    AutoSaveService.markDirty(activeWorkout);
+  }
 }
 
 function addExerciseToWorkout(id){
@@ -3012,6 +4327,7 @@ function addExerciseToWorkout(id){
   });
   closeModal();
   renderWorkout();
+  notifyAutoSave();
   const last = getLastRecord(id);
   if(last && typeof showToast === 'function'){
     showToast('Base: ' + (last.maxWeight || 0) + ' kg · ' + (last.setsCount || sets.length) + ' série(s)');
@@ -3021,6 +4337,7 @@ function addExerciseToWorkout(id){
 function removeExercise(instanceId){
   activeWorkout = activeWorkout.filter(ex => ex.instanceId !== instanceId);
   renderWorkout();
+  notifyAutoSave();
 }
 
 function toggleExerciseState(instanceId){
@@ -3029,6 +4346,7 @@ function toggleExerciseState(instanceId){
     if(!ex.isFinished){ ex.sets.forEach(s => s.completed = true); hapticTap(); }
     ex.isFinished = !ex.isFinished;
     renderWorkout();
+    notifyAutoSave();
   }
 }
 
@@ -3049,6 +4367,7 @@ function addSet(instanceId){
       completed: false
     });
     renderWorkout();
+    notifyAutoSave();
     hapticTap();
   }
 }
@@ -3062,6 +4381,7 @@ function deleteSet(instanceId, setId){
       ex.sets.push({ id: 1, weight: 0, reps: 0, completed: false });
     }
     renderWorkout();
+    notifyAutoSave();
   }
 }
 
@@ -3080,9 +4400,92 @@ function updateSet(instanceId, setId, field, delta){
         const d = delta > 0 ? step : -step;
         set.reps = Math.max(0, (set.reps||0) + d);
       }
-      renderWorkout();
+      // Atualização local do input (evita re-render completo da lista)
+      const input = document.querySelector(
+        'input.treino-step-value[data-iid="'+instanceId+'"][data-sid="'+setId+'"][data-field="'+field+'"]'
+      );
+      if(input){
+        input.value = field === 'weight' ? set.weight : set.reps;
+        updateSessionStrip();
+        notifyAutoSave();
+      }else{
+        renderWorkout();
+        notifyAutoSave();
+      }
     }
   }
+}
+
+function showSetToast(text){
+  let el = document.getElementById('treinoSetToast');
+  if(!el){
+    el = document.createElement('div');
+    el.id = 'treinoSetToast';
+    el.className = 'treino-set-toast';
+    el.setAttribute('role','status');
+    document.body.appendChild(el);
+  }
+  el.textContent = text;
+  el.classList.add('show');
+  clearTimeout(showSetToast._t);
+  showSetToast._t = setTimeout(function(){ el.classList.remove('show'); }, 1600);
+}
+
+function applyPreviousToSet(instanceId, setId, w, r){
+  const ex = activeWorkout.find(e => e.instanceId === instanceId);
+  if(!ex) return;
+  const set = ex.sets.find(s => s.id === setId);
+  if(!set || set.completed) return;
+  set.weight = Math.max(0, w);
+  set.reps = Math.max(0, r);
+  renderWorkout();
+  notifyAutoSave();
+  hapticTap();
+}
+
+function setSetTag(instanceId, setId, tag){
+  const ex = activeWorkout.find(e => e.instanceId === instanceId);
+  if(!ex) return;
+  const set = ex.sets.find(s => s.id === setId);
+  if(!set || set.completed) return;
+  set.tag = tag || 'normal';
+  renderWorkout();
+  notifyAutoSave();
+}
+
+async function completeSetWithGuards(instanceId, setId){
+  const ex = activeWorkout.find(e => e.instanceId === instanceId);
+  if(!ex) return;
+  const set = ex.sets.find(s => s.id === setId);
+  if(!set || set.completed) return;
+  const reps = Number(set.reps) || 0;
+  const weight = Number(set.weight) || 0;
+  if(reps <= 0){
+    if(typeof showToast === 'function') showToast('Informe as reps antes de concluir');
+    return;
+  }
+  const last = getLastRecord(ex.id);
+  if(settings.warnWeightJump !== false && last && last.maxWeight > 0 && weight > last.maxWeight * 1.35){
+    const ok = await iosConfirm({
+      title: 'Carga elevada',
+      message: 'Carga bem acima do último treino ('+last.maxWeight+' kg). Confirmar '+weight+' kg?',
+      confirmText: 'Confirmar',
+      cancelText: 'Cancelar'
+    });
+    if(!ok) return;
+  }
+  set.completed = true;
+  hapticTap();
+  const setNum = set.id;
+  const totalSets = (ex.sets||[]).length;
+  renderWorkout();
+  notifyAutoSave();
+  showSetToast('Série '+setNum+'/'+totalSets+' concluída');
+  try{
+    const card = document.querySelector('.treino-exercise-card.is-current') || document.querySelector('.treino-exercise-card.finished');
+    if(card){ card.classList.add('just-finished'); setTimeout(()=>card.classList.remove('just-finished'), 600); }
+  }catch(_){}
+  startRestTimer();
 }
 
 function toggleSetCompletion(instanceId, setId){
@@ -3091,39 +4494,52 @@ function toggleSetCompletion(instanceId, setId){
     const set = ex.sets.find(s => s.id === setId);
     if(set){
       const wasCompleted = !!set.completed;
-      set.completed = !set.completed;
-      renderWorkout();
-      if(!wasCompleted && set.completed){
-        hapticTap();
-        startRestTimer();
+      if(!wasCompleted){
+        completeSetWithGuards(instanceId, setId);
+        return;
       }
+      set.completed = false;
+      renderWorkout();
+      notifyAutoSave();
     }
   }
 }
 
-function processWorkoutFinish(){
+let isFinishingWorkout = false;
+async function processWorkoutFinish(){
+  if(isFinishingWorkout) return;
   if(activeWorkout.length === 0){
     if(typeof showToast === 'function') showToast('Adicione exercícios antes de finalizar');
     else alert('Adicione exercícios antes de finalizar o treino do dia.');
     return;
   }
   if(settings.confirmFinish){
-    const ok = confirm('Deseja finalizar o treino de hoje? Você só poderá iniciar um novo treino amanhã.');
+    const ok = await iosConfirm({
+      title: 'Finalizar treino',
+      message: 'Deseja finalizar o treino de hoje? Depois disso só será possível iniciar um novo treino amanhã.',
+      confirmText: 'Finalizar',
+      cancelText: 'Continuar treino'
+    });
     if(!ok) return;
   }
+  isFinishingWorkout = true;
   const today = getTodayString();
   try{
     updateHistoryFromWorkout(activeWorkout, today);
     localStorage.setItem(LS_DATE, today);
     localStorage.setItem(LS_DATA, JSON.stringify(activeWorkout));
+    if(typeof AutoSaveService !== 'undefined') AutoSaveService.clearDraft();
   }catch(e){
+    isFinishingWorkout = false;
     if(typeof showToast === 'function') showToast('Erro ao salvar treino');
     return;
   }
+  if(typeof clearRestTimer === 'function') clearRestTimer();
   hapticTap();
   renderDoneScreen();
   if(typeof showToast === 'function') showToast('Treino salvo');
   if(typeof AppBackup!=='undefined') AppBackup.takeSnapshot('workout-finish');
+  isFinishingWorkout = false;
 }
 
 function resetDayDev(){
@@ -3204,10 +4620,14 @@ function bindUI(){
   const settingsBtn = $('treinoSettingsBtn');
   const reorderDone = $('treinoReorderDone');
   const restSkip = $('treinoRestSkip');
+  const restSkip2 = $('treinoRestSkip2');
+  const restPlus = $('treinoRestPlus30');
   if(btnFinish) btnFinish.onclick = processWorkoutFinish;
   if(btnAdd) btnAdd.onclick = openModal;
   if(modalClose) modalClose.onclick = closeModal;
   if(restSkip) restSkip.onclick = function(){ clearRestTimer(); };
+  if(restSkip2) restSkip2.onclick = function(){ clearRestTimer(); };
+  if(restPlus) restPlus.onclick = function(){ addRestSeconds(30); };
   if(modal) modal.addEventListener('click', function(e){ if(e.target === modal) closeModal(); });
   if(search) search.addEventListener('input', renderExerciseList);
   if(settingsBtn) settingsBtn.onclick = function(e){ e.stopPropagation(); toggleSettingsMenu(); };
@@ -3221,6 +4641,35 @@ function bindUI(){
   document.addEventListener('visibilitychange', function(){
     if(document.visibilityState === 'visible' && settings.wakeLock) requestWakeLock();
   });
+
+  // Auto-save: provider de estado + lifecycle + indicador visual
+  if(typeof AutoSaveService !== 'undefined'){
+    AutoSaveService.setStateProvider(function(){ return activeWorkout; });
+    AutoSaveService.bindLifecycle();
+    AutoSaveService.subscribe(function(info){
+      const el = $('treinoSaveStatus');
+      if(!el) return;
+      el.classList.remove('is-pending','is-saving','is-saved','is-error');
+      if(info.status === 'pending'){
+        el.textContent = 'Alterações pendentes…';
+        el.classList.add('is-pending');
+      }else if(info.status === 'saving'){
+        el.textContent = 'Salvando…';
+        el.classList.add('is-saving');
+      }else if(info.status === 'saved' && info.lastSavedAt){
+        try{
+          const t = new Date(info.lastSavedAt).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+          el.textContent = 'Salvo às ' + t;
+        }catch(_){ el.textContent = 'Salvo'; }
+        el.classList.add('is-saved');
+      }else if(info.status === 'error'){
+        el.textContent = 'Erro ao salvar';
+        el.classList.add('is-error');
+      }else{
+        el.textContent = '';
+      }
+    });
+  }
 }
 
 return { init, ensureInit, bindUI, closeModal, clearRestTimer, closeSettingsMenu };
